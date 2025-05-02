@@ -1,0 +1,76 @@
+class AppStrings {
+  static const String userId ='USER NAME';
+  static const String newPass ='NEW PASSWORD';
+  static const String confirmPass ='CONFIRM PASSWORD';
+  static const String mobileNumber ='MOBILE NUMBER';
+  static const String password ='PASSWORD';
+  static const String enterUserId ='Enter User Name';
+  static const String enterNewPassword ='Enter New Password';
+  static const String enterConfirmPassword ='Enter Confirm Password';
+  static const String enterMobileNumber ='Enter Mobile Number';
+  static const String enterPass ='Enter Password';
+  static const String newPassword ='New Password';
+  static const String EnterNewPassword ='Enter New Password';
+  static const String logIn ='Log In';
+  static const String signUp ='Sign Up';
+  static const String signIn ='Sign In';
+  static const String verify ='VERIFY';
+  static const String back ='Back';
+  static const String backtoHome ='Back to Home';
+  static const String submit ='Submit';
+  static const String rememberMe ='Remember me';
+  static const String forgotPassword ='Forgot Password';
+  static const String changePassword ='Change Password';
+  static const String Application ='Application';
+  static const String passwordChanged ='Password changed successfully';
+  static const String currentPassword ='CURRENT PASSWORD';
+  static const String EnterCurrentPassword ='Enter Current Password';
+  static const String Enteremail ='Enter your Email';
+  static const String EnterPass ='Enter your password';
+  static const String email ='Email';
+  static const String phone ='Phone';
+  static const String Profile ='Profile';
+  static const String Settings ='Settings';
+  static const String name ='Name';
+  static const String enterYourName ='Enter Your Name';
+  static const String pass ='Password';
+  static const String Confirpass ='Confirm Password';
+  static const String Continue ='Continue';
+  static const String next ='Next';
+  static const String pleaseEnterYourEmail ='Please Enter your Email';
+  static const String pleaseEnterValidEmail ='Please Enter Valid Email';
+  static const String pleaseEnterYourPassword ='Please Enter your Password';
+  static const String passwordMustBeAtLeast ='Password must be at least 4 characters';
+  static const String donthave ='I don’t have an account?';
+  static const String alreadyHaveAcc ='I already have an account?';
+  static const String uploadPhoto ='Upload Photo';
+  static const String gender ='Select Gender';
+  static const String dateOfBirth ='Date of Birth';
+  static const String selectGender ='Select Gender';
+  static const String pleaseEnterYourDate ='Please Enter Your Date of Birth';
+  static const String iAccept ='I Accept';
+  static const String iAgree ='I Agree';
+  static const String termsandCondation ='Terms and Conditions.';
+  static const String privacyPolicy ='Privacy Policy';
+  static const String signupSuccess ='Signed Up successfully';
+  static const String acceptTermAndConditions ='I Accept the Terms and Conditions';
+  static const String iAgreePrivacyPolicy ='I Agree to the';
+  static const String forgotpass ='Forgot Password';
+  static const String question ='Question';
+  static const String result ='Result';
+  static const String sendLink ='Send Link';
+  static const String goToLogin ='Go to Login';
+  static const String success ='Success!';
+  static const String sumbit ='Submit';
+  static const String Today ='Today';
+  static const String markAll ='Mark all as read';
+  static const String persionalInfo ='Personal Information';
+  static const String Notifications ='Notifications';
+  static const String passChangeSucceess ='Your password was changed\nsuccessfully.';
+  static const String enterYourRegisteredEmail ='Enter your registered email for the verification process.We will send a reset password link to your email. ';
+  static const String passwordMustNotContainSpace ='Password must not contain spaces';
+
+}
+
+
+

@@ -1,0 +1,2 @@
+/Users/apple/Documents/flutterProjects/water_bottle 2/android/app/.cxx/RelWithDebInfo/153d226l/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/apple/Documents/flutterProjects/water_bottle 2/android/app/.cxx/RelWithDebInfo/153d226l/armeabi-v7a/CMakeFiles/rebuild_cache.dir

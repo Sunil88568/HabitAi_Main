@@ -1,0 +1,71 @@
+PODS:
+  - Flutter (1.0.0)
+  - fluttertoast (0.0.2):
+    - Flutter
+  - image_picker_ios (0.0.1):
+    - Flutter
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - Stripe (24.11.0):
+    - StripeApplePay (= 24.11.0)
+    - StripeCore (= 24.11.0)
+    - StripePayments (= 24.11.0)
+    - StripePaymentsUI (= 24.11.0)
+    - StripeUICore (= 24.11.0)
+  - StripeApplePay (24.11.0):
+    - StripeCore (= 24.11.0)
+  - StripeCore (24.11.0)
+  - StripePayments (24.11.0):
+    - StripeCore (= 24.11.0)
+    - StripePayments/Stripe3DS2 (= 24.11.0)
+  - StripePayments/Stripe3DS2 (24.11.0):
+    - StripeCore (= 24.11.0)
+  - StripePaymentsUI (24.11.0):
+    - StripeCore (= 24.11.0)
+    - StripePayments (= 24.11.0)
+    - StripeUICore (= 24.11.0)
+  - StripeUICore (24.11.0):
+    - StripeCore (= 24.11.0)
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - Stripe
+
+SPEC REPOS:
+  trunk:
+    - Stripe
+    - StripeApplePay
+    - StripeCore
+    - StripePayments
+    - StripePaymentsUI
+    - StripeUICore
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  fluttertoast:
+    :path: ".symlinks/plugins/fluttertoast/ios"
+  image_picker_ios:
+    :path: ".symlinks/plugins/image_picker_ios/ios"
+  shared_preferences_foundation:
+    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+
+SPEC CHECKSUMS:
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  fluttertoast: 21eecd6935e7064cc1fcb733a4c5a428f3f24f0f
+  image_picker_ios: c560581cceedb403a6ff17f2f816d7fea1421fc1
+  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
+  Stripe: a220ccdb4a5c0d65d56edeb6fd65cd71d09f78b3
+  StripeApplePay: ae19e44ac95dcf1424badd68d3ef33ed9c403d6f
+  StripeCore: a966111af14ffff257fe3fb39a2ae380f8e0d500
+  StripePayments: f0f97463eb26aeddc1d392c1a619094cc173f36f
+  StripePaymentsUI: 2a299b9438df7c1e0ff00147e6f403c8cf94bae9
+  StripeUICore: a0dcd51c079e0db61e13b95142ff88367f63a619
+
+PODFILE CHECKSUM: 3d25b5987748c1afdce2cafc2ef2162caee67615
+
+COCOAPODS: 1.16.2

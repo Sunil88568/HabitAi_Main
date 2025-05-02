@@ -1,0 +1,2 @@
+/Users/apple/StudioProjects/BWSSB/bwssb/android/app/.cxx/RelWithDebInfo/r5k34j23/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/apple/StudioProjects/BWSSB/bwssb/android/app/.cxx/RelWithDebInfo/r5k34j23/armeabi-v7a/CMakeFiles/rebuild_cache.dir

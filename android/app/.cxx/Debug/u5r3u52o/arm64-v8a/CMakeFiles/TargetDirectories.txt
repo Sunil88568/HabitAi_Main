@@ -1,0 +1,2 @@
+/Users/apple/StudioProjects/BWSSB/bwssb/android/app/.cxx/Debug/u5r3u52o/arm64-v8a/CMakeFiles/edit_cache.dir
+/Users/apple/StudioProjects/BWSSB/bwssb/android/app/.cxx/Debug/u5r3u52o/arm64-v8a/CMakeFiles/rebuild_cache.dir
