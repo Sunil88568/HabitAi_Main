@@ -40,7 +40,7 @@ class AppStrings {
   static const String pleaseEnterYourEmail ='Please Enter your Email';
   static const String pleaseEnterValidEmail ='Please Enter Valid Email';
   static const String pleaseEnterYourPassword ='Please Enter your Password';
-  static const String passwordMustBeAtLeast ='Password must be at least 4 characters';
+  static const String passwordMustBeAtLeast ='Password must be at least 6 characters';
   static const String donthave ='I don’t have an account?';
   static const String alreadyHaveAcc ='I already have an account?';
   static const String uploadPhoto ='Upload Photo';

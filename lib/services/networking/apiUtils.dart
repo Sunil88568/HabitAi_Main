@@ -161,73 +161,84 @@ class ApiUtils {
 
 
 
-
   static Future<ResponseData<Map<String, dynamic>>> call({
-    Map<String,dynamic>? responseStatusValue,
+    Map<String, dynamic>? responseStatusValue,
     required Future<Response> request,
     required Map<String, dynamic> Function(Map<String, dynamic>) data,
     Function(ResponseData)? error,
-
   }) async {
-    // try{
-    final result = await request;
+    try {
+      final result = await request;
 
+      AppUtils.log(result.statusCode);
+      AppUtils.log(result.body);
 
-    AppUtils.log(result.statusCode);
-    AppUtils.log(result.body);
-    // AppUtils.log(result.body);
+      final responseBody = jsonDecode(result.body) as Map<String, dynamic>;
 
-    // AppUtils.log('statuscodse ::: ${result.statusCode}');
-    if (result.statusCode >= 200 && result.statusCode < 300) {
-      final body = jsonDecode(result.body) as Map<String, dynamic>;
+      if (result.statusCode >= 200 && result.statusCode < 300) {
+        // Checking internal API 'statusCode' if provided
+        final apiStatusCode = responseBody['statusCode'];
+        final apiMessage = responseBody['message'] ?? 'Unknown error';
 
-      AppUtils.log(body);
-      if (responseStatusValue != null
-          ? body[responseStatusValue['key']] == responseStatusValue['value']
-          : (body['success'] != null && body['success'] is bool ? body['success'] : false)) {
-        return generateResponse<Map<String, dynamic>>(data(body));
+        bool isStatusOk = responseStatusValue != null
+            ? responseBody[responseStatusValue['key']] == responseStatusValue['value']
+            : apiStatusCode == 200 || apiStatusCode == 201;
+
+        if (isStatusOk) {
+          return ResponseData<Map<String, dynamic>>(
+            data: data(responseBody),
+            statusCode: result.statusCode,
+          );
+        } else {
+          // even for 200 HTTP, API 'statusCode' failed
+          return ResponseData<Map<String, dynamic>>(
+            data: responseBody,
+            statusCode: result.statusCode,
+            error: Exception(apiMessage),
+          );
+        }
       } else {
-        return ResponseData(
-            data: body, isSuccess: false, error: Exception(body['message']));
+        // HTTP non-2xx status codes
+        String errorMsg = _statusErrors(result.statusCode);
+
+        try {
+          final errorBody = jsonDecode(result.body) as Map<String, dynamic>;
+          if (errorBody.containsKey('message')) {
+            errorMsg = errorBody['message'];
+          } else if (errorBody.containsKey('message')) {
+            errorMsg = errorBody['message'];
+          }
+        } catch (e) {
+          // failed to parse error body
+        }
+
+        return ResponseData<Map<String, dynamic>>(
+          statusCode: result.statusCode,
+          error: Exception(errorMsg),
+          message: errorMsg,
+        );
       }
 
-    } else {
+    } catch (e) {
+      return error?.call(
+        ResponseData<Map<String, dynamic>>(
+          error: Exception(e.toString()),
+          message: e.toString(),
+        ),
+      ) ?? ResponseData<Map<String, dynamic>>(
+        error: Exception(e.toString()),
+        message: e.toString(),
+      );
 
-
-
-
-      String errorMsg = _statusErrors(result.statusCode);
-
-      try{
-       final error =  jsonDecode(result.body) as Map<String,dynamic>;
-       if(error.containsKey('error')){
-         errorMsg = error['error'];
-       }else if(error.containsKey('message')){
-         errorMsg = error['message'];
-       }
-      }catch(e){
-
-      }
-      // AppUtils.log(result.body);
-
-
-
-      return ResponseData(
-          isSuccess: false, error: Exception(errorMsg));
     }
-    // }catch(e){
-    //   return error?.call(ResponseData(
-    //       isSuccess: false,
-    //       error: Exception(e.toString())
-    //   ));
-    // }
   }
 
+
+
   static ResponseData<T> generateResponse<T>(T data) =>
-      ResponseData(isSuccess: true, data: data);
+      ResponseData(data: data);
 
   static Uri generateUri(String url, Map<String, String>? query) {
-    AppUtils.log(url);
     Uri uri = Uri.parse(url);
     if (query != null) {
       final obj = uri.replace(queryParameters: query);

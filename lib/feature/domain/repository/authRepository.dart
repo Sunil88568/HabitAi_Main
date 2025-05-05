@@ -6,14 +6,30 @@ import '../../data/models/dataModels/responseDataModel.dart';
 
 abstract class AuthRepository {
   Future<ResponseData<LoginModel>> loginUser({
-    required String user,
+    required String email,
     required String password,
   });
 
-  Future<ResponseData<LoginModel>> verifyUser({
-    required String action,
-    required String username,
-    required String mobile,
+  Future<ResponseData<LoginModel>> register({
+     String ?name,
+     String ?password,
+     String ?email,
+     String ?age,
+     String ?gender,
+     String ?mobileNumber,
+     String ?dob,
+    String? countryCode,
+    String? education,
+    String? image,
+    String? device_type,
+    String? device_token,
+  });
+
+
+
+  Future<ResponseData<LoginModel>> checkEmailAndMobile({
+    required String email,
+    required String mobileNumber,
   });
 
 
@@ -41,4 +57,6 @@ abstract class AuthRepository {
     required String newPassword,
 
   });
+
+  Future<ResponseData<String>> uploadPhoto({ required File imageFile });
 }

@@ -12,7 +12,7 @@ class AppLoader {
       builder: (BuildContext context) {
         return Center(
           child: SpinKitCircle(
-            color: AppColors.forgetText,
+            color: AppColors.primaryColor,
             size: 70.0,
           ),
         );

@@ -4,33 +4,44 @@ import 'dart:convert';
 part 'login_model.freezed.dart';
 part 'login_model.g.dart';
 
-LoginModel loginModelFromJson(String str) => LoginModel.fromJson(json.decode(str));
+/// For decoding from JSON string
+LoginResponse loginResponseFromJson(String str) =>
+    LoginResponse.fromJson(json.decode(str));
 
-String loginModelToJson(LoginModel data) => json.encode(data.toJson());
+/// For encoding to JSON string
+String loginResponseToJson(LoginResponse data) => json.encode(data.toJson());
 
+/// Wrapper class for the API response
+@freezed
+class LoginResponse with _$LoginResponse {
+  const factory LoginResponse({
+    required LoginModel data,
+  }) = _LoginResponse;
+
+  factory LoginResponse.fromJson(Map<String, dynamic> json) =>
+      _$LoginResponseFromJson(json);
+}
+
+/// Actual user model
 @freezed
 class LoginModel with _$LoginModel {
   const factory LoginModel({
-    @JsonKey(name: "id")
-    int? id,
-    @JsonKey(name: "user_id")
-    int? userId,
-    @JsonKey(name: "username")
-    String? username,
-    @JsonKey(name: "name")
+    @JsonKey(name: "_id") String? id,
     String? name,
-    @JsonKey(name: "mobile")
-    String? mobile,
-    @JsonKey(name: "email")
+    String? image,
     String? email,
-    @JsonKey(name: "role_id")
-    int? roleId,
-    @JsonKey(name: "role")
-    String? role,
-    @JsonKey(name: "isactive")
-    int? isactive,
-    @JsonKey(name: "hash") String? hash,
+    String? countryCode,
+    @JsonKey(name: "device_type") String? deviceType,
+    @JsonKey(name: "device_token") String? deviceToken,
+    DateTime? dob,
+    String? gender,
+    String? mobileNumber,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    @JsonKey(name: "__v") int? v,
+    String? token,
   }) = _LoginModel;
 
-  factory LoginModel.fromJson(Map<String, dynamic> json) => _$LoginModelFromJson(json);
+  factory LoginModel.fromJson(Map<String, dynamic> json) =>
+      _$LoginModelFromJson(json);
 }

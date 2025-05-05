@@ -143,7 +143,7 @@ extension stringNull on String? {
   bool get isEmailAddress => isNotNullEmpty && this!.isEmail;
 
   bool get isPassword =>
-      isNotNullEmpty && this!.length >= 4 && this!.length < 25;
+      isNotNullEmpty && this!.length >= 6 && this!.length < 25;
 
   bool get isPhone {
     // if (length > 16 || length < 9) return false;

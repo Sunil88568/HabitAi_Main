@@ -15,6 +15,7 @@ import '../../../../components/coreComponents/common_password_input_field.dart';
 import '../../../../components/styles/appColors.dart';
 import '../../../../components/styles/appImages.dart';
 import '../../../../components/styles/app_strings.dart';
+import '../../controller/auth_ctrl.dart';
 import '../homeScreen/home_screen.dart';
 import 'forgotPass.dart';
 
@@ -133,19 +134,19 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
     super.dispose();
   }
 
-  // void _submitForm() async {
-  //   if (_formKey.currentState!.validate()) {
-  //
-  //     AuthCtrl.find.login(
-  //       emailController.text,
-  //       passwordController.text,
-  //     ).applyLoader.then((value){
-  //       //  _getFcmToken();
-  //
-  //       context.pushAndClearNavigator(HomeScreen());
-  //     });
-  //   }
-  // }
+  void _submitForm() async {
+    if (_formKey.currentState!.validate()) {
+
+      AuthCtrl.find.login(
+        emailController.text,
+        passwordController.text,
+      ).applyLoader.then((value){
+        //  _getFcmToken();
+
+        context.pushAndClearNavigator(HomeScreen());
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -233,11 +234,7 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
                         width: double.infinity,
                         label: AppStrings.Continue,
                         labelStyle: _isFormValid ? 17.txtBoldWhite : 17.txtBoldGrey,
-                        onTap: (){
-                          context.pushAndClearNavigator(HomeScreen());
-                        },
-
-                        // _isFormValid ? null : null,
+                        onTap: _isFormValid ? _submitForm : null,
                         buttonColor: _isFormValid
                             ? AppColors.btnColor
                             : AppColors.greyHint.withOpacity(0.3),

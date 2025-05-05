@@ -6,15 +6,15 @@ import '../../feature/data/models/dataModels/login_model/login_model.dart';
 
 
 class Preferences {
-  static const _langKey = 'language_bwssb';
-  static const _uidKey = 'uid_bwssb';
-  static const _userPDataKey = 'profileData_bwssb';
-  static const _authTokenPDataKey = 'authTokenData_bwssb';
-  static const _fcmTokenKey = 'fcmToken_bwssb';
-  static const _uploadedImageKey = 'uploadedImage_bwssb';
-  static const _emailKey = 'email_bwssb';
-  static const _seemypost = 'seemypost_bwssb';
-  static const _sharepost = 'sharepost_bwssb';
+  static const _langKey = 'language_question_app';
+  static const _uidKey = 'uid_question_app';
+  static const _userPDataKey = 'profileData_question_app';
+  static const _authTokenPDataKey = 'authTokenData_question_app';
+  static const _fcmTokenKey = 'fcmToken_question_app';
+  static const _uploadedImageKey = 'uploadedImage_question_app';
+  static const _emailKey = 'email_question_app';
+  static const _seemypost = 'seemypost_question_app';
+  static const _sharepost = 'sharepost_question_app';
 
 
   static late SharedPreferences _prefs;

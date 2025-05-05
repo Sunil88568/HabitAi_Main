@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 
 abstract class Failure extends Equatable implements Exception {
   const Failure();
+
+  static fromJson(json) {}
 }
 
 // General failures

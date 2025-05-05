@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:question_app/components/styles/textStyles.dart';
@@ -25,6 +26,8 @@ import '../../../../utils/appUtils.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import '../../../data/models/dataModels/responseDataModel.dart';
+import '../../controller/auth_ctrl.dart';
 import 'addProfile_screen.dart';
 
 
@@ -78,8 +81,12 @@ class EmailLoginForm extends StatefulWidget {
 }
 
 class _EmailLoginFormState extends State<EmailLoginForm> {
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController countryCodeController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   Timer? _debounce;
   Rx<Country?> countryData  = Rx(null);
@@ -89,9 +96,11 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
   void initState() {
     super.initState();
     emailController.addListener(_updateButtonState);
+    nameController.addListener(_updateButtonState);
+    countryCodeController.addListener(_updateButtonState);
+    phoneController.addListener(_updateButtonState);
     passwordController.addListener(_updateButtonState);
-    //  _getFcmToken(); // Get FCM token on initialization
-
+    confirmPasswordController.addListener(_updateButtonState);
   }
 
 
@@ -105,32 +114,43 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
 
   bool get _isFormValid =>
       emailController.text.isNotEmpty &&
+          nameController.text.isNotEmpty &&
           passwordController.text.isNotEmpty &&
+          countryCodeController.text.isNotEmpty &&
+          phoneController.text.isNotEmpty &&
+          confirmPasswordController.text.isNotEmpty &&
           _formKey.currentState!.validate() ?? false;
+
+
+
+  Future<bool> _submitForm() async {
+    final ResponseData responseData = await AuthCtrl.find.checkEmailAndMobile(
+      emailController.getText,
+      phoneController.getText,
+    ).applyLoader;
+
+    if (responseData.isSuccess) {
+      return true;
+    } else {
+      AppUtils.toastError(responseData.getError);
+      return false;
+    }
+  }
+
+
+
 
   @override
   void dispose() {
-    // emailController.removeListener(_updateButtonState);
-    // passwordController.removeListener(_updateButtonState);
     emailController.dispose();
+    nameController.dispose();
+    countryCodeController.dispose();
+    phoneController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose();
     _debounce?.cancel();
     super.dispose();
   }
-
-  // void _submitForm() async {
-  //   if (_formKey.currentState!.validate()) {
-  //
-  //     AuthCtrl.find.login(
-  //       emailController.text,
-  //       passwordController.text,
-  //     ).applyLoader.then((value){
-  //       //  _getFcmToken();
-  //
-  //       context.pushAndClearNavigator(HomeScreen());
-  //     });
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -170,10 +190,9 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
                           ],
                         ),
                         margin: 20.bottom,
-                        controller: emailController,
+                        controller: nameController,
                         validator: (value) {
-                          if (!value.isNotNullEmpty) return AppStrings.pleaseEnterYourEmail;
-                          if (!value.isEmailAddress) return AppStrings.pleaseEnterValidEmail;
+                          if (!value.isNotNullEmpty) return "Please Enter Name";
                           return null;
                         },
                       ),
@@ -239,7 +258,7 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
                         margin: 4.bottom,
                       ),
                       CommonPasswordInputField(
-                        controller: passwordController,
+                        controller: confirmPasswordController,
                         hint: AppStrings.EnterPass,
                         inputType: TextInputType.visiblePassword,
                         leading: Padding(
@@ -249,10 +268,12 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
                         validator: (value) {
                           if (!value!.isNotNullEmpty) return AppStrings.pleaseEnterYourPassword;
                           if (!value.isPassword) return AppStrings.passwordMustBeAtLeast;
+                          if (value != passwordController.text) return "Password Does Not Match";
                           return null;
                         },
                         marginBottom: 10.sdp,
                       ),
+
 
                       AppButton(
                         margin: 30.top,
@@ -260,13 +281,25 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
                         width: double.infinity,
                         label: AppStrings.next,
                         labelStyle: _isFormValid ? 17.txtBoldWhite : 17.txtBoldGrey,
-                        onTap: () {context.pushNavigator(AddprofileScreen());},
-
-                        // _isFormValid ? null : null,
+                        onTap: _isFormValid
+                            ? () async {
+                          final success = await _submitForm();
+                          if (success) {
+                            context.pushNavigator(AddprofileScreen(
+                              email: emailController.getText,
+                              name: nameController.getText,
+                              countryCode: countryCodeController.getText,
+                              phoneNumber: phoneController.getText,
+                              password: passwordController.getText,
+                            ));
+                          }
+                        }
+                            : null,
                         buttonColor: _isFormValid
                             ? AppColors.btnColor
                             : AppColors.greyHint.withOpacity(0.3),
                       ),
+
                     ],
                   ),
                 ),
@@ -304,6 +337,10 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
       children: [
         Expanded(
           child: EditText(
+            controller: phoneController,
+            inputFormat: [
+              LengthLimitingTextInputFormatter(10)
+            ],
             prefixIcon: Container(
               child: SizedBox(
                 height: 30,
@@ -320,12 +357,10 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
                               context: context,
                               showPhoneCode: true,
                               onSelect: (Country country) {
-                                AppUtils.log(country.phoneCode);
                                 countryData.value = country;
                                 countryData.refresh();
-                                // countryCode.value = country.phoneCode;
-                                // countryCode.refresh();
-                                AppUtils.log('Selected Country Code: ${country.phoneCode}');
+                                countryCodeController.text = '+${country.phoneCode}';
+                                AppUtils.log('Selected Country Code: ${countryCodeController.text}');
                               },
                               countryListTheme: CountryListThemeData(
                                 borderRadius: BorderRadius.circular(10.0),
@@ -349,13 +384,14 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
                             child: Obx(
                                   () => Row(
                                 children: [
-
                                   Text(
                                     countryData.value?.flagEmoji ?? '',
                                     style: TextStyle(fontSize: 26, color: AppColors.grey),
                                   ),
                                   Text(
-                                     '+1',
+                                    countryCodeController.text.isNotEmpty
+                                        ? countryCodeController.text
+                                        : '+1',
                                     style: 14.txtMediumbtncolor,
                                   ),
                                   Icon(Icons.keyboard_arrow_down, size: 18.sdp, color: AppColors.primaryColor),
@@ -371,7 +407,6 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
                 ),
               ),
             ),
-            // controller: phoneCtrl,
             decoration: InputDecoration(
               labelText: 'Phone Number',
               border: OutlineInputBorder(),
@@ -381,5 +416,6 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
       ],
     );
   }
+
 
 }

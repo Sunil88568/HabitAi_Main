@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../services/networking/urls.dart';
 import '../../../services/storage/preferences.dart';
 import '../../../utils/appUtils.dart';
 import '../../data/models/dataModels/login_model/login_model.dart';
+import '../../data/models/dataModels/responseDataModel.dart';
 import '../../data/models/repository/iAuthRepository.dart';
 import '../../domain/repository/authRepository.dart';
 
@@ -19,9 +23,52 @@ class AuthCtrl extends GetxController{
 
   RxBool isLoading = false.obs;
 
-  Future login(String username, String password) async {
+
+  Future<ResponseData<LoginModel>> register({
+    String? name,
+    String? password,
+    String? email,
+    String? age,
+    String? gender,
+    String? mobileNumber,
+    String? dob,
+    String? countryCode,
+    String? education,
+    String? image,
+    String? device_type,
+    String? device_token,
+  }) async {
+    final response = await _repo.register(
+      name: name,
+      password: password,
+      email: email,
+      age: age,
+      gender: gender,
+      mobileNumber: mobileNumber,
+      dob: dob,
+      countryCode: countryCode,
+      education: education,
+      image: image,
+      device_type: device_type,
+      device_token: device_token,
+    );
+
+    if (response.isSuccess) {
+      final data = response.data;
+      AppUtils.log("register successful: $data");
+      return response;
+    } else {
+      final error = response.getError;
+      AppUtils.toastError(error);
+      AppUtils.log("error>>>>$error");
+      throw '';
+    }
+  }
+
+
+  Future login(String email, String password) async {
     final response = await _repo.loginUser(
-      user: username,
+      email: email,
       password: password,
     );
 
@@ -33,41 +80,25 @@ class AuthCtrl extends GetxController{
       return;
     } else {
       final error = response.getError;
-      // AppUtils.toastError(error);
-      Get.snackbar("Error :", "${error}",
-      backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
-        snackStyle:SnackStyle.FLOATING
-      );
+      AppUtils.toastError(error);
       AppUtils.log("error>>>>$error");
       throw '';
     }
   }
 
-  Future<String?> verifyUser(String username, String action, String mobile) async {
-    final response = await _repo.verifyUser(
-      action: action,
-      username: username,
-      mobile: mobile,
+  Future<ResponseData> checkEmailAndMobile(String email, String mobileNumber) async {
+    final response = await _repo.checkEmailAndMobile(
+      email: email,
+      mobileNumber: mobileNumber,
     );
 
     if (response.isSuccess) {
-      final data = response.data;
-      AppUtils.log("Verify successful: $data");
-      final hash = data?.hash;
-      AppUtils.log("Hash: $hash");
-
-      return hash;
+      AppUtils.log("Verify successful: ${response.data}");
+      return response;
     } else {
       final error = response.getError;
       AppUtils.toastError(error);
-      if (error != null) {
-        AppUtils.toastError(error is Exception ? error : Exception('Unknown error'));
-      } else {
-        AppUtils.toastError(response.getError!);
-      }
-      throw Exception('Verification failed');
+      return response;
     }
   }
 
@@ -84,7 +115,7 @@ class AuthCtrl extends GetxController{
       AppUtils.log("Otp send:  $data");
 
 
-      final responseHash = data?.hash;
+      final responseHash = data;
 
       if (responseHash != null) {
         AppUtils.log("Hash::::::::: $responseHash");
@@ -92,7 +123,7 @@ class AuthCtrl extends GetxController{
         AppUtils.log("Hash not found in response");
       }
 
-      return responseHash;
+      return data?.name;
     } else {
       final error = response.getError;
       if (error != null) {
@@ -121,7 +152,7 @@ class AuthCtrl extends GetxController{
     if (response.isSuccess) {
       final data = response.data;
       AppUtils.log("password successful: $data");
-      final hash = data?.hash;
+      // final hash = data?.hash;
       AppUtils.log("Hash: $hash");
       return hash ?? '';
     } else {
@@ -139,7 +170,7 @@ class AuthCtrl extends GetxController{
 
 
 
-  Future<String> profileChangePassword(String existingPassword, String newPassword) async {
+  Future<LoginModel?> profileChangePassword(String existingPassword, String newPassword) async {
     final response = await _repo.profileChangePassword(
       existingPassword: existingPassword,
       newPassword: newPassword
@@ -147,8 +178,8 @@ class AuthCtrl extends GetxController{
 
     if (response.isSuccess) {
       final data = response.data;
-      final hash = data?.hash;
-      return hash ?? '';
+      // final hash = data?.hash;
+      return data ;
     } else {
       final error = response.getError;
       AppUtils.toastError(error);
@@ -162,6 +193,9 @@ class AuthCtrl extends GetxController{
     }
 
   }
+
+
+
 
 
 }
