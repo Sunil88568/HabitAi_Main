@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:intl/intl.dart';
 import 'package:question_app/components/styles/textStyles.dart';
+import 'package:question_app/feature/data/models/dataModels/login_model/login_model.dart';
 import 'package:question_app/utils/extensions/context_extensions.dart';
 import 'package:question_app/utils/extensions/size.dart';
 import 'package:question_app/utils/extensions/widget.dart';
@@ -13,13 +15,24 @@ import '../../../../components/coreComponents/ImageView.dart';
 import '../../../../components/coreComponents/TextView.dart';
 import '../../../../components/styles/appImages.dart';
 import '../../../../components/styles/app_strings.dart';
+import '../../controller/profile_Info_controller.dart';
 
-class PersonalInfoScreen extends StatelessWidget {
-   PersonalInfoScreen({super.key});
+class PersonalInfoScreen extends StatefulWidget {
+  final LoginModel? userData;
+  PersonalInfoScreen({super.key, this.userData});
 
 
   @override
+  State<PersonalInfoScreen> createState() => _PersonalInfoScreenState();
+}
+
+class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
+
+  final PersonalInfoController controller = Get.put(PersonalInfoController());
+
+  @override
   Widget build(BuildContext context) {
+    controller.setUser(widget.userData);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -45,12 +58,24 @@ class PersonalInfoScreen extends StatelessWidget {
         child: Column(
           children: [
             20.height,
-            _imageWidget(),
-            _buildInfoTile("Name", "John", context),
-            _buildInfoTile("Email", "e**le@gmail.com", context),
-            _buildInfoTile("Phone number", "+91 *****3210", context),
-          _buildInfoTile("Date of Birth", "Feb 25, 2000", context),
-          _buildInfoTile("Gender", "Male", context),
+            Center(
+              child: ImageView(
+                url: AppImages.dummyImg,
+                size: 107,
+                margin: 20.bottom,
+              ),
+            ),
+            TextView(
+              margin: 10.top + 10.bottom,
+              text: widget.userData?.name ?? "",
+              style: 24.txtBoldWhite,
+            ),
+
+            _buildInfoTile("Name", widget.userData?.name ?? "", context),
+            _buildInfoTile("Email", widget.userData?.email ?? "", context),
+            _buildInfoTile("Phone number", "${widget.userData?.countryCode ?? ""}  ${widget.userData?.mobileNumber ?? ""}", context),
+            _buildInfoTile("Date of Birth", widget.userData?.dob != null ? DateFormat('MMM dd, yyyy').format(widget.userData!.dob!) : "N/A", context),
+            _buildInfoTile("Gender", widget.userData?.gender ?? "", context),
           ],
         ),
       ),
@@ -67,14 +92,14 @@ class PersonalInfoScreen extends StatelessWidget {
           ),
           subtitle: TextView(
             text: value,
-            style:  15.txtRegularWhite,
+            style: 15.txtRegularWhite,
           ),
           trailing: isEditable
               ? GestureDetector(
             onTap: () {
               _showEditBottomSheet(context, title, value);
             },
-            child:  TextView(
+            child: TextView(
               text: "Edit",
               style: 16.txtMediumWhite,
               underline: true,
@@ -89,7 +114,7 @@ class PersonalInfoScreen extends StatelessWidget {
   }
 
   void _showEditBottomSheet(BuildContext context, String title, String currentValue) {
-    TextEditingController controller = TextEditingController(text: currentValue);
+    final textController = TextEditingController(text: currentValue);
 
     showModalBottomSheet(
       backgroundColor: AppColors.white,
@@ -124,15 +149,16 @@ class PersonalInfoScreen extends StatelessWidget {
               ),
               Row(
                 children: [
-                  TextView(text: AppStrings.name,
-                  style: 14.txtRegularBlack,
+                  TextView(
+                    text: title,
+                    style: 14.txtRegularBlack,
                   ),
                 ],
               ),
               EditText(
-                controller: controller,
-                hint: title ,
-               hintStyle: 14.txtRegularBlack,
+                controller: textController,
+                hint: title,
+                hintStyle: 14.txtRegularBlack,
                 margin: 20.bottom + 10.top,
               ),
               SizedBox(
@@ -140,12 +166,35 @@ class PersonalInfoScreen extends StatelessWidget {
                 child: AppButton(
                   radius: 10.sdp,
                   label: "Save & Continue",
-                  onTap: () {
-                    Navigator.pop(context);
+                  onTap: () async {
+                    String newValue = textController.text.trim();
+                    if (newValue.isNotEmpty) {
+                      switch (title.toLowerCase()) {
+                        case "name":
+                          await controller.updateProfile(name: newValue);
+                          break;
+                        case "email":
+                          await controller.updateProfile(email: newValue);
+                          break;
+                        case "phone number":
+                        // Optional: Split country code and number if needed
+                          await controller.updateProfile(mobileNumber: newValue);
+                          break;
+                        case "gender":
+                          await controller.updateProfile(gender: newValue);
+                          break;
+                        case "date of birth":
+                          await controller.updateProfile(dob: newValue);
+                          break;
+                      // Add more fields if needed
+                      }
+                      Navigator.pop(context);
+                      setState(() {}); // refresh UI
+                    }
                   },
                   labelStyle: 16.txtBoldWhite,
                   buttonColor: AppColors.btnColor,
-                )
+                ),
               ),
             ],
           ),
@@ -154,22 +203,6 @@ class PersonalInfoScreen extends StatelessWidget {
     );
   }
 
-   Widget _imageWidget() {
-     return Column(
-       children: [
-         Center(
-           child: ImageView(
-             url: AppImages.dummyImg,
-             size: 107,
-             margin: 20.bottom,
-           ),
-         ),
-         TextView(
-           margin: 10.top + 10.bottom,
-           text: "John",
-           style: 24.txtBoldWhite,
-         )
-       ],
-     );
-   }
+
 }
+

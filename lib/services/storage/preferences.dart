@@ -87,14 +87,14 @@ class Preferences {
 
   static set savePrefOnLogin(LoginModel? data) {
     profile = data;
-    // uid = data?.id;
-    // authToken = data?.authToken;
+    uid = data?.id;
+    authToken = data?.token;
   }
 
   static set savePrefOnSocialLogin(LoginModel? data) {
     profile = data;
-    // uid = data?.userId;
-    // authToken = data?.authToken;
+    uid = data?.id;
+    authToken = data?.token;
   }
 
   static Future<void> onLogout() async {

@@ -102,101 +102,21 @@ class AuthCtrl extends GetxController{
     }
   }
 
-  Future<String?> VerifyOtp(String action, String mobile, int otp, String hash) async {
-    final response = await _repo.VerifyOtp(
-      action: action,
-      mobile: mobile,
-      hash: hash,
-      otp: otp,
+
+  Future<ResponseData> forgotPassword(String email) async {
+    final response = await _repo.forgotPassword(
+      email: email,
     );
 
     if (response.isSuccess) {
-      final data = response.data;
-      AppUtils.log("Otp send:  $data");
-
-
-      final responseHash = data;
-
-      if (responseHash != null) {
-        AppUtils.log("Hash::::::::: $responseHash");
-      } else {
-        AppUtils.log("Hash not found in response");
-      }
-
-      return data?.name;
-    } else {
-      final error = response.getError;
-      if (error != null) {
-        AppUtils.toastError(error is Exception ? error : Exception('Unknown error'));
-      } else {
-        AppUtils.toastError(response.getError!);
-      }
-      throw '';
-    }
-  }
-
-
-
-
-
-
-  Future<String> changePassword(int userId, String type, String newPassword, String mobile, String hash) async {
-    final response = await _repo.changePassword(
-      action: type,
-      userID: userId,
-      password: newPassword,
-      mobile: mobile,
-      hash: hash,
-    );
-
-    if (response.isSuccess) {
-      final data = response.data;
-      AppUtils.log("password successful: $data");
-      // final hash = data?.hash;
-      AppUtils.log("Hash: $hash");
-      return hash ?? '';
+      AppUtils.log("forgot Pass Success: ${response.data}");
+      return response;
     } else {
       final error = response.getError;
       AppUtils.toastError(error);
-      if (error != null) {
-        AppUtils.toastError(error is Exception ? error : Exception('Unknown error'));
-      } else {
-        AppUtils.toastError(response.getError!);
-      }
-      throw Exception('Verification failed');
+      return response;
     }
   }
-
-
-
-
-  Future<LoginModel?> profileChangePassword(String existingPassword, String newPassword) async {
-    final response = await _repo.profileChangePassword(
-      existingPassword: existingPassword,
-      newPassword: newPassword
-    );
-
-    if (response.isSuccess) {
-      final data = response.data;
-      // final hash = data?.hash;
-      return data ;
-    } else {
-      final error = response.getError;
-      AppUtils.toastError(error);
-      AppUtils.log("Password change failed: $error");
-      if (error != null) {
-        AppUtils.toastError(error is Exception ? error : Exception(error.toString()));
-      } else {
-        AppUtils.toastError(Exception('Unknown error'));
-      }
-      throw Exception(error?.toString() ?? 'Verification failed');
-    }
-
-  }
-
-
-
-
 
 }
 

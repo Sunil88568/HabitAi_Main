@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:question_app/components/coreComponents/AppButton.dart';
 import 'package:question_app/components/coreComponents/ImageView.dart';
 import 'package:question_app/components/coreComponents/TextView.dart';
@@ -7,15 +9,22 @@ import 'package:question_app/components/styles/appImages.dart';
 import 'package:question_app/components/styles/textStyles.dart';
 import 'package:question_app/feature/presentation/screens/homeScreen/quiz_Screen.dart';
 import 'package:question_app/utils/extensions/context_extensions.dart';
+import 'package:question_app/utils/extensions/extensions.dart';
 import 'package:question_app/utils/extensions/size.dart';
 import 'package:question_app/utils/extensions/widget.dart';
-
+import '../../controller/profile_user_controller.dart';
 import '../notificationScreens/notificationScreen.dart';
 import '../profileScreens/profile_screen.dart';
 
-
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final profileCtrl = Get.put(ProfileUserController());
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +49,15 @@ class HomeScreen extends StatelessWidget {
                         onTap: (){
                           context.pushNavigator(ProfileScreen());
                         },
-                        child: CircleAvatar(
+                        child:
+
+                        // ImageView(
+                        //     url: profileCtrl.userProfile.value?.image.fileUrl ?? "",
+                        //   radius: width * 0.05,
+                        //   defaultImage: AppImages.dummyImg,
+                        // )
+
+                        CircleAvatar(
                           radius: width * 0.05,
                           backgroundImage: AssetImage(
                             AppImages.dummyImg,
@@ -49,19 +66,18 @@ class HomeScreen extends StatelessWidget {
                       ),
                       10.width,
                       TextView(
-                        text:
-                        'Hello, John',
-                        style: 20.txtBoldWhite
+                          text:
+                          'Hello, ${profileCtrl.userProfile.value?.name ?? ""}',
+                          style: 20.txtBoldWhite
                       ),
                     ],
                   ),
                   ImageView(url: AppImages.notificationImg,
-                  size: width * 0.09,
+                    size: width * 0.09,
                     onTap: (){
-                    context.pushNavigator(Notificationscreen());
+                      context.pushNavigator(Notificationscreen());
                     },
                   )
-
                 ],
               ),
 
@@ -107,13 +123,13 @@ class HomeScreen extends StatelessWidget {
               ),
 
               Row(
-                children:[ TextView(
-                  text:
-                  'Ends in: 5 Days',
-                  style: 16.txtMediumWhite,
-                  margin: 20.bottom + 5.top,
-                ),
-          ]
+                  children:[ TextView(
+                    text:
+                    'Ends in: 5 Days',
+                    style: 16.txtMediumWhite,
+                    margin: 20.bottom + 5.top,
+                  ),
+                  ]
               ),
 
               Row(
@@ -126,11 +142,11 @@ class HomeScreen extends StatelessWidget {
               ),
               30.height,
               Center(
-                child:
-                ImageView(url: AppImages.enterToWinPrice,
-                  height: 232.sdp,
-                  width: 340.sdp,
-                )
+                  child:
+                  ImageView(url: AppImages.enterToWinPrice,
+                    height: 232.sdp,
+                    width: 340.sdp,
+                  )
               ),
             ],
           ),
@@ -157,13 +173,12 @@ class HomeScreen extends StatelessWidget {
               label,
               style: 12.txtBoldWhite,
               textAlign: TextAlign.center,
-
             ),
             const SizedBox(height: 5),
             Text(
-              value,
-              textAlign: TextAlign.center,
-              style: 20.txtMediumWhite
+                value,
+                textAlign: TextAlign.center,
+                style: 20.txtMediumWhite
             ),
           ],
         ),

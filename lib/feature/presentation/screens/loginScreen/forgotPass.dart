@@ -15,6 +15,8 @@ import '../../../../components/styles/appColors.dart';
 import '../../../../components/styles/appImages.dart';
 import '../../../../components/styles/app_strings.dart';
 import '../../../../utils/appUtils.dart';
+import '../../../data/models/dataModels/responseDataModel.dart';
+import '../../controller/auth_ctrl.dart';
 import 'forgot_pass_success_screen.dart';
 
 class Forgotpass extends StatefulWidget {
@@ -27,37 +29,30 @@ class Forgotpass extends StatefulWidget {
 class _ForgotpassState extends State<Forgotpass> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
-  RxBool isValid = RxBool(false);
+  bool isValid = false;
 
 
   void _updateEmailValidation() {
-    isValid.value = _formKey.currentState?.validate() ?? false;
+    setState(() {
+      isValid = _formKey.currentState?.validate() ?? false;
+    });
   }
 
-  // Future<int?> _forgotPassword(BuildContext context, String email) async {
-  //   if (!_formKey.currentState!.validate()) return null;
-  //
-  //   try {
-  //     final authService = IAuthRepository();
-  //     final response = await authService.forgotPassword(email: email).applyLoader;
-  //
-  //     if (response.isSuccess) {
-  //       final otp = response.data!.data?.otp;
-  //       final id = response.data!.data?.id;
-  //       if(otp != null && id != null){
-  //         _showOtpBottomSheet(context, otp, email, id);
-  //       }
-  //       return otp;
-  //     } else {
-  //       AppUtils.toastError(AppStrings.emailNotFound);
-  //       return null;
-  //     }
-  //   } catch (e) {
-  //     AppUtils.log('Forgot Password API error: $e');
-  //     AppUtils.toastError(AppStrings.somethingWentWrong);
-  //     return null;
-  //   }
-  // }
+
+  Future<bool> _forgotPassword() async {
+    final ResponseData responseData = await AuthCtrl.find
+        .forgotPassword(_emailController.getText)
+        .applyLoader;
+
+    if (responseData.isSuccess) {
+      context.pushAndClearNavigator(ForgotPassSuccessScreen());
+      return true;
+    } else {
+      AppUtils.toastError(responseData.getError);
+      return false;
+    }
+  }
+
   
 
   @override
@@ -125,25 +120,19 @@ class _ForgotpassState extends State<Forgotpass> {
                       return null;
                     },
                   ),
-
-          AppButton(
+                  AppButton(
                     margin: 100.top,
                     radius: 10.sdp,
-                    buttonColor: isValid.value ? AppColors.white : Colors.grey,
+                    buttonColor: isValid ? AppColors.white : Colors.grey,
                     labelStyle: 18.txtBoldBlack,
-
                     label: AppStrings.sendLink,
-                    onTap:(){
-                      context.pushNavigator(ForgotPassSuccessScreen());
+                    onTap: isValid
+                        ? () async {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        await _forgotPassword();
+                      }
                     }
-                    // isValid.value
-                    //     ? () async {
-                    //   if (_formKey.currentState?.validate() ?? false) {
-                    //     String email = _emailController.textim();
-                    //     await _forgotPassword(context, email);
-                    //   }
-                    // }
-                    //     : null,
+                        : null,
                   )
                 ],
               ),

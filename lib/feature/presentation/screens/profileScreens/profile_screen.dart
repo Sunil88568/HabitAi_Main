@@ -2,22 +2,30 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:question_app/components/styles/textStyles.dart';
 import 'package:question_app/feature/presentation/screens/loginScreen/login_screen.dart';
 import 'package:question_app/feature/presentation/screens/profileScreens/persional_info_screen.dart';
 import 'package:question_app/feature/presentation/screens/profileScreens/privacypolicy.dart';
 import 'package:question_app/feature/presentation/screens/profileScreens/setting_screen.dart';
 import 'package:question_app/feature/presentation/screens/profileScreens/termandconditions.dart';
+import 'package:question_app/utils/appUtils.dart';
 import 'package:question_app/utils/extensions/context_extensions.dart';
+import 'package:question_app/utils/extensions/extensions.dart';
 import 'package:question_app/utils/extensions/size.dart';
 import 'package:question_app/utils/extensions/widget.dart';
 
+import '../../../../components/appLoader.dart';
 import '../../../../components/coreComponents/AppButton.dart';
 import '../../../../components/coreComponents/ImageView.dart';
 import '../../../../components/coreComponents/TextView.dart';
 import '../../../../components/styles/appColors.dart';
 import '../../../../components/styles/appImages.dart';
 import '../../../../components/styles/app_strings.dart';
+import '../../../../services/storage/preferences.dart';
+import '../../controller/auth_ctrl.dart';
+import '../../controller/profile_user_controller.dart';
 
 
 class ProfileScreen extends StatefulWidget {
@@ -28,6 +36,9 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final profileCtrl = Get.put(ProfileUserController());
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,7 +82,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   image: AppImages.persionalInfo,
                   text: AppStrings.persionalInfo,
                   onTap: () {
-                    context.pushNavigator(PersonalInfoScreen());
+                    context.pushNavigator(
+                      PersonalInfoScreen(userData: profileCtrl.userProfile.value),
+                    );
                   },
                 ),
                 _commonWidget(
@@ -106,23 +119,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _imageWidget() {
+    final data = profileCtrl.userProfile.value;
+    AppUtils.log("image>>>>>${data?.image.fileUrl}");
     return Column(
       children: [
         Center(
           child: ImageView(
-            url: AppImages.dummyImg,
+            url: data?.image.fileUrl ?? '',
             size: 107,
             margin: 20.bottom,
+            defaultImage: AppImages.persionalInfo,
           ),
         ),
         TextView(
           margin: 10.top + 10.bottom,
-          text: "John",
+          text: data?.name ?? '',
           style: 24.txtBoldWhite,
-        )
+        ),
       ],
     );
   }
+
 
   Widget _commonWidget({
     required String image,
@@ -253,7 +270,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             labelStyle: 14.txtBoldWhite,
                             buttonColor: AppColors.btnColor,
                             onTap: () {
-                              context.pop();
+                              onLogout(context);
                             },
                             isFilledButton: false,
                           ),
@@ -270,8 +287,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       },
     );
   }
+  static Future<void> onLogout(BuildContext context) async {
+    try {
+      await Get.find<ProfileUserController>().logOut().applyLoader;
+      Preferences.clearUserData();
+      context.pushAndClearNavigator(LoginScreen());
 
-
-
-
+    } catch (e) {
+      AppUtils.log('Logout failed: $e');
+    }
+  }
 }

@@ -1,10 +1,6 @@
-// import 'dart:developer' as AppUtils;
-
-
-import 'dart:developer' as AppUtils;
+import 'dart:convert';
 import 'dart:io';
-
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:question_app/utils/appUtils.dart';
 import 'package:question_app/utils/extensions/extensions.dart';
 
 import '../../../../services/networking/apiMethods.dart';
@@ -50,7 +46,7 @@ class IAuthRepository implements AuthRepository {
       'device_token': device_token,
     };
 
-    AppUtils.log("register API URL: ${Urls.register}");
+   AppUtils.log("register API URL: ${Urls.register}");
     final result = await _apiMethod.post(
       url: Urls.register,
       body: body,
@@ -62,8 +58,8 @@ class IAuthRepository implements AuthRepository {
       final userData = rawData['data'] ?? {};
       final token = rawData['token'] ?? "";
 
-      AppUtils.log("Token: $token");
-      AppUtils.log("Parsed user data: $userData");
+     AppUtils.log("Token: $token");
+     AppUtils.log("Parsed user data: $userData");
 
       final data = LoginModel.fromJson(userData);
       Preferences.authToken = token;
@@ -98,7 +94,7 @@ class IAuthRepository implements AuthRepository {
       'device_type': deviceType,
     };
 
-    AppUtils.log("Login API URL: ${Urls.login}");
+   AppUtils.log("Login API URL: ${Urls.login}");
     final result = await _apiMethod.post(
       url: Urls.login,
       body: body,
@@ -110,12 +106,15 @@ class IAuthRepository implements AuthRepository {
       final userData = rawData['data'] ?? {};
       final token = rawData['token'] ?? "";
 
-      AppUtils.log("Token: $token");
-      AppUtils.log("Parsed user data: $userData");
+     AppUtils.log("Token: $token");
+     AppUtils.log("Parsed user data: $userData");
 
       final data = LoginModel.fromJson(userData);
       Preferences.authToken = token;
       Preferences.profile = data;
+
+     AppUtils.log("Full Profile: ${jsonEncode(Preferences.profile?.toJson())}");
+
 
       return ResponseData<LoginModel>(
         statusCode: result.statusCode,
@@ -158,6 +157,41 @@ class IAuthRepository implements AuthRepository {
     String? message;
     String? error;
     final errorData = result.data;
+    return ResponseData<LoginModel>(
+      statusCode: result.statusCode,
+      message: error,
+      error: error != null ? Exception(error) : null,
+      data: null,
+    );
+  }
+
+
+
+  @override
+  Future<ResponseData<LoginModel>> forgotPassword({
+    required String email,
+  }) async {
+    final body = {
+      'email': email,
+    };
+
+    final result = await _apiMethod.post(
+      url: Urls.forgotPassword,
+      body: body,
+      headers: {},
+    );
+
+    if (result.isSuccess) {
+      return ResponseData<LoginModel>(
+        statusCode: result.statusCode,
+        message: result.message ?? "email successful",
+        data: null,
+      );
+    }
+
+    String? message;
+    String? error;
+    final errorData = result.data;
     if (errorData is Map<String, dynamic>) {
       message = errorData['message']?.toString();
       error = errorData['error']?.toString();
@@ -172,97 +206,82 @@ class IAuthRepository implements AuthRepository {
   }
 
 
-
-
   @override
-  Future<ResponseData<LoginModel>> VerifyOtp({
-    required String action,
-    required String mobile,
-    required String hash,
-    required int ?otp,
+  Future<ResponseData<LoginModel>> getUserProfile() async {
+    final token = Preferences.profile?.token.bearer;
+   AppUtils.log("token???? $token");
 
-  }) async {
-    final body = {
-      'action': action,
-      'mobile': mobile,
-      'hash': hash,
-      'otp': 112200,
-    };
-
-    final result = await _apiMethod.post(
-      url: Urls.verifyOtp,
-      body: body,
-      headers: {
-        "x-app-platform": "android",
-        "x-app-version": "10.0",
-      },
+    final result = await _apiMethod.get(
+      url: Urls.getUserProfile,
+      headers: {},
+      authToken: token,
     );
 
     if (result.isSuccess) {
-      final rawData = result.data ?? {};
-      final userData = rawData['data'] ?? {};
-      AppUtils.log("data::::$userData");
-      final data = LoginModel.fromJson(userData);
-      return ResponseData(
-        statusCode: result.statusCode,
-        message: result.message,
-        data: data,
-      );
-    } else {
-      return ResponseData(
-        statusCode: result.statusCode,
-        message: result.message,
-      );
+      try {
+        final rawData = result.data;
+       AppUtils.log("Raw Profile Data: $rawData");
+
+        final loginModel = LoginModel.fromJson(rawData?['data'] ?? {});
+        return ResponseData<LoginModel>(
+          statusCode: result.statusCode,
+          message: result.message ?? "get user successful",
+          data: loginModel,
+        );
+      } catch (e) {
+       AppUtils.log("Parse error in API: $e");
+        return ResponseData<LoginModel>(
+          statusCode: result.statusCode,
+          message: "Failed to parse user data",
+          error: e is Exception ? e : Exception(e.toString()),
+          data: null,
+        );
+      }
     }
+
+    String? message;
+    String? error;
+    final errorData = result.data;
+    if (errorData is Map<String, dynamic>) {
+      message = errorData['message']?.toString();
+      error = errorData['error']?.toString();
+    }
+
+    return ResponseData<LoginModel>(
+      statusCode: result.statusCode,
+      message: message ?? "get User failed",
+      error: error != null ? Exception(error) : null,
+      data: null,
+    );
   }
 
 
-
   @override
-  Future<ResponseData<LoginModel>> changePassword({
-    required String action,
-    required int userID,
-    required String password,
-    required String mobile,
-    required String hash,
-
-
-  }) async {
-    final body = {
-      'action': action,
-      'userID': userID,
-      'password': password,
-      'mobile': mobile,
-      'hash': hash,
-    };
-
-    final result = await _apiMethod.post(
-      url: Urls.changePassword,
-      body: body,
-      headers: {
-        "x-app-platform": "android",
-        "x-app-version": "10.0",
-      },
+  Future<ResponseData<LoginModel>> logOut() async {
+    final token = Preferences.profile?.token.bearer;
+    AppUtils.log("token>>>>>>> $token");
+    final result = await _apiMethod.put(
+      url: Urls.logOut,
+      headers: {},
+      authToken: token,
+      body: {},
     );
 
     if (result.isSuccess) {
-      final rawData = result.data ?? {};
-      final userData = (rawData['data'] is Map)
-          ? (rawData['data'] as Map)['user'] ?? {}
-          : {};
+        final rawData = result.data;
+        AppUtils.log("Raw Profile Data: $rawData");
 
-      final data = LoginModel.fromJson(Map<String, dynamic>.from(userData));
-      return ResponseData(
-        statusCode: result.statusCode,
-        message: result.message,
-        data: data,
-      );
-    } else {
-      return ResponseData(
-        statusCode: result.statusCode,
-        message: result.message,
-      );
-    }
+        final loginModel = LoginModel.fromJson(rawData?['data'] ?? {});
+        return ResponseData<LoginModel>(
+          statusCode: result.statusCode,
+          message: result.message ?? "get user successful",
+          data: loginModel,
+        );
+      }
+
+    return ResponseData<LoginModel>(
+      statusCode: result.statusCode,
+    );
   }
 
 
@@ -273,22 +292,19 @@ class IAuthRepository implements AuthRepository {
 
   }) async {
     final body = {
-      'existingPassword': existingPassword,
+      'oldPassword': existingPassword,
       'newPassword': newPassword,
     };
-
-    final result = await _apiMethod.patch(
-      url: Urls.profileChangePassword,
+    final token = Preferences.profile?.token.bearer;
+    final result = await _apiMethod.put(
+      url: Urls.changePassword,
       body: body,
       headers: {
-        "x-app-platform": "android",
-        "x-app-version": "1.0",
-        "Content-Type":" application/json",
       },
-      authToken: Preferences.authToken.bearer
+      authToken: token
     );
-    AppUtils.log("body:::$body");
-    AppUtils.log("API Result::::: ${result.toJson()}");
+   AppUtils.log("body:::$body");
+   AppUtils.log("API Result::::: ${result.toJson()}");
 
     if (result.isSuccess) {
       final rawData = result.data ?? {};
@@ -318,7 +334,7 @@ class IAuthRepository implements AuthRepository {
       final multipartFile = {
         'file': imageFile.path,
       };
-      AppUtils.log("Uploading photo: $multipartFile");
+     AppUtils.log("Uploading photo: $multipartFile");
 
       final response = await _apiMethod.post(
         url: Urls.uploadPhoto,
@@ -334,7 +350,7 @@ class IAuthRepository implements AuthRepository {
           dataString = data;
         }
 
-        AppUtils.log("Image uploaded successfully: $dataString");
+       AppUtils.log("Image uploaded successfully: $dataString");
         return ResponseData<String>(
           data: dataString,
           statusCode: response.statusCode,
@@ -342,10 +358,70 @@ class IAuthRepository implements AuthRepository {
         );
 
       } else {
-        AppUtils.log("Photo upload failed with status: ${response.error}");
+       AppUtils.log("Photo upload failed with status: ${response.error}");
         throw Exception('Photo upload failed');
       }
     }
+
+
+
+  @override
+  Future<ResponseData<LoginModel>> editProfile({
+    String? name,
+    String? password,
+    String? email,
+    String? age,
+    String? gender,
+    String? mobileNumber,
+    String? dob,
+    String? countryCode,
+    String? education,
+    String? image,
+    String? device_type,
+    String? device_token,
+  }) async {
+    final body = {
+      'name': name,
+      'password': password,
+      'email': email,
+      'age': age,
+      'gender': gender,
+      'mobileNumber': mobileNumber,
+      'dob': dob,
+      'countryCode': countryCode,
+      'education': education,
+      'image': image,
+      'device_type': device_type,
+      'device_token': device_token,
+    };
+    final token = Preferences.profile?.token.bearer;
+    final result = await _apiMethod.put(
+        url: Urls.editProfile,
+        body: body,
+        headers: {},
+        authToken: token
+    );
+
+    AppUtils.log("body:::$body");
+    AppUtils.log("API Result::::: ${result.toJson()}");
+
+    if (result.isSuccess) {
+      final rawData = result.data ?? {};
+      final userData = rawData['data'] ?? {};
+
+      final data = LoginModel.fromJson(Map<String, dynamic>.from(userData));
+      return ResponseData(
+        statusCode: result.statusCode,
+        message: result.message,
+        data: data,
+      );
+    } else {
+      return ResponseData(
+        statusCode: result.statusCode,
+        message: result.message,
+      );
+    }
+  }
 
 
 

@@ -32,24 +32,17 @@ abstract class AuthRepository {
     required String mobileNumber,
   });
 
-
-  Future<ResponseData<LoginModel>> VerifyOtp({
-    required String action,
-    required String mobile,
-    required String hash,
-    required int? otp,
-
+  Future<ResponseData<LoginModel>> forgotPassword({
+    required String email,
   });
 
 
-  Future<ResponseData<LoginModel>> changePassword({
-    required int userID,
-    required String action,
-    required String password,
-    required String mobile,
-    required String hash,
+  Future<ResponseData<LoginModel>> getUserProfile();
 
-  });
+  Future<ResponseData<LoginModel>> logOut();
+
+
+
 
 
   Future<ResponseData<LoginModel>> profileChangePassword({
@@ -59,4 +52,22 @@ abstract class AuthRepository {
   });
 
   Future<ResponseData<String>> uploadPhoto({ required File imageFile });
+
+
+  Future<ResponseData<LoginModel>> editProfile({
+    String ?name,
+    String ?password,
+    String ?email,
+    String ?age,
+    String ?gender,
+    String ?mobileNumber,
+    String ?dob,
+    String? countryCode,
+    String? education,
+    String? image,
+    String? device_type,
+    String? device_token,
+  });
+
+
 }

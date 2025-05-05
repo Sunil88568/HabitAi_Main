@@ -53,40 +53,37 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     super.dispose();
   }
 
-  // Future<void> _updatePassword() async {
-  //   if (!formKey.currentState!.validate()) {
-  //     AppUtils.log("Form validation failed");
-  //     return;
-  //   }
-  //
-  //   String currentPassword = _currentPasswordController.textim();
-  //   String newPassword = _newPasswordController.textim();
-  //
-  //   try {
-  //     AppUtils.log("Calling change password API...");
-  //     final authService = IAuthRepository();
-  //     final response = await authService
-  //         .changePasswordProfile(
-  //         oldpassword: currentPassword, newpassword: newPassword)
-  //         .applyLoader;
-  //
-  //     if (response.isSuccess) {
-  //       AppUtils.log("Password changed successfully!");
-  //       AppUtils.toast("Password Changed Successfully");
-  //       context.pop();
-  //     } else {
-  //       AppUtils.log("Password change failed: ${response.error}");
-  //       AppUtils.toastError("Passwords do not match");
-  //     }
-  //   } catch (e) {
-  //     AppUtils.log("Error: $e");
-  //     AppUtils.toastError(AppStrings.anErrorOccurred);
-  //   } finally {
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //   }
-  // }
+  Future<void> _updatePassword() async {
+    if (!formKey.currentState!.validate()) {
+      AppUtils.log("Form validation failed");
+      return;
+    }
+    String currentPassword = _currentPasswordController.text.trim();
+    String newPassword = _newPasswordController.text.trim();
+
+    try {
+      AppUtils.log("Calling change password API...");
+      final authService = IAuthRepository();
+      final response = await authService
+          .profileChangePassword(
+           existingPassword: currentPassword, newPassword: newPassword
+      ).applyLoader;
+
+      if (response.isSuccess) {
+        AppUtils.toast("Password Changed Successfully");
+        context.pop();
+      } else {
+        AppUtils.toastError("Passwords do not match");
+      }
+    } catch (e) {
+      AppUtils.log("Error: $e");
+      AppUtils.toastError(e);
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,14 +148,19 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     ),
                     validator: (value) {
                       final trimmedValue = value?.trim() ?? '';
+                      final currentPassword = _currentPasswordController.text.trim();
+
                       if (trimmedValue.isEmpty)
                         return AppStrings.pleaseEnterYourPassword;
                       if (trimmedValue.contains(' '))
                         return AppStrings.passwordMustNotContainSpace;
                       if (!trimmedValue.isPassword)
                         return AppStrings.passwordMustBeAtLeast;
+                      if (trimmedValue == currentPassword)
+                        return "New password must be different from current password";
                       return null;
                     },
+
                   ),
                   AppButton(
                     radius: 10,
@@ -167,9 +169,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     labelStyle: 18.txtMediumWhite,
                     buttonColor:
                     isButtonEnabled ? AppColors.btnColor : Colors.grey,
-                    // onTap:
-                    //
-                    // isButtonEnabled ? _updatePassword : null,
+                    onTap:
+
+                    isButtonEnabled ? _updatePassword : null,
                   ),
                 ],
               ),
