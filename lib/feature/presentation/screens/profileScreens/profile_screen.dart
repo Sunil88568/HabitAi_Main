@@ -1,6 +1,4 @@
-
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -15,8 +13,7 @@ import 'package:question_app/utils/extensions/context_extensions.dart';
 import 'package:question_app/utils/extensions/extensions.dart';
 import 'package:question_app/utils/extensions/size.dart';
 import 'package:question_app/utils/extensions/widget.dart';
-
-import '../../../../components/appLoader.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../components/coreComponents/AppButton.dart';
 import '../../../../components/coreComponents/ImageView.dart';
 import '../../../../components/coreComponents/TextView.dart';
@@ -24,7 +21,6 @@ import '../../../../components/styles/appColors.dart';
 import '../../../../components/styles/appImages.dart';
 import '../../../../components/styles/app_strings.dart';
 import '../../../../services/storage/preferences.dart';
-import '../../controller/auth_ctrl.dart';
 import '../../controller/profile_user_controller.dart';
 
 
@@ -124,12 +120,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       children: [
         Center(
-          child: ImageView(
-            url: data?.image.fileUrl ?? '',
-            size: 107,
-            margin: 20.bottom,
-            defaultImage: AppImages.persionalInfo,
+          child:ClipOval(
+            child:  data?.image.fileUrl != null
+                ? ImageView(
+              url:  data?.image.fileUrl ?? '',
+              defaultImage: AppImages.dummyImg,
+              size: 120.sdp,
+              imageType: ImageType.network,
+              fit: BoxFit.cover,
+            )
+                : Shimmer.fromColors(
+              baseColor: Colors.grey.shade300,
+              highlightColor: Colors.grey.shade100,
+              child: Container(
+                width: 80.sdp,
+                height: 80.sdp,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                ),
+              ),
+            ),
           ),
+
+
+
+    //       ImageView(
+    // url: data?.image.fileUrl ?? '',
+    //   defaultImage: AppImages.dummyImg,
+    //         size: 45.sdp,
+    //         margin: 20.bottom,
+    //   imageType: ImageType.network,
+    //   fit: BoxFit.cover,
+    // )
+
+          // ImageView(
+          //   url: data?.image.fileUrl ?? '',
+          //   size: 107,
+          //   margin: 20.bottom,
+          //   defaultImage: AppImages.dummyImg,
+          // ),
         ),
         TextView(
           margin: 10.top + 10.bottom,

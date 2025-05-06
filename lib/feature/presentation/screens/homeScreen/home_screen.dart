@@ -12,6 +12,7 @@ import 'package:question_app/utils/extensions/context_extensions.dart';
 import 'package:question_app/utils/extensions/extensions.dart';
 import 'package:question_app/utils/extensions/size.dart';
 import 'package:question_app/utils/extensions/widget.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../controller/profile_user_controller.dart';
 import '../notificationScreens/notificationScreen.dart';
 import '../profileScreens/profile_screen.dart';
@@ -49,18 +50,28 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: (){
                           context.pushNavigator(ProfileScreen());
                         },
-                        child:
-
-                        // ImageView(
-                        //     url: profileCtrl.userProfile.value?.image.fileUrl ?? "",
-                        //   radius: width * 0.05,
-                        //   defaultImage: AppImages.dummyImg,
-                        // )
-
-                        CircleAvatar(
-                          radius: width * 0.05,
-                          backgroundImage: AssetImage(
-                            AppImages.dummyImg,
+                        child: Center(
+                          child:ClipOval(
+                            child: profileCtrl.userProfile.value?.image.fileUrl != null
+                                ? ImageView(
+                              url:  profileCtrl.userProfile.value?.image.fileUrl ?? "",
+                              defaultImage: AppImages.dummyImg,
+                              size: 45.sdp,
+                              imageType: ImageType.network,
+                              fit: BoxFit.cover,
+                            )
+                                : Shimmer.fromColors(
+                              baseColor: Colors.grey.shade300,
+                              highlightColor: Colors.grey.shade100,
+                              child: Container(
+                                width: 80.sdp,
+                                height: 80.sdp,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),

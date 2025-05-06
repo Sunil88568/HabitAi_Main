@@ -17,6 +17,15 @@ class PersonalInfoController extends GetxController {
     }
   }
 
+  void updatePhoneNumber(String newCountryCode, String newMobileNumber) {
+    if (userData.value != null) {
+      userData.value = userData.value!.copyWith(
+        countryCode: newCountryCode,
+        mobileNumber: newMobileNumber,
+      );
+    }
+  }
+
   Future<void> updateProfile({
     String? name,
     String? password,

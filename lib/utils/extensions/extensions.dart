@@ -128,10 +128,10 @@ extension stringNull on String? {
     if (this!.contains('http')) {
       return this;
     }
-    if (this!.startsWith('/public')) {
+    if (this!.startsWith('/uploads/')) {
       return '$baseUrl$this';
     }
-    return '$baseUrl/public$this';
+    return '$baseUrl/uploads/$this';
   }
 
   bool get isPostCode => isNotNullEmpty && this!.trim().length == 6;

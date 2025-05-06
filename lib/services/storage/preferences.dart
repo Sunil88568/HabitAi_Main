@@ -139,19 +139,17 @@ class Preferences {
   }
 
 
-  static void clearUserData()  {
-    uid = null;
-    profile = null;
-    authToken = null;
-    uploadedImage = null;
-
-    // await _prefs.remove(_uidKey);
-    // await _prefs.remove(_userPDataKey);
-    // await _prefs.remove(_authTokenPDataKey);
-    // await _prefs.remove(_fcmTokenKey);
-    // await _prefs.remove(_uploadedImageKey);
-    // await _prefs.clear();
+  static Future<void> clearUserData() async {
+    await _prefs.remove(_uidKey);
+    await _prefs.remove(_userPDataKey);
+    await _prefs.remove(_authTokenPDataKey);
+    await _prefs.remove(_fcmTokenKey);
+    await _prefs.remove(_uploadedImageKey);
+    await _prefs.remove(_emailKey);
+    await _prefs.remove(_seemypost);
+    await _prefs.remove(_sharepost);
   }
+
 
 }
 
