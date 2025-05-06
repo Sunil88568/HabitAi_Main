@@ -285,15 +285,18 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
                             ? () async {
                           final success = await _submitForm();
                           if (success) {
+                            final countryFlag = countryData.value?.flagEmoji ?? '';
+                            final fullCountryCode = '$countryFlag ${countryCodeController.text}';
                             context.pushNavigator(AddprofileScreen(
                               email: emailController.getText,
                               name: nameController.getText,
-                              countryCode: countryCodeController.getText,
+                              countryCode: fullCountryCode,
                               phoneNumber: phoneController.getText,
                               password: passwordController.getText,
                             ));
                           }
                         }
+
                             : null,
                         buttonColor: _isFormValid
                             ? AppColors.btnColor

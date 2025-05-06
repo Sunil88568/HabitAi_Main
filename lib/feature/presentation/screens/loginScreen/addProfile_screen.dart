@@ -402,7 +402,7 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
       onSingleChange: (selectedValue) {
         setState(() {
           gender = selectedValue;
-          genderController.text = selectedValue; // update controller
+          genderController.text = selectedValue;
         });
       },
       singleValueBuilder: (value) => value,

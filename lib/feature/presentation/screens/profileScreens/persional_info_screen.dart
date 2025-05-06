@@ -121,15 +121,25 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     );
   }
 
+
   Widget _buildPhoneField() {
-    final phoneNumber = "${controller.userData.value?.countryCode ?? '+1'} ${controller.userData.value?.mobileNumber ?? ''}";
-    return _buildInfoTile("Phone Number", phoneNumber, context, isEditable: true);
+    final phoneNumber =
+        "${controller.userData.value?.countryCode ?? '+1'} ${controller.userData.value?.mobileNumber ?? ''}";
+    return _buildInfoTile(
+      "Phone Number",
+      phoneNumber,
+      context,
+      isEditable: true,
+      onEditTap: () => _showPhoneEditBottomSheet(context),
+    );
   }
 
 
+
   void _showPhoneEditBottomSheet(BuildContext context) {
-    final phoneController = TextEditingController(text: controller.userData.value?.mobileNumber ?? '');
-    String selectedCode = controller.userData.value?.countryCode ?? '+1';
+    final phoneController = TextEditingController(
+      text: controller.userData.value?.mobileNumber ?? '',
+    );
 
     showModalBottomSheet(
       backgroundColor: AppColors.white,
@@ -139,101 +149,116 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       ),
       isScrollControlled: true,
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-            top: 16,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextView(text: "Edit Phone Number", style: 20.txtBoldBlack),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  TextView(text: "Phone Number", style: 14.txtRegularBlack),
-                ],
-              ),
-              10.height,
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      showCountryPicker(
-                        context: context,
-                        showPhoneCode: true,
-                        onSelect: (Country country) {
-                          selectedCode = '+${country.phoneCode}';
-                          Navigator.pop(context);
-                          _showPhoneEditBottomSheet(context); // re-open with updated code
-                        },
-                      );
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.grey),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          TextView(text: selectedCode, style: 14.txtRegularBlack),
-                          Icon(Icons.arrow_drop_down, color: AppColors.grey),
-                        ],
-                      ),
+        return Obx(() {
+          final currentCode = controller.userData.value?.countryCode ?? '+1';
+
+          return Padding(
+            padding: EdgeInsets.only(
+              left: 10,
+              right: 16,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              top: 16,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextView(text: "Edit Phone Number", style: 20.txtBoldBlack),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
                     ),
-                  ),
-                  10.width,
-                  Expanded(
-                    child: EditText(
-                      controller: phoneController,
-                      inputFormat: [LengthLimitingTextInputFormatter(10)],
-                      hint: "Phone Number",
-                      hintStyle: 14.txtRegularBlack,
-                    ),
-                  ),
-                ],
-              ),
-              20.height,
-              SizedBox(
-                width: double.infinity,
-                child: AppButton(
-                  radius: 10.sdp,
-                  label: "Save & Continue",
-                  onTap: () async {
-                    String newPhone = phoneController.text.trim();
-                    if (newPhone.isNotEmpty) {
-                      await controller.updateProfile(
-                        mobileNumber: newPhone,
-                        countryCode: selectedCode,
-                      ).applyLoader;
-                      Get.put(ProfileUserController());
-                      context.pop(); // close sheet
-                      setState(() {});
-                    }
-                  },
-                  labelStyle: 16.txtBoldWhite,
-                  buttonColor: AppColors.btnColor,
+                  ],
                 ),
-              ),
-            ],
-          ),
-        );
+                Row(
+                  children: [
+                    TextView(text: "Phone Number", style: 14.txtRegularBlack),
+                  ],
+                ),
+                10.height,
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        showCountryPicker(
+                          context: context,
+                          showPhoneCode: true,
+                          onSelect: (Country country) {
+                            final newCode = '+${country.phoneCode}';
+                            final newFlag = country.flagEmoji;
+                            // Update controller
+                            controller.userData.value = controller.userData.value?.copyWith(
+                              countryCode: '$newFlag $newCode',
+                            );
+                            controller.userData.refresh();
+                          },
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.grey.withOpacity(0.3)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            TextView(text: currentCode, style: 14.txtRegularBlack),
+                            const Icon(Icons.keyboard_arrow_down_sharp, color: AppColors.grey),
+                          ],
+                        ),
+                      ),
+                    ),
+                    10.width,
+                    Expanded(
+                      child: EditText(
+                        controller: phoneController,
+                        inputFormat: [LengthLimitingTextInputFormatter(10)],
+                        hint: "Phone Number",
+                        hintStyle: 14.txtRegularBlack,
+                      ),
+                    ),
+                  ],
+                ),
+                20.height,
+                SizedBox(
+                  width: double.infinity,
+                  child: AppButton(
+                    radius: 10.sdp,
+                    label: "Save & Continue",
+                    onTap: () async {
+                      String newPhone = phoneController.text.trim();
+                      if (newPhone.isNotEmpty) {
+                        await controller.updateProfile(
+                          mobileNumber: newPhone,
+                          countryCode: controller.userData.value?.countryCode ?? '+1',
+                        ).applyLoader;
+
+                        Get.put(ProfileUserController());
+                        Navigator.pop(context);
+                      }
+                    },
+                    labelStyle: 16.txtBoldWhite,
+                    buttonColor: AppColors.btnColor,
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
       },
     );
   }
 
-  Widget _buildInfoTile(String title, String value, BuildContext context, {bool isEditable = true}) {
+
+  Widget _buildInfoTile(
+      String title,
+      String value,
+      BuildContext context, {
+        bool isEditable = true,
+        VoidCallback? onEditTap,
+      }) {
     return Column(
       children: [
         ListTile(
@@ -247,9 +272,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
           ),
           trailing: isEditable
               ? GestureDetector(
-            onTap: () {
-              _showEditBottomSheet(context, title, value);
-            },
+            onTap: onEditTap ??
+                    () {
+                  _showEditBottomSheet(context, title, value);
+                },
             child: TextView(
               text: "Edit",
               style: 16.txtMediumWhite,
@@ -263,6 +289,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       ],
     );
   }
+
 
   void _showEditBottomSheet(BuildContext context, String title, String currentValue) {
     final textController = TextEditingController(text: currentValue);

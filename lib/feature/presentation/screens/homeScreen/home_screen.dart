@@ -8,6 +8,7 @@ import 'package:question_app/components/styles/appColors.dart';
 import 'package:question_app/components/styles/appImages.dart';
 import 'package:question_app/components/styles/textStyles.dart';
 import 'package:question_app/feature/presentation/screens/homeScreen/quiz_Screen.dart';
+import 'package:question_app/utils/appUtils.dart';
 import 'package:question_app/utils/extensions/context_extensions.dart';
 import 'package:question_app/utils/extensions/extensions.dart';
 import 'package:question_app/utils/extensions/size.dart';
@@ -24,7 +25,14 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
+
 class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+   AppUtils.log("image:::${profileCtrl.userProfile.value?.image.fileUrl}");
+    super.initState();
+  }
+
   final profileCtrl = Get.put(ProfileUserController());
 
   @override
@@ -32,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final size = MediaQuery.of(context).size;
     final width = size.width;
     final height = size.height;
+
 
     return Scaffold(
       backgroundColor: AppColors.primaryColor,
@@ -64,8 +73,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               baseColor: Colors.grey.shade300,
                               highlightColor: Colors.grey.shade100,
                               child: Container(
-                                width: 80.sdp,
-                                height: 80.sdp,
+                                width: 45.sdp,
+                                height: 45.sdp,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Colors.white,

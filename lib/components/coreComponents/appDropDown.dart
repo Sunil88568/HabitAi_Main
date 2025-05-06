@@ -262,7 +262,7 @@ Widget _dropDownWidget({
                                     : hintValue,
                                 style: value != null && value.trim().isNotEmpty
                                     ? 16.txtRegularBlack
-                                    : 16.txtRegularBlack,
+                                    : 16.txtRegularGrey,
                               ),
                             ),
                             if (suffixIcon != null) suffixIcon,
