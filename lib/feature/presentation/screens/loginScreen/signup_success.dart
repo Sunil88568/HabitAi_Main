@@ -21,7 +21,8 @@ class _SignupSuccessState extends State<SignupSuccess> {
   void initState() {
     super.initState();
     Timer(const Duration(seconds: 3), () {
-      context.pushAndClearNavigator(LoginScreen());
+      context.pushAndClearNavigator(LoginScreen()
+      );
     });
   }
 

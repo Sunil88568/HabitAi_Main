@@ -41,20 +41,40 @@ class PersonalInfoController extends GetxController {
     String? deviceToken,
   }) async {
     try {
-      AppUtils.log("Calling editProfile API...");
+      final Map<String, dynamic> updatedFields = {};
+
+      if (name != null && name.isNotEmpty) updatedFields['name'] = name;
+      if (password != null && password.isNotEmpty) updatedFields['password'] = password;
+      if (email != null && email.isNotEmpty) updatedFields['email'] = email;
+      if (age != null && age.isNotEmpty) updatedFields['age'] = age;
+      if (gender != null && gender.isNotEmpty) updatedFields['gender'] = gender;
+      if (mobileNumber != null && mobileNumber.isNotEmpty) updatedFields['mobileNumber'] = mobileNumber;
+      if (dob != null && dob.isNotEmpty) updatedFields['dob'] = dob;
+      if (countryCode != null && countryCode.isNotEmpty) updatedFields['countryCode'] = countryCode;
+      if (education != null && education.isNotEmpty) updatedFields['education'] = education;
+      if (image != null && image.isNotEmpty) updatedFields['image'] = image;
+      if (deviceType != null && deviceType.isNotEmpty) updatedFields['deviceType'] = deviceType;
+      if (deviceToken != null && deviceToken.isNotEmpty) updatedFields['deviceToken'] = deviceToken;
+
+      if (updatedFields.isEmpty) {
+        AppUtils.toastError("No fields to update.");
+        return;
+      }
+
+      AppUtils.log("Calling editProfile API with fields: $updatedFields");
       final response = await _authRepository.editProfile(
-        name: name,
-        password: password,
-        email: email,
-        age: age,
-        gender: gender,
-        mobileNumber: mobileNumber,
-        dob: dob,
-        countryCode: countryCode,
-        education: education,
-        image: image,
-        device_type: deviceType,
-        device_token: deviceToken,
+        name: updatedFields['name'],
+        password: updatedFields['password'],
+        email: updatedFields['email'],
+        age: updatedFields['age'],
+        gender: updatedFields['gender'],
+        mobileNumber: updatedFields['mobileNumber'],
+        dob: updatedFields['dob'],
+        countryCode: updatedFields['countryCode'],
+        education: updatedFields['education'],
+        image: updatedFields['image'],
+        device_type: updatedFields['device_type'],
+        device_token: updatedFields['device_token'],
       );
 
       if (response.isSuccess && response.data != null) {
@@ -69,4 +89,6 @@ class PersonalInfoController extends GetxController {
       AppUtils.toastError("An error occurred while updating profile");
     }
   }
+
+
 }

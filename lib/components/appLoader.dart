@@ -30,7 +30,7 @@ class AppLoader {
   static Widget loaderWidget() {
     return  Center(
       child: SpinKitCircle(
-        color: AppColors.forgetText,
+        color: AppColors.primaryColor,
         size: 70.0,
       ),
     );

@@ -27,13 +27,26 @@ class HomeScreen extends StatefulWidget {
 
 
 class _HomeScreenState extends State<HomeScreen> {
+  final profileCtrl = Get.put(ProfileUserController());
+
   @override
   void initState() {
-   AppUtils.log("image:::${profileCtrl.userProfile.value?.image.fileUrl}");
     super.initState();
+    AppUtils.log("image:::${profileCtrl.userProfile.value?.image?.fileUrl}");
+    profileCtrl.fetchUserProfile();
+    questionCtrl.getQuestions();
   }
 
-  final profileCtrl = Get.put(ProfileUserController());
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    profileCtrl.fetchUserProfile();
+  }
+
+
+  final questionCtrl = Get.put(ProfileUserController());
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -56,40 +69,43 @@ class _HomeScreenState extends State<HomeScreen> {
                   Row(
                     children: [
                       InkWell(
-                        onTap: (){
+                        onTap: () {
                           context.pushNavigator(ProfileScreen());
                         },
                         child: Center(
-                          child:ClipOval(
-                            child: profileCtrl.userProfile.value?.image.fileUrl != null
-                                ? ImageView(
-                              url:  profileCtrl.userProfile.value?.image.fileUrl ?? "",
-                              defaultImage: AppImages.dummyImg,
-                              size: 45.sdp,
-                              imageType: ImageType.network,
-                              fit: BoxFit.cover,
-                            )
-                                : Shimmer.fromColors(
-                              baseColor: Colors.grey.shade300,
-                              highlightColor: Colors.grey.shade100,
-                              child: Container(
-                                width: 45.sdp,
-                                height: 45.sdp,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white,
+                          child: ClipOval(
+                            child: Obx(() {
+                              return profileCtrl.userProfile.value?.image?.fileUrl != null
+                                  ? ImageView(
+                                url: profileCtrl.userProfile.value?.image?.fileUrl ?? "",
+                                defaultImage: AppImages.dummyImg,
+                                size: 45.sdp,
+                                imageType: ImageType.network,
+                                fit: BoxFit.cover,
+                              )
+                                  : Shimmer.fromColors(
+                                baseColor: Colors.grey.shade300,
+                                highlightColor: Colors.grey.shade100,
+                                child: Container(
+                                  width: 45.sdp,
+                                  height: 45.sdp,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                              ),
-                            ),
+                              );
+                            }),
                           ),
                         ),
                       ),
                       10.width,
-                      TextView(
-                          text:
-                          'Hello, ${profileCtrl.userProfile.value?.name ?? ""}',
-                          style: 20.txtBoldWhite
-                      ),
+                      Obx(() {
+                        return TextView(
+                          text: 'Hello, ${profileCtrl.userProfile.value?.name ?? ""}',
+                          style: 20.txtBoldWhite,
+                        );
+                      }),
                     ],
                   ),
                   ImageView(url: AppImages.notificationImg,
@@ -137,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   buttonColor: AppColors.quzeYellow,
                   alignment: Alignment.center,
                   onTap: (){
-                    context.pushNavigator(QuizScreen());
+                    context.pushNavigator(QuizScreen(questions: questionCtrl.questionList));
                   },
                 ),
               ),

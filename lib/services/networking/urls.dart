@@ -10,6 +10,9 @@ class _UrlsCollections{
 
 class Urls{
   static const api = _UrlsCollections.api;
+
+
+  /////////////////////////////  Auth     //////////////////////////////////
   static const login = '${_UrlsCollections.user}/login';
   static const uploadPhoto = '${_UrlsCollections.user}/upload-file';
   static const register = '${_UrlsCollections.user}/register';
@@ -19,5 +22,14 @@ class Urls{
   static const logOut = '${_UrlsCollections.user}/logout';
   static const changePassword = '${_UrlsCollections.user}/change-password';
   static const editProfile = '${_UrlsCollections.user}/edit-profile';
+  static const contactUs = '/contact-us';
+
+
+
+/////////////////////////////  Questions     //////////////////////////////////
+
+
+  static const getQuestions = '/questions';
+  static const submitQuestions = '/user-question-answer';
 }
 

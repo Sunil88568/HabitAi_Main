@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:question_app/feature/data/models/dataModels/question_model.dart';
 import 'package:question_app/utils/appUtils.dart';
 import 'package:question_app/utils/extensions/extensions.dart';
 
@@ -65,6 +66,8 @@ class IAuthRepository implements AuthRepository {
       Preferences.authToken = token;
       Preferences.profile = data;
 
+      AppUtils.log("signup save Profile: ${jsonEncode(Preferences.profile?.toJson())}");
+
       return ResponseData<LoginModel>(
         statusCode: result.statusCode,
         message: result.message,
@@ -113,7 +116,7 @@ class IAuthRepository implements AuthRepository {
       Preferences.authToken = token;
       Preferences.profile = data;
 
-     AppUtils.log("Full Profile: ${jsonEncode(Preferences.profile?.toJson())}");
+     AppUtils.log("login save Profile: ${jsonEncode(Preferences.profile?.toJson())}");
 
 
       return ResponseData<LoginModel>(
@@ -270,8 +273,10 @@ class IAuthRepository implements AuthRepository {
     if (result.isSuccess) {
         final rawData = result.data;
         AppUtils.log("Raw Profile Data: $rawData");
-
-        final loginModel = LoginModel.fromJson(rawData?['data'] ?? {});
+        final data = rawData?['data'];
+        final loginModel = data is Map<String, dynamic>
+            ? LoginModel.fromJson(data)
+            : null;
         return ResponseData<LoginModel>(
           statusCode: result.statusCode,
           message: result.message ?? "get user successful",
@@ -380,26 +385,28 @@ class IAuthRepository implements AuthRepository {
     String? device_type,
     String? device_token,
   }) async {
+
     final body = {
-      'name': name,
-      'password': password,
-      'email': email,
-      'age': age,
-      'gender': gender,
-      'mobileNumber': mobileNumber,
-      'dob': dob,
-      'countryCode': countryCode,
-      'education': education,
-      'image': image,
-      'device_type': device_type,
-      'device_token': device_token,
+      if (name != null && name.isNotEmpty) 'name': name,
+      if (password != null && password.isNotEmpty) 'password': password,
+      if (email != null && email.isNotEmpty) 'email': email,
+      if (age != null && age.isNotEmpty) 'age': age,
+      if (gender != null && gender.isNotEmpty) 'gender': gender,
+      if (mobileNumber != null && mobileNumber.isNotEmpty) 'mobileNumber': mobileNumber,
+      if (dob != null && dob.isNotEmpty) 'dob': dob,
+      if (countryCode != null && countryCode.isNotEmpty) 'countryCode': countryCode,
+      if (education != null && education.isNotEmpty) 'education': education,
+      if (image != null && image.isNotEmpty) 'image': image,
+      if (device_type != null && device_type.isNotEmpty) 'device_type': device_type,
+      if (device_token != null && device_token.isNotEmpty) 'device_token': device_token,
     };
+
     final token = Preferences.profile?.token.bearer;
     final result = await _apiMethod.put(
-        url: Urls.editProfile,
-        body: body,
-        headers: {},
-        authToken: token
+      url: Urls.editProfile,
+      body: body,
+      headers: {},
+      authToken: token,
     );
 
     AppUtils.log("body:::$body");
@@ -425,4 +432,136 @@ class IAuthRepository implements AuthRepository {
 
 
 
+  @override
+  Future<ResponseData<LoginModel>> contactUs({
+    required String title,
+    required String message,
+
+  }) async {
+    final body = {
+      'title': title,
+      'message': message,
+    };
+    final token = Preferences.profile?.token.bearer;
+    final result = await _apiMethod.post(
+        url: Urls.contactUs,
+        body: body,
+        headers: {
+        },
+        authToken: token
+    );
+    AppUtils.log("body:::$body");
+    AppUtils.log("API Result::::: ${result.toJson()}");
+
+    if (result.isSuccess) {
+      final rawData = result.data ?? {};
+      final userData = (rawData['data'] is Map)
+          ? (rawData['data'] as Map)['user'] ?? {}
+          : {};
+
+      final data = LoginModel.fromJson(Map<String, dynamic>.from(userData));
+      return  ResponseData(
+        statusCode: result.statusCode,
+        message: result.message,
+        data: data,
+      );
+    } else {
+      return ResponseData(
+        statusCode: result.statusCode,
+        message: result.message,
+      );
+    }
   }
+
+
+
+
+  @override
+  Future<ResponseData<List<QuestionModel>>> getQuestions() async {
+    final token = Preferences.profile?.token.bearer;
+    AppUtils.log("token???? $token");
+
+    final result = await _apiMethod.get(
+      url: Urls.getQuestions,
+      headers: {},
+      authToken: token,
+    );
+
+    if (result.isSuccess) {
+      try {
+        final rawData = result.data;
+        AppUtils.log("Raw Profile Data: $rawData");
+
+        final List<dynamic> rawList = rawData?['data'] ?? [];
+        final List<QuestionModel> data = rawList.map((json) => QuestionModel.fromJson(json)).toList();
+
+        return ResponseData<List<QuestionModel>>(
+          statusCode: result.statusCode,
+          message: result.message ?? "get questions successful",
+          data: data,
+        );
+      } catch (e) {
+        AppUtils.log("Parse error in API: $e");
+        return ResponseData<List<QuestionModel>>(
+          statusCode: result.statusCode,
+          message: "Failed to parse questions",
+          error: e is Exception ? e : Exception(e.toString()),
+          data: null,
+        );
+      }
+    }
+
+    String? message;
+    String? error;
+    final errorData = result.data;
+    if (errorData is Map<String, dynamic>) {
+      message = errorData['message']?.toString();
+      error = errorData['error']?.toString();
+    }
+
+    return ResponseData<List<QuestionModel>>(
+      statusCode: result.statusCode,
+      message: message ?? "get questions failed",
+      error: error != null ? Exception(error) : null,
+      data: null,
+    );
+  }
+
+
+  @override
+  Future<ResponseData<LoginModel>> submitQuestions({
+    required String question,
+    required String answer,
+  }) async {
+    final body = {
+      'question': question,
+      'answer': answer,
+    };
+    final token = Preferences.profile?.token.bearer;
+    final result = await _apiMethod.post(
+      url: Urls.submitQuestions,
+      body: body,
+      headers: {},
+      authToken: token
+    );
+
+    if (result.isSuccess) {
+      return ResponseData<LoginModel>(
+        statusCode: result.statusCode,
+        message: result.message ?? "submit Question successful",
+        data: null,
+      );
+    }
+
+    String? error;
+    return ResponseData<LoginModel>(
+      statusCode: result.statusCode,
+      message: error,
+      error: error != null ? Exception(error) : null,
+      data: null,
+    );
+  }
+
+
+
+}

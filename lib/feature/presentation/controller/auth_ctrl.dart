@@ -103,6 +103,22 @@ class AuthCtrl extends GetxController{
   }
 
 
+  Future<ResponseData> contactUs(String title, String message) async {
+    final response = await _repo.contactUs(
+        title: title,
+        message: message,
+    );
+
+    if (response.isSuccess) {
+      AppUtils.log("contact us successful: ${response.data}");
+      return response;
+    } else {
+      final error = response.getError;
+      AppUtils.toastError(error);
+      return response;
+    }
+  }
+
   Future<ResponseData> forgotPassword(String email) async {
     final response = await _repo.forgotPassword(
       email: email,
@@ -110,6 +126,24 @@ class AuthCtrl extends GetxController{
 
     if (response.isSuccess) {
       AppUtils.log("forgot Pass Success: ${response.data}");
+      return response;
+    } else {
+      final error = response.getError;
+      AppUtils.toastError(error);
+      return response;
+    }
+  }
+
+
+
+  Future<ResponseData> submitQuestion(String question, String answer) async {
+    final response = await _repo.submitQuestions(
+      question: question,
+      answer: answer,
+    );
+
+    if (response.isSuccess) {
+      AppUtils.log("submit question successful: ${response.data}");
       return response;
     } else {
       final error = response.getError;

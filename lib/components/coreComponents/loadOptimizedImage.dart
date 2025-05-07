@@ -1,4 +1,3 @@
-// import 'dart:developer' as AppUtils;
 // import 'dart:io';
 // import 'dart:typed_data';
 // import 'package:flutter/material.dart';
@@ -7,19 +6,17 @@
 // import '../../utils/appUtils.dart';
 // import '../styles/appImages.dart';
 //
-// Future<ImageProvider> loadOptimizedImage(String? image, String baseUrl) async {
+//
+// Future<ImageProvider> loadOptimizedImage(String? image) async {
 //   if (image == null) return AssetImage('');
 //
 //   bool isNetworkImage = image.startsWith("http");
 //   bool isServerImage = image.startsWith("/public/uploads/");
 //   bool isFileImage = image.startsWith("/") && !isNetworkImage && !isServerImage;
 //
-//
-//
 //   if (isNetworkImage || isServerImage) {
-//     String finalImage = isServerImage ? "$baseUrl$image" : image;
-//     AppUtils.log('finalImage');
-//     AppUtils.log('$baseUrl$image');
+//     String finalImage = isServerImage ? "$image" : image;
+//     AppUtils.log('finalImage: $finalImage');
 //
 //     return NetworkImage(finalImage);
 //   } else if (isFileImage) {
@@ -27,7 +24,7 @@
 //     Uint8List? compressedBytes = await compressImage(file);
 //     return MemoryImage(compressedBytes ?? await file.readAsBytes());
 //   } else {
-//     return AssetImage(AppImages.bagImg);
+//     return AssetImage(AppImages.persionalInfo);
 //   }
 // }
 //

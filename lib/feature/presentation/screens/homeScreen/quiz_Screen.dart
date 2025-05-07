@@ -1,22 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:question_app/components/coreComponents/AppButton.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:question_app/components/coreComponents/ImageView.dart';
 import 'package:question_app/components/coreComponents/TextView.dart';
 import 'package:question_app/components/styles/appImages.dart';
 import 'package:question_app/components/styles/textStyles.dart';
-import 'package:question_app/feature/presentation/screens/homeScreen/result_screen.dart';
+import 'package:question_app/utils/appUtils.dart';
 import 'package:question_app/utils/extensions/context_extensions.dart';
+import 'package:question_app/utils/extensions/extensions.dart';
 import 'package:question_app/utils/extensions/size.dart';
 import 'package:question_app/utils/extensions/widget.dart';
-
-import '../../../../components/coreComponents/appBar2.dart';
+import '../../../../components/appLoader.dart';
 import '../../../../components/coreComponents/appRadio.dart';
 import '../../../../components/styles/appColors.dart';
 import '../../../../components/styles/app_strings.dart';
+import '../../../data/models/dataModels/question_model.dart';
+import '../../controller/auth_ctrl.dart';
+import '../../controller/profile_user_controller.dart';
 
 
 class QuizScreen extends StatefulWidget {
-  const QuizScreen({super.key});
+  final List<QuestionModel> questions;
+
+  QuizScreen({super.key, required this.questions});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -25,8 +31,21 @@ class QuizScreen extends StatefulWidget {
 class _QuizScreenState extends State<QuizScreen> {
   String? selectedOption;
 
-  final String question = "Does this work for you ?";
-  final List<String> options = ["Yes", "No", "Sometimes"];
+  List<String> get options => widget.questions.isNotEmpty ? widget.questions[0].options ?? [] : [];
+  String get question => widget.questions.isNotEmpty ? widget.questions[0].question ?? "" : "";
+
+  Future<void> _submitForm() async {
+    if (selectedOption == null) {
+      AppUtils.log("No option selected");
+      return;
+    }
+
+    AppUtils.log("Submitting data => Question: $question, Selected Option: $selectedOption");
+
+    AuthCtrl.find.submitQuestion(question, selectedOption ?? "").applyLoader.then((value) {
+      context.pop();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +59,7 @@ class _QuizScreenState extends State<QuizScreen> {
         centerTitle: true,
         backgroundColor: AppColors.white,
         elevation: 0,
-        title: Text(AppStrings.question,),
+        title: Text(AppStrings.question),
         titleTextStyle: 24.txtBoldWhite,
         leading: GestureDetector(
           onTap: () {
@@ -62,14 +81,15 @@ class _QuizScreenState extends State<QuizScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                   TextView(
-                     text:
-                    "Test Your Knowledge\nwith Quizzes",
-                    style: 25.txtsemiBoldWhite
+                  TextView(
+                    text: "Test Your Knowledge\nwith Quizzes",
+                    style: 25.txtsemiBoldWhite,
                   ),
-                  ImageView(url: AppImages.quizetimeimg,
-                  height: 60.sdp,
-                  width: 60.sdp,)
+                  ImageView(
+                    url: AppImages.quizetimeimg,
+                    height: 60.sdp,
+                    width: 60.sdp,
+                  )
                 ],
               ),
               SizedBox(height: size.height * 0.04),
@@ -121,13 +141,9 @@ class _QuizScreenState extends State<QuizScreen> {
                         child: ElevatedButton(
                           onPressed: () {
                             if (selectedOption != null) {
-                              context.pushNavigator(
-                                ResultScreen(
-                                  score: 29,
-                                  maxScore: 30,
-                                  userName: "John",
-                                ),
-                              );
+                              _submitForm();
+                            } else {
+                              AppUtils.toast("Please select an option before submitting.");
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -146,8 +162,7 @@ class _QuizScreenState extends State<QuizScreen> {
                     )
                   ],
                 ),
-              )
-
+              ),
             ],
           ),
         ),

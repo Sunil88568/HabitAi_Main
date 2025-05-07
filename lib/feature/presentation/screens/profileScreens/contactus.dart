@@ -1,7 +1,10 @@
+import 'dart:developer' as AppUtils;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:question_app/components/styles/textStyles.dart';
 import 'package:question_app/utils/extensions/context_extensions.dart';
+import 'package:question_app/utils/extensions/extensions.dart';
 import 'package:question_app/utils/extensions/size.dart';
 import 'package:question_app/utils/extensions/widget.dart';
 import '../../../../../components/coreComponents/AppButton.dart';
@@ -12,6 +15,7 @@ import '../../../../../components/styles/appColors.dart';
 import '../../../../../components/styles/appImages.dart';
 import '../../../../../components/styles/app_strings.dart';
 import '../../../../../services/storage/preferences.dart';
+import '../../controller/auth_ctrl.dart';
 
 class Contactus extends StatefulWidget {
   const Contactus({super.key});
@@ -28,28 +32,22 @@ class _ContactusState extends State<Contactus> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController messageController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  //
-  // Future<void> _submitForm() async {
-  //   if (!_formKey.currentState!.validate()) return;
-  //
-  //   setState(() => isLoading = true);
-  //   AppUtils.log("<><><><><><><><>><><${profileCtrl.profileData.value.email}>");
-  //
-  //   try {
-  //      SettingsCtrl.find.contactuss(
-  //        profileCtrl.profileData.value.email ?? "",
-  //       titleController.text.trim(),
-  //       messageController.text.trim(),
-  //     ).applyLoader.then((value){
-  //       AppUtils.log(Preferences.email);
-  //       context.pop();
-  //      } );
-  //
-  //
-  //   } finally {
-  //     setState(() => isLoading = false);
-  //   }
-  // }
+
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => isLoading = true);
+    try {
+      AuthCtrl.find.contactUs(
+        titleController.text.trim(),
+        messageController.text.trim(),
+      ).applyLoader.then((value){
+        context.pop();
+       } );
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +107,7 @@ class _ContactusState extends State<Contactus> {
                           Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: TextFormField(
-                              controller: messageController, // Bind controller
+                              controller: messageController,
                               decoration: InputDecoration(
                                 hintText: "Your Message...",
                                 border: OutlineInputBorder(
@@ -142,7 +140,7 @@ class _ContactusState extends State<Contactus> {
                             label: 'Submit',
                             labelStyle: 18.txtBoldBlack,
                             buttonColor: AppColors.white,
-                            // onTap: _submitForm,
+                            onTap: _submitForm,
                           ),
                         ],
                       ),

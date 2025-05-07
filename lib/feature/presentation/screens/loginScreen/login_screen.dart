@@ -126,8 +126,6 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
 
   @override
   void dispose() {
-    // emailController.removeListener(_updateButtonState);
-    // passwordController.removeListener(_updateButtonState);
     emailController.dispose();
     passwordController.dispose();
     _debounce?.cancel();
@@ -150,121 +148,119 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        padding: 20.left + 20.right,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      40.height,
-                      TextView(
-                        textAlign: TextAlign.start,
-                        text: AppStrings.email,
-                        style: 14.txtRegularBlack,
-                        margin: 8.vertical,
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      padding: 20.left + 20.right,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    40.height,
+                    TextView(
+                      textAlign: TextAlign.start,
+                      text: AppStrings.email,
+                      style: 14.txtRegularBlack,
+                      margin: 8.vertical,
+                    ),
+                    EditText(
+                      hint: AppStrings.Enteremail,
+                      hintStyle: 16.txtRegularGrey,
+                      inputType: TextInputType.emailAddress,
+                      prefixIcon: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ImageView(url: AppImages.email, size: 20.sdp, tintColor: AppColors.grey),
+                        ],
                       ),
-                      EditText(
-                        hint: AppStrings.Enteremail,
-                        hintStyle: 16.txtRegularGrey,
-                        inputType: TextInputType.emailAddress,
-                        prefixIcon: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ImageView(url: AppImages.email, size: 20.sdp, tintColor: AppColors.grey),
-                          ],
-                        ),
-                        margin: 20.bottom,
-                        controller: emailController,
-                        validator: (value) {
-                          if (!value.isNotNullEmpty) return AppStrings.pleaseEnterYourEmail;
-                          if (!value.isEmailAddress) return AppStrings.pleaseEnterValidEmail;
-                          return null;
-                        },
+                      margin: 20.bottom,
+                      controller: emailController,
+                      validator: (value) {
+                        if (!value.isNotNullEmpty) return AppStrings.pleaseEnterYourEmail;
+                        if (!value.isEmailAddress) return AppStrings.pleaseEnterValidEmail;
+                        return null;
+                      },
+                    ),
+                    TextView(
+                      textAlign: TextAlign.start,
+                      text: AppStrings.pass,
+                      style: 14.txtRegularBlack,
+                      margin: 4.bottom,
+                    ),
+                    CommonPasswordInputField(
+                      controller: passwordController,
+                      hint: AppStrings.EnterPass,
+                      inputType: TextInputType.visiblePassword,
+                      leading: Padding(
+                        padding: 16.all,
+                        child: ImageView(url: AppImages.passimg, size: 16.sdp),
                       ),
-                      TextView(
-                        textAlign: TextAlign.start,
-                        text: AppStrings.pass,
-                        style: 14.txtRegularBlack,
-                        margin: 4.bottom,
-                      ),
-                      CommonPasswordInputField(
-                        controller: passwordController,
-                        hint: AppStrings.EnterPass,
-                        inputType: TextInputType.visiblePassword,
-                        leading: Padding(
-                          padding: 16.all,
-                          child: ImageView(url: AppImages.passimg, size: 16.sdp),
-                        ),
-                        validator: (value) {
-                          if (!value!.isNotNullEmpty) return AppStrings.pleaseEnterYourPassword;
-                          if (!value.isPassword) return AppStrings.passwordMustBeAtLeast;
-                          return null;
-                        },
-                        marginBottom: 10.sdp,
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: 17.top,
-                          child: TextView(
-                            textAlign: TextAlign.right,
-                            text: AppStrings.forgotPassword,
-                            style: 17.txtMediumbtncolor,
-                            onTap: () {
-                              context.pushNavigator(Forgotpass());
-                            },
-                            margin: 30.bottom,
-                          ),
+                      validator: (value) {
+                        if (!value!.isNotNullEmpty) return AppStrings.pleaseEnterYourPassword;
+                        if (!value.isPassword) return AppStrings.passwordMustBeAtLeast;
+                        return null;
+                      },
+                      marginBottom: 10.sdp,
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: 17.top,
+                        child: TextView(
+                          textAlign: TextAlign.right,
+                          text: AppStrings.forgotPassword,
+                          style: 17.txtMediumbtncolor,
+                          onTap: () {
+                            context.pushNavigator(Forgotpass());
+                          },
+                          margin: 30.bottom,
                         ),
                       ),
-                      AppButton(
-                        radius: 10,
-                        width: double.infinity,
-                        label: AppStrings.Continue,
-                        labelStyle: _isFormValid ? 17.txtBoldWhite : 17.txtBoldGrey,
-                        onTap: _isFormValid ? _submitForm : null,
-                        buttonColor: _isFormValid
-                            ? AppColors.btnColor
-                            : AppColors.greyHint.withOpacity(0.3),
-                      ),
-                    ],
-                  ),
+                    ),
+                    AppButton(
+                      radius: 10,
+                      width: double.infinity,
+                      label: AppStrings.Continue,
+                      labelStyle: _isFormValid ? 17.txtBoldWhite : 17.txtBoldGrey,
+                      onTap: _isFormValid ? _submitForm : null,
+                      buttonColor: _isFormValid
+                          ? AppColors.btnColor
+                          : AppColors.greyHint.withOpacity(0.3),
+                    ),
+                  ],
                 ),
               ),
             ),
-            20.height,
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextView(
-                  text: AppStrings.donthave,
-                  style: 14.txtRegularBlack,
-                ),
-                TextView(
-                  margin: 10.left,
-                  text: AppStrings.signUp,
-                  style: 14.txtregularBtncolor,
-                  onTap: () {
-                    context.pushNavigator( SignupScreen());
-                  },
-                ),
-              ],
-            ),
-            30.height,
-          ],
-        ),
+          ),
+          20.height,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextView(
+                text: AppStrings.donthave,
+                style: 14.txtRegularBlack,
+              ),
+              TextView(
+                margin: 10.left,
+                text: AppStrings.signUp,
+                style: 14.txtregularBtncolor,
+                onTap: () {
+                  context.pushNavigator( SignupScreen());
+                },
+              ),
+            ],
+          ),
+          30.height,
+        ],
       ),
     );
   }
