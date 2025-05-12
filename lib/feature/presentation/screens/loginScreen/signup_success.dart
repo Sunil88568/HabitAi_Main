@@ -6,6 +6,7 @@ import 'package:question_app/components/styles/appColors.dart';
 import 'package:question_app/components/styles/appImages.dart';
 import 'package:question_app/components/styles/app_strings.dart';
 import 'package:question_app/components/styles/textStyles.dart';
+import 'package:question_app/feature/presentation/screens/homeScreen/home_screen.dart';
 import 'package:question_app/feature/presentation/screens/loginScreen/login_screen.dart';
 import 'package:question_app/utils/extensions/context_extensions.dart';
 
@@ -21,7 +22,8 @@ class _SignupSuccessState extends State<SignupSuccess> {
   void initState() {
     super.initState();
     Timer(const Duration(seconds: 3), () {
-      context.pushAndClearNavigator(LoginScreen()
+      // context.pushAndClearNavigator(LoginScreen()
+      context.pushAndClearNavigator(HomeScreen()
       );
     });
   }

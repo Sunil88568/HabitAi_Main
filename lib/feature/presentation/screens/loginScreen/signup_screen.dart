@@ -40,6 +40,15 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupState extends State<SignupScreen> {
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,6 +110,7 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
     phoneController.addListener(_updateButtonState);
     passwordController.addListener(_updateButtonState);
     confirmPasswordController.addListener(_updateButtonState);
+    countryCodeController.text = '+44';
   }
 
 
@@ -116,7 +126,7 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
       emailController.text.isNotEmpty &&
           nameController.text.isNotEmpty &&
           passwordController.text.isNotEmpty &&
-          countryCodeController.text.isNotEmpty &&
+          // countryCodeController.text.isNotEmpty &&
           phoneController.text.isNotEmpty &&
           confirmPasswordController.text.isNotEmpty &&
           _formKey.currentState!.validate() ?? false;
@@ -132,7 +142,7 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
     if (responseData.isSuccess) {
       return true;
     } else {
-      AppUtils.toastError(responseData.getError);
+      // AppUtils.toastError(responseData.getError);
       return false;
     }
   }
@@ -341,6 +351,7 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
         Expanded(
           child: EditText(
             controller: phoneController,
+            inputType: TextInputType.phone,
             inputFormat: [
               LengthLimitingTextInputFormatter(10)
             ],
@@ -394,7 +405,7 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
                                   Text(
                                     countryCodeController.text.isNotEmpty
                                         ? countryCodeController.text
-                                        : '+1',
+                                        : '+44',
                                     style: 14.txtMediumbtncolor,
                                   ),
                                   Icon(Icons.keyboard_arrow_down, size: 18.sdp, color: AppColors.primaryColor),

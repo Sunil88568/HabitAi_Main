@@ -56,6 +56,7 @@ class AuthCtrl extends GetxController{
     if (response.isSuccess) {
       final data = response.data;
       AppUtils.log("register successful: $data");
+      Preferences.savePrefOnLogin = data;
       return response;
     } else {
       final error = response.getError;
@@ -96,8 +97,8 @@ class AuthCtrl extends GetxController{
       AppUtils.log("Verify successful: ${response.data}");
       return response;
     } else {
-      final error = response.getError;
-      AppUtils.toastError(error);
+      // final error = response.getError;
+      // AppUtils.toastError(error);
       return response;
     }
   }

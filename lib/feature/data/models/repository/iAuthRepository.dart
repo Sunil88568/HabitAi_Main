@@ -155,6 +155,8 @@ class IAuthRepository implements AuthRepository {
         message: result.message ?? "Verification successful",
         data: null,
       );
+    }else{
+      AppUtils.toastError(result.message);
     }
 
     String? message;

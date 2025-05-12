@@ -13,6 +13,7 @@ import 'package:question_app/feature/data/models/dataModels/login_model/login_mo
 import 'package:question_app/feature/presentation/screens/homeScreen/home_screen.dart';
 import 'package:question_app/utils/appUtils.dart';
 import 'package:question_app/utils/extensions/context_extensions.dart';
+import 'package:question_app/utils/extensions/dateTimeUtils.dart';
 import 'package:question_app/utils/extensions/extensions.dart';
 import 'package:question_app/utils/extensions/size.dart';
 import 'package:question_app/utils/extensions/widget.dart';
@@ -32,8 +33,8 @@ import '../../controller/profile_Info_controller.dart';
 import '../../controller/profile_user_controller.dart';
 
 class PersonalInfoScreen extends StatefulWidget {
-  LoginModel? userData;
-  PersonalInfoScreen({super.key, this.userData});
+  // LoginModel? userData;
+  // PersonalInfoScreen({super.key, this.userData});
 
   @override
   State<PersonalInfoScreen> createState() => _PersonalInfoScreenState();
@@ -54,19 +55,19 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   @override
   void initState() {
     super.initState();
-    controller.setUser(widget.userData);
-    if (widget.userData?.image != null) {
+    controller.setUser(ProfileUserController.find.userProfile.value);
+    if (ProfileUserController.find.userProfile.value?.image != null) {
       imageData.value = ImageDataModel(
         type: ImageType.network,
-        network: widget.userData!.image.fileUrl,
+        network: ProfileUserController.find.userProfile.value!.image.fileUrl,
       );
 
       imageData.refresh();
       AppUtils.logEr(">>>>>>>>>${imageData.value}");
-      AppUtils.logEr("image>>>>>>>>>${widget.userData!.image.fileUrl}");
+      AppUtils.logEr("image>>>>>>>>>${ProfileUserController.find.userProfile.value!.image.fileUrl}");
     }
-    _selectedDob = widget.userData?.dob;
-    gender = widget.userData?.gender;
+    _selectedDob = DateFormat("dd/MM/yyyy").parse(ProfileUserController.find.userProfile.value?.dob??"");
+    gender = ProfileUserController.find.userProfile.value?.gender;
   }
 
   @override
@@ -79,7 +80,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    controller.setUser(widget.userData);
+    controller.setUser(ProfileUserController.find.userProfile.value);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -100,56 +101,59 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         ),
       ),
       backgroundColor: AppColors.primaryColor,
-      body: Padding(
-        padding: 16.horizontal,
-        child: Column(
-          children: [
-            20.height,
-            Obx(() => EditProfileImage(
-              isEditable: true,
-              size: 120.sdp,
-              imageData: imageData.value,
-              onChange: (newImage) async {
-                if (newImage.file != null) {
-                  imageData.value = newImage;
-                  imageData.refresh();
-                  AppUtils.log("Image selected: ${newImage.file}");
-                  await controller.updateProfile(image: newImage.file).applyLoader;
-                  // context.pushAndClearNavigator(HomeScreen());
-                }
-              },
-            )),
+      body: Obx((){
+        return Padding(
+          padding: 16.horizontal,
+          child: Column(
+            children: [
+              20.height,
+              Obx(() => EditProfileImage(
+                isEditable: true,
+                size: 120.sdp,
+                imageData: imageData.value,
+                onChange: (newImage) async {
+                  if (newImage.file != null) {
+                    imageData.value = newImage;
+                    imageData.refresh();
+                    AppUtils.log("Image selected: ${newImage.file}");
+                    await controller.updateProfile(image: newImage.file).applyLoader;
+                    // context.pushAndClearNavigator(HomeScreen());
+                  }
+                },
+              )),
 
-            GestureDetector(
-              onTap: () => _showImagePicker(context),
-              child: TextView(
-                text: AppStrings.uploadPhoto,
-                style: 16.txtMediumWhite,
-                margin: 10.top + 20.bottom,
+              GestureDetector(
+                onTap: () => _showImagePicker(context),
+                child: TextView(
+                  text: AppStrings.uploadPhoto,
+                  style: 16.txtMediumWhite,
+                  margin: 10.top + 20.bottom,
+                ),
               ),
-            ),
-            _buildInfoTile("Name", widget.userData?.name ?? "", context),
-            _buildInfoTile("Email", widget.userData?.email ?? "", context),
-            _buildPhoneField(),
-            _buildInfoTile(
-              "Date of Birth",
-              widget.userData?.dob != null
-                  ? DateFormat('MMM dd, yyyy').format(widget.userData!.dob!)
-                  : "N/A",
-              context,
-              onEditTap: () {
-                _showDobBottomSheet(context);
-              },
-            ),
-            _buildInfoTile(
-              "Gender",
-              widget.userData?.gender ?? "",
-              context,
-              onEditTap: () => _showGenderEditBottomSheet(context),
-            ),
-          ],
-        ),
-      ),
+              _buildInfoTile("Name", ProfileUserController.find.userProfile.value?.name ?? "", context),
+              _buildInfoTile("Email", ProfileUserController.find.userProfile.value?.email ?? "", context),
+              _buildPhoneField(),
+              _buildInfoTile(
+                "Date of Birth",
+                ProfileUserController.find.userProfile.value?.dob != null
+                    ?ProfileUserController.find.userProfile.value?.dob??""
+                // ? DateFormat('MMM dd, yyyy').format(DateFormat("dd/MM/yyyy").parse(ProfileUserController.find.userProfile.value?.dob??""))
+                    : "N/A",
+                context,
+                onEditTap: () {
+                  _showDobBottomSheet(context);
+                },
+              ),
+              _buildInfoTile(
+                "Gender",
+                ProfileUserController.find.userProfile.value?.gender ?? "",
+                context,
+                onEditTap: () => _showGenderEditBottomSheet(context),
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 
@@ -208,10 +212,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   }
 
 
-  void _showEditBottomSheet(BuildContext context, String title, String currentValue) {
+  Future<void> _showEditBottomSheet(BuildContext context, String title, String currentValue) async {
     final textController = TextEditingController(text: currentValue);
 
-    showModalBottomSheet(
+    await showModalBottomSheet(
       backgroundColor: AppColors.white,
       context: context,
       shape: const RoundedRectangleBorder(
@@ -309,8 +313,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           }
                           break;
                       }
-                      context.pushAndClearNavigator(HomeScreen());
-                     // context.pop();
+                      // context.pushAndClearNavigator(HomeScreen());
+                     context.pop();
                       await authRepository.getUserProfile();
                       if (mounted) {
                         setState(() {
@@ -328,6 +332,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         );
       },
     );
+
+    setState(() {
+
+    });
   }
 
   void _showImagePicker(BuildContext context) {
@@ -433,8 +441,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                         imageData.value.file = uploadedImageUrl;
                         imageData.value.type = ImageType.network;
                         imageData.refresh();
-                        context.pushAndClearNavigator(HomeScreen());
-                        // context.pop();
+                        // context.pushAndClearNavigator(HomeScreen());
+                        context.pop();
                       } else {
                         AppUtils.toastError("Image upload failed: ${response.error ?? "Unknown error"}");
                         AppUtils.log("Image upload failed: ${response.error ?? "Unknown error"}");
@@ -578,8 +586,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           mobileNumber: newPhoneNumber,
                           countryCode: newCountryCode,
                         );
-                        context.pushAndClearNavigator(HomeScreen());
-                        // Navigator.pop(context);
+                        // context.pushAndClearNavigator(HomeScreen());
+                        Navigator.pop(context);
                       } else {
                         AppUtils.logEr("Please enter a valid phone number");
                       }
@@ -644,15 +652,16 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      DateTime? picked = await showDatePicker(
+                      final picked = await showDatePicker(
                         context: context,
                         initialDate: tempSelectedDob ?? DateTime(1990, 1, 1),
                         firstDate: DateTime(1900),
                         lastDate: DateTime.now(),
                       );
                       if (picked != null) {
+                        String formatted = picked.ddcMMcyyyy;
                         setModalState(() {
-                          tempSelectedDob = picked;
+                          tempSelectedDob = DateFormat("dd/MM/yyyy").parse(formatted);
                         });
                       }
                     },
@@ -669,7 +678,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                         children: [
                           TextView(
                             text: tempSelectedDob != null
-                                ? DateFormat('yyyy-MM-dd').format(tempSelectedDob!)
+                                ? DateFormat('dd/MM/yyyy').format(tempSelectedDob!)
                                 : 'Select date of birth',
                             style: 16.txtRegularBlack,
                           ),
@@ -689,12 +698,13 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       label: "Save & Continue",
                       onTap: () async {
                         if (tempSelectedDob != null) {
-                          String dobString = DateFormat('yyyy-MM-dd').format(tempSelectedDob!);
+                          String dobString = DateFormat('dd/MM/yyyy').format(tempSelectedDob!);
                           await controller.updateProfile(dob: dobString).applyLoader;
                           setState(() {
                             _selectedDob = tempSelectedDob;
                           });
-                          context.pushAndClearNavigator(HomeScreen());
+                          // context.pushAndClearNavigator(HomeScreen());
+                          context.pop();
                           // Navigator.pop(context);
                         } else {
                           AppUtils.logEr("Please select a date of birth");
@@ -793,9 +803,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           await controller.updateProfile(gender: tempSelectedGender).applyLoader;
                           setState(() {
                             gender = tempSelectedGender!;
-                            widget.userData = widget.userData?.copyWith(gender: gender);
+                            ProfileUserController.find.userProfile.value = ProfileUserController.find.userProfile.value?.copyWith(gender: gender);
                           });
-                          context.pushAndClearNavigator(HomeScreen());
+                          // context.pushAndClearNavigator(HomeScreen());
+                          context.pop();
                           // Navigator.pop(context);
                         } else {
                           AppUtils.logEr("Please select a gender");

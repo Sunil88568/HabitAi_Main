@@ -73,14 +73,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: 20.left + 20.right + 20.top,
             child: Column(
               children: [
-                _imageWidget(),
+               Obx((){
+                 return _imageWidget();
+               }),
                 _commonWidget(
                   image: AppImages.persionalInfo,
                   text: AppStrings.persionalInfo,
                   onTap: () {
                     context.pushNavigator(
-                      PersonalInfoScreen(userData: profileCtrl.userProfile.value),
+                      PersonalInfoScreen(),
                     );
+                    // context.pushNavigator(
+                    //   PersonalInfoScreen(userData: profileCtrl.userProfile.value),
+                    // );
                   },
                 ),
                 _commonWidget(
@@ -115,7 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _imageWidget() {
-    final data = profileCtrl.userProfile.value;
+    final data = ProfileUserController.find.userProfile.value;
     AppUtils.log("image>>>>>${data?.image.fileUrl}");
     return Column(
       children: [

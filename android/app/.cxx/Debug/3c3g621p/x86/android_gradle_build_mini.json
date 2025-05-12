@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/Users/codingzonereact/Documents/Flutter_projects/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/codingzonereact/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/codingzonereact/Desktop/question_app/android/app/.cxx/Debug/3c3g621p/x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/codingzonereact/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/codingzonereact/Desktop/question_app/android/app/.cxx/Debug/3c3g621p/x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}

@@ -1,7 +1,9 @@
 import 'package:get/get.dart';
 import 'package:question_app/feature/data/models/dataModels/login_model/login_model.dart';
 import 'package:question_app/feature/data/models/repository/iAuthRepository.dart';
+import 'package:question_app/feature/presentation/controller/profile_user_controller.dart';
 import 'package:question_app/utils/appUtils.dart';
+import 'package:question_app/utils/extensions/extensions.dart';
 
 class PersonalInfoController extends GetxController {
   Rx<LoginModel?> userData = Rx<LoginModel?>(null);
@@ -39,7 +41,8 @@ class PersonalInfoController extends GetxController {
     String? image,
     String? deviceType,
     String? deviceToken,
-  }) async {
+  }) async
+  {
     try {
       final Map<String, dynamic> updatedFields = {};
 
@@ -78,6 +81,7 @@ class PersonalInfoController extends GetxController {
       );
 
       if (response.isSuccess && response.data != null) {
+       await ProfileUserController.find.fetchUserProfile().applyLoader;
         userData.value = response.data!;
         AppUtils.toast("Profile updated successfully");
         AppUtils.log("Profile updated: ${userData.value}");

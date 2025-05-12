@@ -33,7 +33,7 @@ class LoginModel with _$LoginModel {
     String? countryCode,
     @JsonKey(name: "device_type") String? deviceType,
     @JsonKey(name: "device_token") String? deviceToken,
-    DateTime? dob,
+    String? dob,
     String? gender,
     String? mobileNumber,
     DateTime? createdAt,

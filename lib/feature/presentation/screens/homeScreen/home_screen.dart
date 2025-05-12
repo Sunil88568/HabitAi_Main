@@ -58,12 +58,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: AppColors.primaryColor,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: width * 0.05),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 20,right: 20,top: 20),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
@@ -116,76 +116,85 @@ class _HomeScreenState extends State<HomeScreen> {
                   )
                 ],
               ),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: width * 0.05),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        TextView(
-                            margin: 30.top + 12.bottom,
-                            text: 'Ready to Win\nBig This\nWeek?',
-                            style: 30.txtBoldWhite
+                        Expanded(
+                          child: Column(
+                            children: [
+                              TextView(
+                                  margin: 30.top + 5.bottom,
+                                  text: 'Ready to Win\nBig This\nWeek?',
+                                  style: 27.txtBoldWhite
+                              ),
+                              TextView(
+                                  margin: 20.bottom,
+                                  text: 'This week quiz is closing down on Friday take part before it’s too late to win exciting prizes',
+                                  style: 14.txtMediumWhite
+                              ),
+                            ],
+                          ),
                         ),
-                        TextView(
-                            margin: 20.bottom,
-                            text: 'This week quiz is closing\ndown on Friday take\npart before it’s too late to\nwin exciting prizes',
-                            style: 16.txtMediumWhite
+                        ImageView(
+                          url: AppImages.giftImg,
+                          height: height * 0.25,
+                          width: width * 0.4,
+                          margin: 20.bottom,
                         ),
                       ],
                     ),
-                  ),
-                  ImageView(
-                    url: AppImages.giftImg,
-                    height: height * 0.25,
-                    width: width * 0.5,
-                    margin: 20.bottom,
-                  ),
-                ],
-              ),
 
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.6,
-                child: AppButton(
-                  radius: 10,
-                  label: "Join This Week’s\nQuiz",
-                  labelStyle: 18.txtBoldBlack,
-                  buttonColor: AppColors.quzeYellow,
-                  alignment: Alignment.center,
-                  onTap: (){
-                    context.pushNavigator(QuizScreen(questions: questionCtrl.questionList));
-                  },
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.6,
+                      child: AppButton(
+                        radius: 10,
+                        label: "Join This Week’s\nQuiz",
+                        labelStyle: 18.txtBoldBlack,
+                        buttonColor: AppColors.quzeYellow,
+                        alignment: Alignment.center,
+                        onTap: (){
+                          context.pushNavigator(QuizScreen(questions: questionCtrl.questionList));
+                        },
+                      ),
+                    ),
+
+                    Row(
+                        children:[ TextView(
+                          text:
+                          'Ends in: 5 Days',
+                          style: 16.txtMediumWhite,
+                          margin: 20.bottom + 5.top,
+                        ),
+                        ]
+                    ),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildStatCard(context, 'Total Players\nThis Week', '8,542'),
+                        _buildStatCard(context, 'Current\nPrize Pool', '\$5,542'),
+                        _buildStatCard(context, 'Winners\nAnnounced In', '5 Days'),
+                      ],
+                    ),
+                    30.height,
+                    Center(
+                        child:
+                        ImageView(url: AppImages.enterToWinPrice,
+                          height: 232.sdp,
+                          width: 340.sdp,
+                        )
+                    ),
+                  ],
                 ),
               ),
-
-              Row(
-                  children:[ TextView(
-                    text:
-                    'Ends in: 5 Days',
-                    style: 16.txtMediumWhite,
-                    margin: 20.bottom + 5.top,
-                  ),
-                  ]
-              ),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildStatCard(context, 'Total Players\nThis Week', '8,542'),
-                  _buildStatCard(context, 'Current\nPrize Pool', '\$5,542'),
-                  _buildStatCard(context, 'Winners\nAnnounced In', '5 Days'),
-                ],
-              ),
-              30.height,
-              Center(
-                  child:
-                  ImageView(url: AppImages.enterToWinPrice,
-                    height: 232.sdp,
-                    width: 340.sdp,
-                  )
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

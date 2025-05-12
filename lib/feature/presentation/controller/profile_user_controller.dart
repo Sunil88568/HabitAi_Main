@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:question_app/utils/appUtils.dart';
@@ -8,6 +9,7 @@ import '../../data/models/repository/iAuthRepository.dart';
 import '../../domain/repository/authRepository.dart';
 
 class ProfileUserController extends GetxController {
+  static ProfileUserController get find => Get.put(ProfileUserController(), permanent: true);
   final AuthRepository _repo = IAuthRepository();
 
   RxBool isLoading = false.obs;

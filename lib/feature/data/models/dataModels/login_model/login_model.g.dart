@@ -25,7 +25,7 @@ _$LoginModelImpl _$$LoginModelImplFromJson(Map<String, dynamic> json) =>
       countryCode: json['countryCode'] as String?,
       deviceType: json['device_type'] as String?,
       deviceToken: json['device_token'] as String?,
-      dob: json['dob'] == null ? null : DateTime.parse(json['dob'] as String),
+      dob: json['dob'] as String?,
       gender: json['gender'] as String?,
       mobileNumber: json['mobileNumber'] as String?,
       createdAt: json['createdAt'] == null
@@ -47,7 +47,7 @@ Map<String, dynamic> _$$LoginModelImplToJson(_$LoginModelImpl instance) =>
       'countryCode': instance.countryCode,
       'device_type': instance.deviceType,
       'device_token': instance.deviceToken,
-      'dob': instance.dob?.toIso8601String(),
+      'dob': instance.dob,
       'gender': instance.gender,
       'mobileNumber': instance.mobileNumber,
       'createdAt': instance.createdAt?.toIso8601String(),

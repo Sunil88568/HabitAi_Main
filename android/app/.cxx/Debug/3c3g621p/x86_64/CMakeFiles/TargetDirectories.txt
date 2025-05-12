@@ -1,0 +1,2 @@
+/Users/codingzonereact/Desktop/question_app/android/app/.cxx/Debug/3c3g621p/x86_64/CMakeFiles/edit_cache.dir
+/Users/codingzonereact/Desktop/question_app/android/app/.cxx/Debug/3c3g621p/x86_64/CMakeFiles/rebuild_cache.dir

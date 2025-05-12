@@ -349,10 +349,12 @@ class NotificationItem extends StatelessWidget {
                       padding: 8.top,
                       child: Row(
                         children: [
-                          TextView(
-                            text: 'You have a new booking request. Please review and\nconfirm at your earliest convenience. ',
-                            style: 12.txtRegularGrey,
-                            maxlines: 2,
+                          Flexible(
+                            child: TextView(
+                              text: 'You have a new booking request. Please review and confirm at your earliest convenience. ',
+                              style: 12.txtRegularGrey,
+                              maxlines: 2,
+                            ),
                           ),
                         ],
                       ),

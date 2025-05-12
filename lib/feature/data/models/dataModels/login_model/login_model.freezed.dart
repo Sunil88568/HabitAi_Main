@@ -195,7 +195,7 @@ mixin _$LoginModel {
   String? get deviceType => throw _privateConstructorUsedError;
   @JsonKey(name: "device_token")
   String? get deviceToken => throw _privateConstructorUsedError;
-  DateTime? get dob => throw _privateConstructorUsedError;
+  String? get dob => throw _privateConstructorUsedError;
   String? get gender => throw _privateConstructorUsedError;
   String? get mobileNumber => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
@@ -228,7 +228,7 @@ abstract class $LoginModelCopyWith<$Res> {
       String? countryCode,
       @JsonKey(name: "device_type") String? deviceType,
       @JsonKey(name: "device_token") String? deviceToken,
-      DateTime? dob,
+      String? dob,
       String? gender,
       String? mobileNumber,
       DateTime? createdAt,
@@ -299,7 +299,7 @@ class _$LoginModelCopyWithImpl<$Res, $Val extends LoginModel>
       dob: freezed == dob
           ? _value.dob
           : dob // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
+              as String?,
       gender: freezed == gender
           ? _value.gender
           : gender // ignore: cast_nullable_to_non_nullable
@@ -344,7 +344,7 @@ abstract class _$$LoginModelImplCopyWith<$Res>
       String? countryCode,
       @JsonKey(name: "device_type") String? deviceType,
       @JsonKey(name: "device_token") String? deviceToken,
-      DateTime? dob,
+      String? dob,
       String? gender,
       String? mobileNumber,
       DateTime? createdAt,
@@ -413,7 +413,7 @@ class __$$LoginModelImplCopyWithImpl<$Res>
       dob: freezed == dob
           ? _value.dob
           : dob // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
+              as String?,
       gender: freezed == gender
           ? _value.gender
           : gender // ignore: cast_nullable_to_non_nullable
@@ -482,7 +482,7 @@ class _$LoginModelImpl implements _LoginModel {
   @JsonKey(name: "device_token")
   final String? deviceToken;
   @override
-  final DateTime? dob;
+  final String? dob;
   @override
   final String? gender;
   @override
@@ -573,7 +573,7 @@ abstract class _LoginModel implements LoginModel {
       final String? countryCode,
       @JsonKey(name: "device_type") final String? deviceType,
       @JsonKey(name: "device_token") final String? deviceToken,
-      final DateTime? dob,
+      final String? dob,
       final String? gender,
       final String? mobileNumber,
       final DateTime? createdAt,
@@ -602,7 +602,7 @@ abstract class _LoginModel implements LoginModel {
   @JsonKey(name: "device_token")
   String? get deviceToken;
   @override
-  DateTime? get dob;
+  String? get dob;
   @override
   String? get gender;
   @override
