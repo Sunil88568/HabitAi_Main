@@ -8,12 +8,17 @@ import 'package:question_app/components/styles/appColors.dart';
 import 'package:question_app/components/styles/appImages.dart';
 import 'package:question_app/components/styles/textStyles.dart';
 import 'package:question_app/feature/presentation/screens/homeScreen/quiz_Screen.dart';
+import 'package:question_app/feature/presentation/screens/loginScreen/login_screen.dart';
+import 'package:question_app/feature/presentation/screens/loginScreen/signup_screen.dart';
 import 'package:question_app/utils/appUtils.dart';
 import 'package:question_app/utils/extensions/context_extensions.dart';
 import 'package:question_app/utils/extensions/extensions.dart';
 import 'package:question_app/utils/extensions/size.dart';
 import 'package:question_app/utils/extensions/widget.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../../../components/coreComponents/appDialog.dart';
+import '../../../../components/coreComponents/showAppDilog.dart';
+import '../../../../services/storage/preferences.dart';
 import '../../controller/profile_user_controller.dart';
 import '../notificationScreens/notificationScreen.dart';
 import '../profileScreens/profile_screen.dart';
@@ -61,8 +66,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 20,right: 20,top: 20),
+            Preferences.authToken != null
+                ? Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -108,15 +114,48 @@ class _HomeScreenState extends State<HomeScreen> {
                       }),
                     ],
                   ),
-                  ImageView(url: AppImages.notificationImg,
+                  ImageView(
+                    url: AppImages.notificationImg,
                     size: width * 0.09,
-                    onTap: (){
+                    onTap: () {
                       context.pushNavigator(Notificationscreen());
                     },
-                  )
+                  ),
                 ],
               ),
-            ),
+            )
+                :     Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    AppButton(
+                      padding: 10.top+ 10.bottom,
+                      margin: 20.right,
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      isFilledButton: false,
+                      radius: 10,
+                      label: "Sign In / Register",
+                      labelStyle: 14.txtSBoldBlack,
+                      buttonColor: AppColors.white,
+                      onTap: () {
+                         showAppDialog(
+                        context: context,
+                        title: 'Sign In / Register',
+                        message: 'Please Sign In / Register For Continue',
+                        confirmLabel: 'Sign In',
+                        cancelLabel: 'Register',
+                        onConfirm: () {
+                          context.pushAndClearNavigator(LoginScreen());
+                        }, onCancel: (){
+                           context.pushAndClearNavigator(SignupScreen());
+                         }
+                        );
+
+                      },
+
+                    ),
+                  ],
+                ),
+
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: width * 0.05),

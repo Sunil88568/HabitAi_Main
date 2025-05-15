@@ -29,12 +29,11 @@ class _SplashState extends State<Splash> {
 
   Future<void> _checkLoginStatus() async {
     await Future.delayed(const Duration(seconds: 3));
-    if (Preferences.authToken != null) {
+    // if (Preferences.authToken != null) {
       context.pushAndClearNavigator(const HomeScreen());
-    } else {
-      context.pushAndClearNavigator(LoginScreen());
+    // } else {
+      // context.pushAndClearNavigator(LoginScreen());
     }
-  }
 
   @override
   Widget build(BuildContext context) {
