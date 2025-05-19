@@ -38,6 +38,7 @@ class AppStrings {
   static const String Continue ='Continue';
   static const String next ='Next';
   static const String pleaseEnterYourEmail ='Please Enter your Email';
+  static const String pleaseEnterYourPhoneNumber ='Please Enter your Phone Number';
   static const String pleaseEnterValidEmail ='Please Enter Valid Email';
   static const String pleaseEnterYourPassword ='Please Enter your Password';
   static const String passwordMustBeAtLeast ='Password must be at least 6 characters';

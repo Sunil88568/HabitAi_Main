@@ -25,16 +25,16 @@ Future<String?> showLoginOptionsDialog({
         contentPadding: EdgeInsets.symmetric(vertical: height * 0.02),
         title: Column(
           children: [
-            Text(
-              'Welcome!',
+            TextView(
+              text: 'Welcome!',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style:22.txtBoldBlack,
+              margin: 8.bottom,
             ),
-            SizedBox(height: 8),
-            Text(
-              'Please choose how you want to continue:',
+            TextView(
+              text: 'Please choose how you want to continue:',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16),
+              style: 16.txtMediumBlack,
             ),
           ],
         ),
@@ -52,14 +52,17 @@ Future<String?> showLoginOptionsDialog({
 Widget _buildDialogButton(BuildContext context, String label, String value) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 4.0),
-    child: ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-      ),
-      onPressed: () {
-        Navigator.of(context).pop(value); // Return selected option
+    child: AppButton(
+      buttonColor: AppColors.btnColor,
+      isFilledButton: true,
+      padding: 10.top+ 10.bottom,
+      width: MediaQuery.of(context).size.width * 0.6,
+
+      label: label,
+      labelStyle: 14.txtMediumWhite,
+      onTap: () {
+        Navigator.of(context).pop(value);
       },
-      child: Text(label),
-    ),
+    )
   );
 }

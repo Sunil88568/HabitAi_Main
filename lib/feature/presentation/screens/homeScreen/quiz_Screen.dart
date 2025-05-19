@@ -5,12 +5,15 @@ import 'package:question_app/components/coreComponents/ImageView.dart';
 import 'package:question_app/components/coreComponents/TextView.dart';
 import 'package:question_app/components/styles/appImages.dart';
 import 'package:question_app/components/styles/textStyles.dart';
+import 'package:question_app/services/storage/preferences.dart';
 import 'package:question_app/utils/appUtils.dart';
 import 'package:question_app/utils/extensions/context_extensions.dart';
 import 'package:question_app/utils/extensions/extensions.dart';
 import 'package:question_app/utils/extensions/size.dart';
 import 'package:question_app/utils/extensions/widget.dart';
 import '../../../../components/appLoader.dart';
+import '../../../../components/coreComponents/AppButton.dart';
+import '../../../../components/coreComponents/EditText.dart';
 import '../../../../components/coreComponents/appRadio.dart';
 import '../../../../components/coreComponents/showLoginOptionsDilog.dart';
 import '../../../../components/styles/appColors.dart';
@@ -25,8 +28,9 @@ import 'home_screen.dart';
 
 class QuizScreen extends StatefulWidget {
   final List<QuestionModel> questions;
+  String ? guestid;
 
-  QuizScreen({super.key, required this.questions});
+  QuizScreen({super.key, required this.questions , this.guestid});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -46,10 +50,38 @@ class _QuizScreenState extends State<QuizScreen> {
 
     AppUtils.log("Submitting data => Question: $question, Selected Option: $selectedOption");
 
-    AuthCtrl.find.submitQuestion(question, selectedOption ?? "").applyLoader.then((value) {
-      context.pop();
-    });
+    final token = Preferences.profile?.token;
+
+    if (token == null || token.isEmpty) {
+      final guestUserId = Preferences.guestUserId;
+      if (guestUserId == null || guestUserId.isEmpty) {
+        AppUtils.log("No guest user ID found");
+        return;
+      }
+
+      try {
+        final response = await AuthCtrl.find.submitQuestionsGuestUser(guestUserId).applyLoader;
+        if (response.isSuccess) {
+          AppUtils.toast("Answer Submit Successfully");
+          context.pop();
+        }
+      } catch (e) {
+        AppUtils.log('Guest question submit error: $e');
+      }
+    } else {
+
+      try {
+        final response = await AuthCtrl.find.submitQuestion(question, selectedOption ?? "").applyLoader;
+        if (response.isSuccess) {
+          AppUtils.toast("Answer Submit Successfully");
+          context.pop();
+        }
+      } catch (e) {
+        AppUtils.log('Submit question error: $e');
+      }
+    }
   }
+
 
   void _handleLoginOptions(BuildContext context) async {
     final result = await showLoginOptionsDialog(context: context);
@@ -61,59 +93,133 @@ class _QuizScreenState extends State<QuizScreen> {
     } else if (result == 'guest') {
       final guestInfo = await showGuestInfoDialog(context);
       if (guestInfo != null) {
-        // Use guestInfo['name'], guestInfo['email'], guestInfo['phone']
-        print('Guest Data: $guestInfo');
+        AppUtils.log('Guest Data: $guestInfo');
 
-        AuthCtrl.find.guestLogin(name: guestInfo['name'],email:  guestInfo['email'],mobileNumber:  guestInfo['phone']).applyLoader.then((value) {
+        try {
+          final response = await AuthCtrl.find.guestLogin(
+            name: guestInfo['name'],
+            email: guestInfo['email'],
+            mobileNumber: guestInfo['phone'],
+          ).applyLoader;
+
+          AppUtils.log('Guest Login Response: $response');
+          final loginData = response.data;
+          AppUtils.toast("Answer Submit Successfully");
+          AppUtils.log('Guest Login Response Data: name=${loginData?.name ?? ""}, email=${loginData?.email}, id=${loginData?.id}');
+          widget.guestid = loginData?.id;
           context.pop();
-        });
-       // Navigator.push(context, MaterialPageRoute(builder: (_) => HomeScreen()));
+        } catch (e) {
+          AppUtils.log('Guest Login Error: $e');
+        }
       }
     }
+
   }
 
 
-
   Future<Map<String, String>?> showGuestInfoDialog(BuildContext context) {
-    final nameController = TextEditingController();
+
+    final nameController  = TextEditingController();
     final emailController = TextEditingController();
     final phoneController = TextEditingController();
+
+
+    final _formKey = GlobalKey<FormState>();
 
     return showDialog<Map<String, String>>(
       context: context,
       barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text('Continue as Guest'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: nameController, decoration: InputDecoration(labelText: 'Name')),
-              TextField(controller: emailController, decoration: InputDecoration(labelText: 'Email')),
-              TextField(controller: phoneController, decoration: InputDecoration(labelText: 'Phone')),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(), // Cancel
-              child: Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop({
-                  'name': nameController.text,
-                  'email': emailController.text,
-                  'phone': phoneController.text,
-                });
-              },
-              child: Text('Continue as Guest'),
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+
+        titlePadding: const EdgeInsets.only(left: 24, right: 8, top: 24, bottom: 0),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            TextView(text: 'Continue as Guest', style: 20.txtBoldBlack),
+            IconButton(
+              icon: const Icon(Icons.close),
+              splashRadius: 20,
+              onPressed: () => Navigator.pop(context),
             ),
           ],
-        );
-      },
+        ),
+
+
+        content: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                8.height,
+                EditText(
+                  controller: nameController,
+                  hint: AppStrings.enterYourName,
+                  hintStyle: 16.txtRegularGrey,
+                  prefixIcon: _pfIcon(AppImages.nameImage),
+                  validator: (v) =>
+                  v.isNotNullEmpty ? null : 'Please enter your name',
+                  margin: 12.bottom,
+                ),
+                EditText(
+                  controller: emailController,
+                  hint: AppStrings.Enteremail,
+                  inputType: TextInputType.emailAddress,
+                  hintStyle: 16.txtRegularGrey,
+                  prefixIcon: _pfIcon(AppImages.email),
+                  validator: (v) {
+                    if (!v.isNotNullEmpty) return AppStrings.pleaseEnterYourEmail;
+                    if (!v.isEmailAddress)   return AppStrings.pleaseEnterValidEmail;
+                    return null;
+                  },
+                  margin: 12.bottom,
+                ),
+                EditText(
+                  maxLength: 10,
+                  controller: phoneController,
+                  hint: AppStrings.enterMobileNumber,
+                  inputType: TextInputType.phone,
+                  hintStyle: 16.txtRegularGrey,
+                  prefixIcon: _pfIcon(AppImages.phoneIcon),
+                  validator: (v) =>
+                  v.isNotNullEmpty ? null : AppStrings.pleaseEnterYourPhoneNumber,
+                ),
+              ],
+            ),
+          ),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          AppButton(
+            label: 'Continue as Guest',
+            isFilledButton: true,
+            width: MediaQuery.of(context).size.width * 0.6,
+            padding: 15.top + 15.bottom,
+            labelStyle: 14.txtMediumWhite,
+            buttonColor: AppColors.btnColor,
+            onTap: () {
+              if (_formKey.currentState?.validate() ?? false) {
+                Navigator.pop(context, {
+                  'name' : nameController.text.trim(),
+                  'email': emailController.text.trim(),
+                  'phone': phoneController.text.trim(),
+                });
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
+
+  Widget _pfIcon(String asset) => Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      ImageView(url: asset, size: 20.sdp, tintColor: AppColors.grey),
+    ],
+  );
 
 
 
@@ -212,13 +318,18 @@ class _QuizScreenState extends State<QuizScreen> {
                         child: ElevatedButton(
                           onPressed: () {
                             if (selectedOption != null) {
-                            //  _submitForm();
+                              final token = Preferences.profile?.token;
 
-                              _handleLoginOptions(context);
+                              if (token != null && token.isNotEmpty) {
+                                _submitForm();
+                              } else {
+                                _handleLoginOptions(context);
+                              }
                             } else {
                               AppUtils.toast("Please select an option before submitting.");
                             }
                           },
+
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.btnColor,
                             padding: 14.vertical,

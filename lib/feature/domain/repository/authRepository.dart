@@ -88,4 +88,8 @@ abstract class AuthRepository {
   });
 
 
+  Future<ResponseData<LoginModel>> submitQuestionsGuestUser({
+    required String guestUserId
+});
+
 }

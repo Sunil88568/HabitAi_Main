@@ -31,5 +31,6 @@ class AppImages{
   static const String settingConact = '${_path}settingConact.png';
   static const String settingNotification = '${_path}settingNotification.png';
   static const String loginSecurityImg = '${_path}loginSecurityImg.png';
+  static const String phoneIcon = '${_path}phoneIcon.png';
 
 }

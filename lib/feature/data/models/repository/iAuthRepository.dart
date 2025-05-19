@@ -587,11 +587,15 @@ class IAuthRepository implements AuthRepository {
       'answer': answer,
     };
     final token = Preferences.profile?.token.bearer;
+    final id = Preferences.profile?.id;
     final result = await _apiMethod.post(
       url: Urls.submitQuestions,
       body: body,
       headers: {},
-      authToken: token
+      authToken: token,
+      query: {
+        "userId" : id?? ""
+      }
     );
 
     if (result.isSuccess) {
@@ -611,6 +615,38 @@ class IAuthRepository implements AuthRepository {
     );
   }
 
+
+
+  @override
+  Future<ResponseData<LoginModel>> submitQuestionsGuestUser({
+    required String guestUserId,
+  }) async {
+
+    final token = Preferences.profile?.token.bearer;
+    final result = await _apiMethod.post(
+      url: Urls.submitQuestions,
+      headers: {},
+      authToken: token,
+      query: {
+        "guestUserId" : guestUserId
+      }
+    );
+    if (result.isSuccess) {
+      return ResponseData<LoginModel>(
+        statusCode: result.statusCode,
+        message: result.message ?? "submit Question successful",
+        data: null,
+      );
+    }
+
+    String? error;
+    return ResponseData<LoginModel>(
+      statusCode: result.statusCode,
+      message: error,
+      error: error != null ? Exception(error) : null,
+      data: null,
+    );
+  }
 
 
 }

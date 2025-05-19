@@ -15,6 +15,7 @@ class Preferences {
   static const _emailKey = 'email_question_app';
   static const _seemypost = 'seemypost_question_app';
   static const _sharepost = 'sharepost_question_app';
+  static const _guestUserIdKey = 'guestUserId_question_app';
 
 
   static late SharedPreferences _prefs;
@@ -77,6 +78,8 @@ class Preferences {
 
   static String? get authToken => _prefs.getString(_authTokenPDataKey);
 
+
+
   static bool get hasSession => authToken.isNotNullEmpty;
 
   static set fcmToken(String? value) =>
@@ -105,6 +108,8 @@ class Preferences {
     uploadedImage = null;
   }
 
+
+  static String? get guestUserId => _prefs.getString(_guestUserIdKey);
 
 
   static set language(String? value) =>
@@ -137,6 +142,11 @@ class Preferences {
   static Future<void> clearUploadedImage() async {
     await Preferences._prefs.remove(Preferences._uploadedImageKey);
   }
+
+  static set guestUserId(String? id) =>
+      id != null ? _prefs.setString(_guestUserIdKey, id) : _prefs.remove(_guestUserIdKey);
+
+
 
 
   static Future<void> clearUserData() async {

@@ -179,6 +179,21 @@ class AuthCtrl extends GetxController{
     }
   }
 
+
+
+
+  Future<ResponseData> submitQuestionsGuestUser(String guestUserId) async {
+    final response = await _repo.submitQuestionsGuestUser(guestUserId: guestUserId);
+    if (response.isSuccess) {
+      AppUtils.toast("Answer Submit Successfully");
+      AppUtils.log("guest submit question successful: ${response.data}");
+      return response;
+    } else {
+      final error = response.getError;
+      AppUtils.toastError(error);
+      return response;
+    }
+  }
 }
 
 
