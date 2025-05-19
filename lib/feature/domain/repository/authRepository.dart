@@ -6,6 +6,7 @@ import '../../data/models/dataModels/responseDataModel.dart';
 
 
 abstract class AuthRepository {
+
   Future<ResponseData<LoginModel>> loginUser({
     required String email,
     required String password,
@@ -26,6 +27,12 @@ abstract class AuthRepository {
     String? device_token,
   });
 
+
+  Future<ResponseData<LoginModel>> guestLogin({
+    String ?name,
+    String ?email,
+    String ?mobileNumber,
+  });
 
   Future<ResponseData<LoginModel>> checkEmailAndMobile({
     required String email,

@@ -12,11 +12,15 @@ import 'package:question_app/utils/extensions/size.dart';
 import 'package:question_app/utils/extensions/widget.dart';
 import '../../../../components/appLoader.dart';
 import '../../../../components/coreComponents/appRadio.dart';
+import '../../../../components/coreComponents/showLoginOptionsDilog.dart';
 import '../../../../components/styles/appColors.dart';
 import '../../../../components/styles/app_strings.dart';
 import '../../../data/models/dataModels/question_model.dart';
 import '../../controller/auth_ctrl.dart';
 import '../../controller/profile_user_controller.dart';
+import '../loginScreen/login_screen.dart';
+import '../loginScreen/signup_screen.dart';
+import 'home_screen.dart';
 
 
 class QuizScreen extends StatefulWidget {
@@ -46,6 +50,73 @@ class _QuizScreenState extends State<QuizScreen> {
       context.pop();
     });
   }
+
+  void _handleLoginOptions(BuildContext context) async {
+    final result = await showLoginOptionsDialog(context: context);
+
+    if (result == 'login') {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => LoginScreen()));
+    } else if (result == 'signup') {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => SignupScreen()));
+    } else if (result == 'guest') {
+      final guestInfo = await showGuestInfoDialog(context);
+      if (guestInfo != null) {
+        // Use guestInfo['name'], guestInfo['email'], guestInfo['phone']
+        print('Guest Data: $guestInfo');
+
+        AuthCtrl.find.guestLogin(name: guestInfo['name'],email:  guestInfo['email'],mobileNumber:  guestInfo['phone']).applyLoader.then((value) {
+          context.pop();
+        });
+       // Navigator.push(context, MaterialPageRoute(builder: (_) => HomeScreen()));
+      }
+    }
+  }
+
+
+
+  Future<Map<String, String>?> showGuestInfoDialog(BuildContext context) {
+    final nameController = TextEditingController();
+    final emailController = TextEditingController();
+    final phoneController = TextEditingController();
+
+    return showDialog<Map<String, String>>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text('Continue as Guest'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: nameController, decoration: InputDecoration(labelText: 'Name')),
+              TextField(controller: emailController, decoration: InputDecoration(labelText: 'Email')),
+              TextField(controller: phoneController, decoration: InputDecoration(labelText: 'Phone')),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), // Cancel
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop({
+                  'name': nameController.text,
+                  'email': emailController.text,
+                  'phone': phoneController.text,
+                });
+              },
+              child: Text('Continue as Guest'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +212,9 @@ class _QuizScreenState extends State<QuizScreen> {
                         child: ElevatedButton(
                           onPressed: () {
                             if (selectedOption != null) {
-                              _submitForm();
+                            //  _submitForm();
+
+                              _handleLoginOptions(context);
                             } else {
                               AppUtils.toast("Please select an option before submitting.");
                             }
@@ -169,4 +242,8 @@ class _QuizScreenState extends State<QuizScreen> {
       ),
     );
   }
+
+
+
+
 }

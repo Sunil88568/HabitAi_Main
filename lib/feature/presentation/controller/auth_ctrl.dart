@@ -67,6 +67,32 @@ class AuthCtrl extends GetxController{
   }
 
 
+
+  Future<ResponseData<LoginModel>> guestLogin({
+    String? name,
+    String? email,
+    String? mobileNumber,
+  }) async {
+    final response = await _repo.guestLogin(
+      name: name,
+      email: email,
+      mobileNumber: mobileNumber,
+    );
+
+    if (response.isSuccess) {
+      final data = response.data;
+      AppUtils.log("register successful: $data");
+      Preferences.savePrefOnLogin = data;
+      return response;
+    } else {
+      final error = response.getError;
+      AppUtils.toastError(error);
+      AppUtils.log("error>>>>$error");
+      throw '';
+    }
+  }
+
+
   Future login(String email, String password) async {
     final response = await _repo.loginUser(
       email: email,

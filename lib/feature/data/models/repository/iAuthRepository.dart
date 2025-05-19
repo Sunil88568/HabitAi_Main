@@ -17,6 +17,7 @@ class IAuthRepository implements AuthRepository {
 
 
 
+
   @override
   Future<ResponseData<LoginModel>> register({
     String ?name,
@@ -67,6 +68,52 @@ class IAuthRepository implements AuthRepository {
       Preferences.profile = data;
 
       AppUtils.log("signup save Profile: ${jsonEncode(Preferences.profile?.toJson())}");
+
+      return ResponseData<LoginModel>(
+        statusCode: result.statusCode,
+        message: result.message,
+        data: data,
+      );
+    } else {
+      return ResponseData(
+        statusCode: result.statusCode,
+        message: result.message,
+      );
+    }
+  }
+
+
+
+  @override
+  Future<ResponseData<LoginModel>> guestLogin({
+    String ?name,
+    String ?email,
+    String ?mobileNumber,
+  }) async {
+    final body = {
+      'name': name,
+      'email': email,
+      'mobileNumber': mobileNumber,
+    };
+
+    AppUtils.log("guestLogin API URL: ${Urls.register}");
+    final result = await _apiMethod.post(
+      url: Urls.guestLogin,
+      body: body,
+      headers: {},
+    );
+
+    if (result.isSuccess) {
+      final rawData = result.data ?? {};
+      final userData = rawData['data'] ?? {};
+      final token = rawData['token'] ?? "";
+
+      AppUtils.log("Token: $token");
+      AppUtils.log("Parsed user data: $userData");
+
+      final data = LoginModel.fromJson(userData);
+
+
 
       return ResponseData<LoginModel>(
         statusCode: result.statusCode,

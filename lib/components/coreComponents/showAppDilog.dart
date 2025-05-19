@@ -78,7 +78,7 @@ Future<bool?> showAppDialog({
                           buttonColor: AppColors.btnColor,
                           onTap: () {
                             if (onCancel != null) onCancel();
-                            Navigator.of(context).pop(true);
+                            // Navigator.of(context).pop(true);
                           },
                           isFilledButton: false,
                         ),
@@ -95,7 +95,7 @@ Future<bool?> showAppDialog({
                           buttonColor: AppColors.btnColor,
                           onTap: () {
                             if (onConfirm != null) onConfirm();
-                            Navigator.of(context).pop(true);
+                            // Navigator.of(context).pop(true);
                           },
                           isFilledButton: false,
                         ),

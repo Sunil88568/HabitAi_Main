@@ -16,6 +16,7 @@ class Urls{
   static const login = '${_UrlsCollections.user}/login';
   static const uploadPhoto = '${_UrlsCollections.user}/upload-file';
   static const register = '${_UrlsCollections.user}/register';
+  static const guestLogin = '/guest-user';
   static const checkEmailAndMobile = '${_UrlsCollections.user}/check-email-mobile-exist';
   static const forgotPassword = '${_UrlsCollections.user}/forgot-password';
   static const getUserProfile = '${_UrlsCollections.user}/profile';

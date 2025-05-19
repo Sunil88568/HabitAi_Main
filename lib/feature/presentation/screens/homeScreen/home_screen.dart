@@ -137,6 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       labelStyle: 14.txtSBoldBlack,
                       buttonColor: AppColors.white,
                       onTap: () {
+
                          showAppDialog(
                         context: context,
                         title: 'Sign In / Register',
@@ -145,7 +146,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         cancelLabel: 'Register',
                         onConfirm: () {
                           context.pushAndClearNavigator(LoginScreen());
-                        }, onCancel: (){
+                        },
+                             onCancel: (){
+
                            context.pushAndClearNavigator(SignupScreen());
                          }
                         );
