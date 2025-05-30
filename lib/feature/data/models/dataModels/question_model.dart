@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'dart:convert';
 
@@ -16,9 +18,13 @@ class QuestionModel with _$QuestionModel {
   const factory QuestionModel({
     @JsonKey(name: "_id") String? id,
     String? question,
+    String? pricePoll,
+    bool? isSubmitted,
+
     List<String>? options,
     DateTime? createdAt,
     DateTime? updatedAt,
+
     @JsonKey(name: "__v") int? v,
   }) = _QuestionModel;
 

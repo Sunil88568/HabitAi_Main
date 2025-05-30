@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:question_app/components/styles/appColors.dart';
+import 'package:question_app/services/firebase/firebase_services.dart';
 import 'package:question_app/utils/extensions/context_extensions.dart';
 import '../../../components/coreComponents/ImageView.dart';
 import '../../../components/styles/appImages.dart';
@@ -23,6 +24,9 @@ class _SplashState extends State<Splash> {
   @override
   void initState() {
     super.initState();
+    FirebaseServices.init(context).then((value){
+      FirebaseServices.listener();
+    });
     _checkLoginStatus();
   }
 

@@ -26,6 +26,7 @@ import '../../../../components/coreComponents/editProfileImage.dart';
 import '../../../../components/styles/appColors.dart';
 import '../../../../components/styles/appImages.dart';
 import '../../../../components/styles/app_strings.dart';
+import '../../../../services/storage/preferences.dart';
 import '../../../../utils/appUtils.dart';
 
 import 'package:flutter/gestures.dart';
@@ -37,15 +38,21 @@ import '../../../domain/repository/authRepository.dart';
 import '../../controller/auth_ctrl.dart';
 import '../homeScreen/home_screen.dart';
 
-
-
 class AddprofileScreen extends StatefulWidget {
-  String ? name;
-  String ?email;
-  String ?countryCode;
-  String ?phoneNumber;
-  String ?password;
-  AddprofileScreen({super.key,this.name,this.email,this.countryCode,this.phoneNumber,this.password});
+  String? name;
+  String? email;
+  String? countryCode;
+  String? phoneNumber;
+  String? password;
+
+  AddprofileScreen({
+    super.key,
+    this.name,
+    this.email,
+    this.countryCode,
+    this.phoneNumber,
+    this.password,
+  });
 
   @override
   State<AddprofileScreen> createState() => _addProfileState();
@@ -53,8 +60,6 @@ class AddprofileScreen extends StatefulWidget {
 
 class _addProfileState extends State<AddprofileScreen> {
   Rx<ImageDataModel> imageData = Rx(ImageDataModel());
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -66,39 +71,37 @@ class _addProfileState extends State<AddprofileScreen> {
         centerTitle: true,
         backgroundColor: AppColors.white,
         elevation: 0,
-        title: Text( AppStrings.signUp),
+        title: Text(AppStrings.signUp),
         titleTextStyle: 24.txtBoldWhite,
         leading: GestureDetector(
           onTap: () {
             context.pop();
           },
-          child: Icon(
-            Icons.arrow_back_ios_new,
-            color: AppColors.white,
-          ),
+          child: Icon(Icons.arrow_back_ios_new, color: AppColors.white),
         ),
       ),
       body: Column(
         children: [
           Expanded(
-            child:
-            Column(
+            child: Column(
               children: [
                 Center(
                   child: Column(
                     children: [
-                      Obx(() => EditProfileImage(
-                        isEditable: true,
-                        size: 120.sdp,
-                        imageData: imageData.value,
-                        onChange: (newImage) {
-                          if (newImage.file != null) {
-                            imageData.value = newImage;
-                            imageData.refresh();
-                            AppUtils.log("Image selected: ${newImage.file}");
-                          }
-                        },
-                      )),
+                      Obx(
+                        () => EditProfileImage(
+                          isEditable: true,
+                          size: 120.sdp,
+                          imageData: imageData.value,
+                          onChange: (newImage) {
+                            if (newImage.file != null) {
+                              imageData.value = newImage;
+                              imageData.refresh();
+                              AppUtils.log("Image selected: ${newImage.file}");
+                            }
+                          },
+                        ),
+                      ),
 
                       GestureDetector(
                         onTap: () => _showImagePicker(context),
@@ -118,16 +121,14 @@ class _addProfileState extends State<AddprofileScreen> {
                   phoneNumber: widget.phoneNumber,
                   password: widget.password,
                   imageData: imageData.value,
-                )
+                ),
               ],
-            )
-
+            ),
           ),
         ],
       ),
     );
   }
-
 
   void _showImagePicker(BuildContext context) {
     appBSheet(
@@ -162,7 +163,6 @@ class _addProfileState extends State<AddprofileScreen> {
     }
     return null;
   }
-
 }
 
 class EmailLoginForm extends StatefulWidget {
@@ -193,7 +193,7 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
   String uploadedImageUrl = "";
   final _formKey = GlobalKey<FormState>();
   Timer? _debounce;
-  Rx<Country?> countryData  = Rx(null);
+  Rx<Country?> countryData = Rx(null);
   RxString dateOfBirth = RxString('');
   String gender = "";
   bool isCheckedTerms = false;
@@ -205,10 +205,7 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
     super.initState();
     genderController.addListener(_updateButtonState);
     dobController.addListener(_updateButtonState);
-
   }
-
-
 
   void _updateButtonState() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
@@ -220,7 +217,8 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
   bool get _isFormValid =>
       genderController.text.isNotEmpty &&
           dobController.text.isNotEmpty &&
-          _formKey.currentState!.validate() ?? false;
+          _formKey.currentState!.validate() ??
+      false;
 
   @override
   void dispose() {
@@ -237,7 +235,8 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
 
     if (widget.imageData.file != null) {
       final File imageFile = File(widget.imageData.file!);
-      final response = await authRepository.uploadPhoto(imageFile: imageFile).applyLoader;
+      final response =
+          await authRepository.uploadPhoto(imageFile: imageFile).applyLoader;
       AppUtils.log("Response: ${response.data}");
       if (response.isSuccess) {
         setState(() {
@@ -245,31 +244,34 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
         });
         AppUtils.log("Image uploaded: $uploadedImageUrl");
       } else {
-        AppUtils.toastError("Image upload failed: ${response.error ?? "Unknown error"}");
-        AppUtils.log("Image upload failed: ${response.error ?? "Unknown error"}");
+        AppUtils.toastError(
+          "Image upload failed: ${response.error ?? "Unknown error"}",
+        );
+        AppUtils.log(
+          "Image upload failed: ${response.error ?? "Unknown error"}",
+        );
         return;
       }
     }
 
-    await AuthCtrl.find.register(
-      email: widget.email ?? "",
-      password: widget.password ?? "",
-      name: widget.name ?? "",
-      countryCode: widget.countryCode ?? "",
-      mobileNumber: widget.phoneNumber ?? "",
-      gender: genderController.text,
-      dob: dobController.text,
-      image: uploadedImageUrl,
-      device_type: deviceType,
-      device_token: "",
-    ).applyLoader.then((value){
-      context.pushAndClearNavigator(SignupSuccess());
-    });
+    await AuthCtrl.find
+        .register(
+          email: widget.email ?? "",
+          password: widget.password ?? "",
+          name: widget.name ?? "",
+          countryCode: widget.countryCode ?? "",
+          mobileNumber: widget.phoneNumber ?? "",
+          gender: genderController.text,
+          dob: dobController.text,
+          image: uploadedImageUrl,
+          device_type: deviceType,
+          device_token: Preferences.fcmToken,
+        )
+        .applyLoader
+        .then((value) {
+          context.pushAndClearNavigator(SignupSuccess());
+        });
   }
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -293,28 +295,42 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
                     children: <Widget>[
                       40.height,
 
-                      TextView(text:AppStrings.gender,style:14.txtRegularWhite),
+                      TextView(
+                        text: AppStrings.gender,
+                        style: 14.txtRegularWhite,
+                      ),
                       8.height,
                       _buildGenderDropdown(),
-                      TextView(text:AppStrings.dateOfBirth,style:14.txtRegularWhite),
+                      TextView(
+                        text: AppStrings.dateOfBirth,
+                        style: 14.txtRegularWhite,
+                      ),
                       8.height,
                       _buildDateOfBirthField(),
                       10.height,
                       GestureDetector(
-                        onTap: (){
+                        onTap: () {
                           // context.pushNavigator(TermsWebViewScreen());
                         },
-                        child: _buildCheckbox(AppStrings.acceptTermAndConditions, isChecked: isCheckedTerms, onChanged: (value) {
-                          setState(() => isCheckedTerms = value!);
-                        }),
+                        child: _buildCheckbox(
+                          AppStrings.acceptTermAndConditions,
+                          isChecked: isCheckedTerms,
+                          onChanged: (value) {
+                            setState(() => isCheckedTerms = value!);
+                          },
+                        ),
                       ),
                       GestureDetector(
-                        onTap: (){
+                        onTap: () {
                           // context.pushNavigator(Privacywebviewscreen());
                         },
-                        child: _buildCheckbox(AppStrings.iAgreePrivacyPolicy.tr, isChecked: isCheckedPrivacy, onChanged: (value) {
-                          setState(() => isCheckedPrivacy = value!);
-                        }),
+                        child: _buildCheckbox(
+                          AppStrings.iAgreePrivacyPolicy.tr,
+                          isChecked: isCheckedPrivacy,
+                          onChanged: (value) {
+                            setState(() => isCheckedPrivacy = value!);
+                          },
+                        ),
                       ),
 
                       AppButton(
@@ -322,11 +338,13 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
                         radius: 10,
                         width: double.infinity,
                         label: AppStrings.Continue,
-                        labelStyle: _isFormValid ? 17.txtBoldWhite : 17.txtBoldGrey,
+                        labelStyle:
+                            _isFormValid ? 17.txtBoldWhite : 17.txtBoldGrey,
                         onTap: _isFormValid ? _submitForm : null,
-                        buttonColor: _isFormValid
-                            ? AppColors.btnColor
-                            : AppColors.greyHint.withOpacity(0.3),
+                        buttonColor:
+                            _isFormValid
+                                ? AppColors.btnColor
+                                : AppColors.greyHint.withOpacity(0.3),
                       ),
                     ],
                   ),
@@ -340,7 +358,6 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
       ),
     );
   }
-
 
   Widget _buildDateOfBirthField() {
     return Column(
@@ -375,8 +392,6 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
     );
   }
 
-
-
   void _selectDateOfBirth() async {
     final pickedDate = await showDatePicker(
       context: context,
@@ -392,7 +407,6 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
       });
     }
   }
-
 
   Widget _buildGenderDropdown() {
     return AppDropDown.singleSelect(
@@ -411,17 +425,12 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
       borderColor: AppColors.grey.withOpacity(0.3),
       radius: 10,
       error: "",
-      prefixIcon: ImageView(
-        url: AppImages.gender,
-        size: 20,
-        margin: 10.right,
-      ),
+      prefixIcon: ImageView(url: AppImages.gender, size: 20, margin: 10.right),
     );
   }
 
-
-
-  Widget _buildCheckbox(String label, {
+  Widget _buildCheckbox(
+    String label, {
     required bool isChecked,
     required ValueChanged<bool?> onChanged,
   }) {
@@ -450,12 +459,18 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
           Expanded(
             child: RichText(
               text: TextSpan(
-                text: label.contains("Terms") ? "${AppStrings.iAccept} " : "${AppStrings.iAgree} ",
+                text:
+                    label.contains("Terms")
+                        ? "${AppStrings.iAccept} "
+                        : "${AppStrings.iAgree} ",
 
                 style: 14.txtRegularBlack,
                 children: [
                   TextSpan(
-                    text: label.contains("Terms") ? AppStrings.termsandCondation.tr : AppStrings.privacyPolicy.tr,
+                    text:
+                        label.contains("Terms")
+                            ? AppStrings.termsandCondation.tr
+                            : AppStrings.privacyPolicy.tr,
                     style: 14.txtRegularbtncolor,
                   ),
                 ],
@@ -466,5 +481,4 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
       ),
     );
   }
-
 }

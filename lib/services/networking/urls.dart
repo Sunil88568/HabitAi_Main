@@ -1,4 +1,5 @@
-const String baseUrl = 'http://85.31.234.205:5414';
+// const String baseUrl = 'http://85.31.234.205:5414';
+const String baseUrl = 'https://api.dhaniq.co.uk';
 
 
 
@@ -24,6 +25,7 @@ class Urls{
   static const changePassword = '${_UrlsCollections.user}/change-password';
   static const editProfile = '${_UrlsCollections.user}/edit-profile';
   static const contactUs = '/contact-us';
+  static const getNotifications = '/notifications';
 
 
 
@@ -32,5 +34,6 @@ class Urls{
 
   static const getQuestions = '/questions';
   static const submitQuestions = '/user-question-answer';
+  static const checkout = '/checkout-session';
 }
 

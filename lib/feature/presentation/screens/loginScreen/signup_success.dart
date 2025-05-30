@@ -57,7 +57,7 @@ class _SignupSuccessState extends State<SignupSuccess> {
               const SizedBox(height: 12),
               TextView(
                 text:
-                'You Will Receive An\nConfirmation Email Once Your\nProfile Is Verified',
+                '',
                 style: 14.txtregularBtncolor,
                 textAlign: TextAlign.center,
               ),

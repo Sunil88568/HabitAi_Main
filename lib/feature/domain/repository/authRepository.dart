@@ -10,6 +10,8 @@ abstract class AuthRepository {
   Future<ResponseData<LoginModel>> loginUser({
     required String email,
     required String password,
+    String? device_type,
+    String? device_token,
   });
 
   Future<ResponseData<LoginModel>> register({
@@ -83,13 +85,21 @@ abstract class AuthRepository {
 
 
   Future<ResponseData<LoginModel>> submitQuestions({
+    required String questionId,
     required String question,
     required String answer,
   });
 
 
   Future<ResponseData<LoginModel>> submitQuestionsGuestUser({
-    required String guestUserId
+    required String guestUserId,
+    required String questionId,
+    required String question,
+    required String answer,
 });
+
+
+  Future<Map<String,dynamic>> checkout(String id);
+  Future<Map<String,dynamic>> getNotifications(String id);
 
 }

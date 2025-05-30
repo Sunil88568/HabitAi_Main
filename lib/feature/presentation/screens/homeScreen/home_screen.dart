@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:question_app/components/coreComponents/AppButton.dart';
@@ -7,6 +8,7 @@ import 'package:question_app/components/coreComponents/TextView.dart';
 import 'package:question_app/components/styles/appColors.dart';
 import 'package:question_app/components/styles/appImages.dart';
 import 'package:question_app/components/styles/textStyles.dart';
+import 'package:question_app/feature/presentation/controller/auth_ctrl.dart';
 import 'package:question_app/feature/presentation/screens/homeScreen/quiz_Screen.dart';
 import 'package:question_app/feature/presentation/screens/loginScreen/login_screen.dart';
 import 'package:question_app/feature/presentation/screens/loginScreen/signup_screen.dart';
@@ -38,8 +40,13 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     AppUtils.log("image:::${profileCtrl.userProfile.value?.image?.fileUrl}");
+    AppUtils.log("User Id:::${Preferences.uid}");
     profileCtrl.fetchUserProfile();
     questionCtrl.getQuestions();
+    if( Preferences.authToken != null){
+      AuthCtrl.find.getNotifications(Preferences.profile!.id.toString());
+    }
+
   }
 
   @override
@@ -117,8 +124,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ImageView(
                     url: AppImages.notificationImg,
                     size: width * 0.09,
-                    onTap: () {
-                      context.pushNavigator(Notificationscreen());
+                    onTap: () async {
+                      await context.pushNavigator(Notificationscreen());
+                      questionCtrl.getQuestions();
                     },
                   ),
                 ],
@@ -201,7 +209,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         buttonColor: AppColors.quzeYellow,
                         alignment: Alignment.center,
                         onTap: (){
-                          context.pushNavigator(QuizScreen(questions: questionCtrl.questionList));
+                          if(questionCtrl.questionList.isNotEmpty){
+
+                            if(questionCtrl.questionList.first.isSubmitted==false) {
+                              context.pushNavigator(QuizScreen(
+                                  questions: questionCtrl.questionList));
+                            }else{
+                              AppUtils.toast("You already submitted the response");
+                            }
+                          }else{
+                            AppUtils.toastError("No Quiz Found");
+                          }
+
                         },
                       ),
                     ),
@@ -220,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _buildStatCard(context, 'Total Players\nThis Week', '8,542'),
-                        _buildStatCard(context, 'Current\nPrize Pool', '\$5,542'),
+                        _buildStatCard(context, 'Current\nPrize Pool', (questionCtrl.questionList.isNotEmpty)?"\$${questionCtrl.questionList.first.pricePoll.toString()}":"\$0.00"),
                         _buildStatCard(context, 'Winners\nAnnounced In', '5 Days'),
                       ],
                     ),

@@ -3,11 +3,13 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:question_app/feature/data/models/dataModels/checkout_response.dart';
 
 import '../../../services/networking/urls.dart';
 import '../../../services/storage/preferences.dart';
 import '../../../utils/appUtils.dart';
 import '../../data/models/dataModels/login_model/login_model.dart';
+import '../../data/models/dataModels/notification_model.dart';
 import '../../data/models/dataModels/responseDataModel.dart';
 import '../../data/models/repository/iAuthRepository.dart';
 import '../../domain/repository/authRepository.dart';
@@ -18,6 +20,8 @@ class AuthCtrl extends GetxController{
   final AuthRepository _repo = IAuthRepository();
 
 
+  CheckoutResponse checkoutResponse = CheckoutResponse();
+  NotificationModel notificationModel = NotificationModel();
   var searchedUsers = <Map<String, dynamic>>[].obs;
 
 
@@ -94,9 +98,13 @@ class AuthCtrl extends GetxController{
 
 
   Future login(String email, String password) async {
+    final deviceType = Platform.isAndroid ? "android" : "ios";
+
     final response = await _repo.loginUser(
       email: email,
       password: password,
+      device_type: deviceType,
+      device_token: Preferences.fcmToken
     );
 
     if (response.isSuccess) {
@@ -163,8 +171,9 @@ class AuthCtrl extends GetxController{
 
 
 
-  Future<ResponseData> submitQuestion(String question, String answer) async {
+  Future<ResponseData> submitQuestion(String questionId,String question, String answer) async {
     final response = await _repo.submitQuestions(
+      questionId: questionId,
       question: question,
       answer: answer,
     );
@@ -182,8 +191,40 @@ class AuthCtrl extends GetxController{
 
 
 
-  Future<ResponseData> submitQuestionsGuestUser(String guestUserId) async {
-    final response = await _repo.submitQuestionsGuestUser(guestUserId: guestUserId);
+  Future<CheckoutResponse> checkout(String id) async {
+    final response = await _repo.checkout(id);
+
+    checkoutResponse = CheckoutResponse.fromJson(response);
+    if (checkoutResponse.statusCode == 200) {
+      AppUtils.log("checkout question successful: ${checkoutResponse.data}");
+      return checkoutResponse;
+    } else {
+      final error = checkoutResponse.message;
+      AppUtils.toastError(error);
+      return checkoutResponse;
+    }
+  }
+
+  Future<NotificationModel> getNotifications(String id) async {
+    final response = await _repo.getNotifications(id);
+
+    notificationModel = NotificationModel.fromJson(response);
+    if (notificationModel.statusCode == 200 || notificationModel.statusCode == 201) {
+      AppUtils.log("checkout question successful: ${checkoutResponse.data}");
+      return notificationModel;
+    } else {
+      final error = notificationModel.message;
+      AppUtils.toastError(error);
+      return notificationModel;
+    }
+  }
+
+
+
+  Future<ResponseData> submitQuestionsGuestUser(String guestUserId,String questionId,String question, String answer) async {
+    final response = await _repo.submitQuestionsGuestUser(guestUserId: guestUserId,questionId: questionId,
+      question: question,
+      answer: answer,);
     if (response.isSuccess) {
       AppUtils.toast("Answer Submit Successfully");
       AppUtils.log("guest submit question successful: ${response.data}");
@@ -192,6 +233,28 @@ class AuthCtrl extends GetxController{
       final error = response.getError;
       AppUtils.toastError(error);
       return response;
+    }
+  }
+
+  String timeAgo(String dateStr) {
+    final date = DateTime.parse(dateStr).toUtc();
+    final now = DateTime.now().toUtc();
+    final diff = now.difference(date);
+
+    if (diff.inDays >= 365) {
+      final years = diff.inDays ~/ 365;
+      return '$years year${years > 1 ? 's' : ''} ago';
+    } else if (diff.inDays >= 30) {
+      final months = diff.inDays ~/ 30;
+      return '$months month${months > 1 ? 's' : ''} ago';
+    } else if (diff.inDays >= 1) {
+      return '${diff.inDays} day${diff.inDays > 1 ? 's' : ''} ago';
+    } else if (diff.inHours >= 1) {
+      return '${diff.inHours} hour${diff.inHours > 1 ? 's' : ''} ago';
+    } else if (diff.inMinutes >= 1) {
+      return '${diff.inMinutes} minute${diff.inMinutes > 1 ? 's' : ''} ago';
+    } else {
+      return '${diff.inSeconds} second${diff.inSeconds > 1 ? 's' : ''} ago';
     }
   }
 }

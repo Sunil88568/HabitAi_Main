@@ -5,6 +5,7 @@ import 'package:question_app/components/coreComponents/ImageView.dart';
 import 'package:question_app/components/coreComponents/TextView.dart';
 import 'package:question_app/components/styles/appImages.dart';
 import 'package:question_app/components/styles/textStyles.dart';
+import 'package:question_app/feature/presentation/screens/homeScreen/web_view_screen.dart';
 import 'package:question_app/services/storage/preferences.dart';
 import 'package:question_app/utils/appUtils.dart';
 import 'package:question_app/utils/extensions/context_extensions.dart';
@@ -25,12 +26,11 @@ import '../loginScreen/login_screen.dart';
 import '../loginScreen/signup_screen.dart';
 import 'home_screen.dart';
 
-
 class QuizScreen extends StatefulWidget {
   final List<QuestionModel> questions;
-  String ? guestid;
+  String? guestid;
 
-  QuizScreen({super.key, required this.questions , this.guestid});
+  QuizScreen({super.key, required this.questions, this.guestid});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -39,8 +39,14 @@ class QuizScreen extends StatefulWidget {
 class _QuizScreenState extends State<QuizScreen> {
   String? selectedOption;
 
-  List<String> get options => widget.questions.isNotEmpty ? widget.questions[0].options ?? [] : [];
-  String get question => widget.questions.isNotEmpty ? widget.questions[0].question ?? "" : "";
+  List<String> get options =>
+      widget.questions.isNotEmpty ? widget.questions[0].options ?? [] : [];
+
+  String get question =>
+      widget.questions.isNotEmpty ? widget.questions[0].question ?? "" : "";
+
+  String get questionId =>
+      widget.questions.isNotEmpty ? widget.questions[0].id ?? "" : "";
 
   Future<void> _submitForm() async {
     if (selectedOption == null) {
@@ -48,7 +54,9 @@ class _QuizScreenState extends State<QuizScreen> {
       return;
     }
 
-    AppUtils.log("Submitting data => Question: $question, Selected Option: $selectedOption");
+    AppUtils.log(
+      "Submitting data => Question: $question, Selected Option: $selectedOption",
+    );
 
     final token = Preferences.profile?.token;
 
@@ -60,21 +68,71 @@ class _QuizScreenState extends State<QuizScreen> {
       }
 
       try {
-        final response = await AuthCtrl.find.submitQuestionsGuestUser(guestUserId).applyLoader;
+        var data = await AuthCtrl.find.checkout(guestUserId);
+
+        if (data.statusCode == 200) {
+          var value = await context.pushNavigator(
+            WebViewScreen(url: data.data!.url.toString()),
+          );
+
+          print("Return Data = $value");
+
+          if (value == "success") {
+            print("Return Data = $value");
+            final response =
+                await AuthCtrl.find
+                    .submitQuestionsGuestUser(
+                      guestUserId,
+                      questionId,
+                      question,
+                      selectedOption ?? "",
+                    )
+                    .applyLoader;
+            if (response.isSuccess) {
+              AppUtils.toast("Answer Submit Successfully");
+              Preferences.guestUserId="";
+
+              context.pop();
+            }
+          }
+
+          /*final response = await AuthCtrl.find.submitQuestion(questionId,question, selectedOption ?? "").applyLoader;
+         if (response.isSuccess) {
+           AppUtils.toast("Answer Submit Successfully");
+
+           context.pop();
+         }*/
+        }
+
+        /*final response = await AuthCtrl.find.submitQuestionsGuestUser(guestUserId,questionId,question, selectedOption ?? "").applyLoader;
         if (response.isSuccess) {
           AppUtils.toast("Answer Submit Successfully");
           context.pop();
-        }
+        }*/
       } catch (e) {
         AppUtils.log('Guest question submit error: $e');
       }
     } else {
-
       try {
-        final response = await AuthCtrl.find.submitQuestion(question, selectedOption ?? "").applyLoader;
-        if (response.isSuccess) {
-          AppUtils.toast("Answer Submit Successfully");
-          context.pop();
+        var data = await AuthCtrl.find.checkout(
+          Preferences.profile!.id.toString(),
+        );
+        if (data.statusCode == 200) {
+          var value = await context.pushNavigator(
+            WebViewScreen(url: data.data!.url.toString()),
+          );
+          if (value == "success") {
+            print("Return Data = $value");
+            final response =
+                await AuthCtrl.find
+                    .submitQuestion(questionId, question, selectedOption ?? "")
+                    .applyLoader;
+            if (response.isSuccess) {
+              AppUtils.toast("Answer Submit Successfully");
+
+              context.pop();
+            }
+          }
         }
       } catch (e) {
         AppUtils.log('Submit question error: $e');
@@ -82,147 +140,164 @@ class _QuizScreenState extends State<QuizScreen> {
     }
   }
 
-
   void _handleLoginOptions(BuildContext context) async {
     final result = await showLoginOptionsDialog(context: context);
 
     if (result == 'login') {
       Navigator.push(context, MaterialPageRoute(builder: (_) => LoginScreen()));
     } else if (result == 'signup') {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => SignupScreen()));
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => SignupScreen()),
+      );
     } else if (result == 'guest') {
       final guestInfo = await showGuestInfoDialog(context);
       if (guestInfo != null) {
         AppUtils.log('Guest Data: $guestInfo');
 
         try {
-          final response = await AuthCtrl.find.guestLogin(
-            name: guestInfo['name'],
-            email: guestInfo['email'],
-            mobileNumber: guestInfo['phone'],
-          ).applyLoader;
+          final response =
+              await AuthCtrl.find
+                  .guestLogin(
+                    name: guestInfo['name'],
+                    email: guestInfo['email'],
+                    mobileNumber: guestInfo['phone'],
+                  )
+                  .applyLoader;
 
           AppUtils.log('Guest Login Response: $response');
           final loginData = response.data;
-          AppUtils.toast("Answer Submit Successfully");
-          AppUtils.log('Guest Login Response Data: name=${loginData?.name ?? ""}, email=${loginData?.email}, id=${loginData?.id}');
+          AppUtils.log(
+            'Guest Login Response Data: name=${loginData?.name ?? ""}, email=${loginData?.email}, id=${loginData?.id}',
+          );
           widget.guestid = loginData?.id;
-          context.pop();
+          Preferences.guestUserId=loginData?.id;
+          // context.pop();
+          _submitForm();
+
+
+
         } catch (e) {
           AppUtils.log('Guest Login Error: $e');
         }
       }
     }
-
   }
 
-
   Future<Map<String, String>?> showGuestInfoDialog(BuildContext context) {
-
-    final nameController  = TextEditingController();
+    final nameController = TextEditingController();
     final emailController = TextEditingController();
     final phoneController = TextEditingController();
-
 
     final _formKey = GlobalKey<FormState>();
 
     return showDialog<Map<String, String>>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        backgroundColor: AppColors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-
-        titlePadding: const EdgeInsets.only(left: 24, right: 8, top: 24, bottom: 0),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            TextView(text: 'Continue as Guest', style: 20.txtBoldBlack),
-            IconButton(
-              icon: const Icon(Icons.close),
-              splashRadius: 20,
-              onPressed: () => Navigator.pop(context),
+      builder:
+          (_) => AlertDialog(
+            backgroundColor: AppColors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-          ],
-        ),
 
-
-        content: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+            titlePadding: const EdgeInsets.only(
+              left: 24,
+              right: 8,
+              top: 24,
+              bottom: 0,
+            ),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                8.height,
-                EditText(
-                  controller: nameController,
-                  hint: AppStrings.enterYourName,
-                  hintStyle: 16.txtRegularGrey,
-                  prefixIcon: _pfIcon(AppImages.nameImage),
-                  validator: (v) =>
-                  v.isNotNullEmpty ? null : 'Please enter your name',
-                  margin: 12.bottom,
-                ),
-                EditText(
-                  controller: emailController,
-                  hint: AppStrings.Enteremail,
-                  inputType: TextInputType.emailAddress,
-                  hintStyle: 16.txtRegularGrey,
-                  prefixIcon: _pfIcon(AppImages.email),
-                  validator: (v) {
-                    if (!v.isNotNullEmpty) return AppStrings.pleaseEnterYourEmail;
-                    if (!v.isEmailAddress)   return AppStrings.pleaseEnterValidEmail;
-                    return null;
-                  },
-                  margin: 12.bottom,
-                ),
-                EditText(
-                  maxLength: 10,
-                  controller: phoneController,
-                  hint: AppStrings.enterMobileNumber,
-                  inputType: TextInputType.phone,
-                  hintStyle: 16.txtRegularGrey,
-                  prefixIcon: _pfIcon(AppImages.phoneIcon),
-                  validator: (v) =>
-                  v.isNotNullEmpty ? null : AppStrings.pleaseEnterYourPhoneNumber,
+                TextView(text: 'Continue as Guest', style: 20.txtBoldBlack),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  splashRadius: 20,
+                  onPressed: () => Navigator.pop(context),
                 ),
               ],
             ),
+
+            content: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    8.height,
+                    EditText(
+                      controller: nameController,
+                      hint: AppStrings.enterYourName,
+                      hintStyle: 16.txtRegularGrey,
+                      prefixIcon: _pfIcon(AppImages.nameImage),
+                      validator:
+                          (v) =>
+                              v.isNotNullEmpty
+                                  ? null
+                                  : 'Please enter your name',
+                      margin: 12.bottom,
+                    ),
+                    EditText(
+                      controller: emailController,
+                      hint: AppStrings.Enteremail,
+                      inputType: TextInputType.emailAddress,
+                      hintStyle: 16.txtRegularGrey,
+                      prefixIcon: _pfIcon(AppImages.email),
+                      validator: (v) {
+                        if (!v.isNotNullEmpty)
+                          return AppStrings.pleaseEnterYourEmail;
+                        if (!v.isEmailAddress)
+                          return AppStrings.pleaseEnterValidEmail;
+                        return null;
+                      },
+                      margin: 12.bottom,
+                    ),
+                    EditText(
+                      maxLength: 10,
+                      controller: phoneController,
+                      hint: AppStrings.enterMobileNumber,
+                      inputType: TextInputType.phone,
+                      hintStyle: 16.txtRegularGrey,
+                      prefixIcon: _pfIcon(AppImages.phoneIcon),
+                      validator:
+                          (v) =>
+                              v.isNotNullEmpty
+                                  ? null
+                                  : AppStrings.pleaseEnterYourPhoneNumber,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actionsAlignment: MainAxisAlignment.center,
+            actions: [
+              AppButton(
+                label: 'Continue as Guest',
+                isFilledButton: true,
+                width: MediaQuery.of(context).size.width * 0.6,
+                padding: 15.top + 15.bottom,
+                labelStyle: 14.txtMediumWhite,
+                buttonColor: AppColors.btnColor,
+                onTap: () {
+                  if (_formKey.currentState?.validate() ?? false) {
+                    Navigator.pop(context, {
+                      'name': nameController.text.trim(),
+                      'email': emailController.text.trim(),
+                      'phone': phoneController.text.trim(),
+                    });
+                  }
+                },
+              ),
+            ],
           ),
-        ),
-        actionsAlignment: MainAxisAlignment.center,
-        actions: [
-          AppButton(
-            label: 'Continue as Guest',
-            isFilledButton: true,
-            width: MediaQuery.of(context).size.width * 0.6,
-            padding: 15.top + 15.bottom,
-            labelStyle: 14.txtMediumWhite,
-            buttonColor: AppColors.btnColor,
-            onTap: () {
-              if (_formKey.currentState?.validate() ?? false) {
-                Navigator.pop(context, {
-                  'name' : nameController.text.trim(),
-                  'email': emailController.text.trim(),
-                  'phone': phoneController.text.trim(),
-                });
-              }
-            },
-          ),
-        ],
-      ),
     );
   }
 
   Widget _pfIcon(String asset) => Column(
     mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      ImageView(url: asset, size: 20.sdp, tintColor: AppColors.grey),
-    ],
+    children: [ImageView(url: asset, size: 20.sdp, tintColor: AppColors.grey)],
   );
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -242,10 +317,7 @@ class _QuizScreenState extends State<QuizScreen> {
           onTap: () {
             context.pop();
           },
-          child: Icon(
-            Icons.arrow_back_ios_new,
-            color: AppColors.white,
-          ),
+          child: Icon(Icons.arrow_back_ios_new, color: AppColors.white),
         ),
       ),
       body: SafeArea(
@@ -266,7 +338,7 @@ class _QuizScreenState extends State<QuizScreen> {
                     url: AppImages.quizetimeimg,
                     height: 60.sdp,
                     width: 60.sdp,
-                  )
+                  ),
                 ],
               ),
               SizedBox(height: size.height * 0.04),
@@ -326,7 +398,9 @@ class _QuizScreenState extends State<QuizScreen> {
                                 _handleLoginOptions(context);
                               }
                             } else {
-                              AppUtils.toast("Please select an option before submitting.");
+                              AppUtils.toast(
+                                "Please select an option before submitting.",
+                              );
                             }
                           },
 
@@ -343,7 +417,7 @@ class _QuizScreenState extends State<QuizScreen> {
                           ),
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -353,8 +427,4 @@ class _QuizScreenState extends State<QuizScreen> {
       ),
     );
   }
-
-
-
-
 }

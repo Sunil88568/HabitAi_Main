@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:question_app/components/styles/textStyles.dart';
+import 'package:question_app/feature/presentation/screens/homeScreen/home_screen.dart';
 import 'package:question_app/feature/presentation/screens/loginScreen/login_screen.dart';
 import 'package:question_app/feature/presentation/screens/profileScreens/persional_info_screen.dart';
 import 'package:question_app/feature/presentation/screens/profileScreens/privacypolicy.dart';
@@ -324,8 +325,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
   static Future<void> onLogout(BuildContext context) async {
     try {
-      await Get.find<ProfileUserController>().logOut().applyLoader;
       Preferences.clearUserData();
+
+      await Get.find<ProfileUserController>().logOut().applyLoader;
       context.pushAndClearNavigator(LoginScreen());
 
     } catch (e) {

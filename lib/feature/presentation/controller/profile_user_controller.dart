@@ -41,7 +41,7 @@ class ProfileUserController extends GetxController {
 
 
 
-  Future<void> getQuestions() async {
+  Future<void>  getQuestions() async {
     isLoading.value = true;
 
     final response = await _repo.getQuestions();

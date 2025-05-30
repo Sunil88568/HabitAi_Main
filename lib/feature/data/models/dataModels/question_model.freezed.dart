@@ -23,6 +23,8 @@ mixin _$QuestionModel {
   @JsonKey(name: "_id")
   String? get id => throw _privateConstructorUsedError;
   String? get question => throw _privateConstructorUsedError;
+  String? get pricePoll => throw _privateConstructorUsedError;
+  bool? get isSubmitted => throw _privateConstructorUsedError;
   List<String>? get options => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
@@ -48,6 +50,8 @@ abstract class $QuestionModelCopyWith<$Res> {
   $Res call(
       {@JsonKey(name: "_id") String? id,
       String? question,
+      String? pricePoll,
+      bool? isSubmitted,
       List<String>? options,
       DateTime? createdAt,
       DateTime? updatedAt,
@@ -71,6 +75,8 @@ class _$QuestionModelCopyWithImpl<$Res, $Val extends QuestionModel>
   $Res call({
     Object? id = freezed,
     Object? question = freezed,
+    Object? pricePoll = freezed,
+    Object? isSubmitted = freezed,
     Object? options = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
@@ -85,6 +91,14 @@ class _$QuestionModelCopyWithImpl<$Res, $Val extends QuestionModel>
           ? _value.question
           : question // ignore: cast_nullable_to_non_nullable
               as String?,
+      pricePoll: freezed == pricePoll
+          ? _value.pricePoll
+          : pricePoll // ignore: cast_nullable_to_non_nullable
+              as String?,
+      isSubmitted: freezed == isSubmitted
+          ? _value.isSubmitted
+          : isSubmitted // ignore: cast_nullable_to_non_nullable
+              as bool?,
       options: freezed == options
           ? _value.options
           : options // ignore: cast_nullable_to_non_nullable
@@ -116,6 +130,8 @@ abstract class _$$QuestionModelImplCopyWith<$Res>
   $Res call(
       {@JsonKey(name: "_id") String? id,
       String? question,
+      String? pricePoll,
+      bool? isSubmitted,
       List<String>? options,
       DateTime? createdAt,
       DateTime? updatedAt,
@@ -137,6 +153,8 @@ class __$$QuestionModelImplCopyWithImpl<$Res>
   $Res call({
     Object? id = freezed,
     Object? question = freezed,
+    Object? pricePoll = freezed,
+    Object? isSubmitted = freezed,
     Object? options = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
@@ -151,6 +169,14 @@ class __$$QuestionModelImplCopyWithImpl<$Res>
           ? _value.question
           : question // ignore: cast_nullable_to_non_nullable
               as String?,
+      pricePoll: freezed == pricePoll
+          ? _value.pricePoll
+          : pricePoll // ignore: cast_nullable_to_non_nullable
+              as String?,
+      isSubmitted: freezed == isSubmitted
+          ? _value.isSubmitted
+          : isSubmitted // ignore: cast_nullable_to_non_nullable
+              as bool?,
       options: freezed == options
           ? _value._options
           : options // ignore: cast_nullable_to_non_nullable
@@ -177,6 +203,8 @@ class _$QuestionModelImpl implements _QuestionModel {
   const _$QuestionModelImpl(
       {@JsonKey(name: "_id") this.id,
       this.question,
+      this.pricePoll,
+      this.isSubmitted,
       final List<String>? options,
       this.createdAt,
       this.updatedAt,
@@ -191,6 +219,10 @@ class _$QuestionModelImpl implements _QuestionModel {
   final String? id;
   @override
   final String? question;
+  @override
+  final String? pricePoll;
+  @override
+  final bool? isSubmitted;
   final List<String>? _options;
   @override
   List<String>? get options {
@@ -211,7 +243,7 @@ class _$QuestionModelImpl implements _QuestionModel {
 
   @override
   String toString() {
-    return 'QuestionModel(id: $id, question: $question, options: $options, createdAt: $createdAt, updatedAt: $updatedAt, v: $v)';
+    return 'QuestionModel(id: $id, question: $question, pricePoll: $pricePoll, isSubmitted: $isSubmitted, options: $options, createdAt: $createdAt, updatedAt: $updatedAt, v: $v)';
   }
 
   @override
@@ -222,6 +254,10 @@ class _$QuestionModelImpl implements _QuestionModel {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.question, question) ||
                 other.question == question) &&
+            (identical(other.pricePoll, pricePoll) ||
+                other.pricePoll == pricePoll) &&
+            (identical(other.isSubmitted, isSubmitted) ||
+                other.isSubmitted == isSubmitted) &&
             const DeepCollectionEquality().equals(other._options, _options) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
@@ -232,8 +268,16 @@ class _$QuestionModelImpl implements _QuestionModel {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, question,
-      const DeepCollectionEquality().hash(_options), createdAt, updatedAt, v);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      question,
+      pricePoll,
+      isSubmitted,
+      const DeepCollectionEquality().hash(_options),
+      createdAt,
+      updatedAt,
+      v);
 
   /// Create a copy of QuestionModel
   /// with the given fields replaced by the non-null parameter values.
@@ -255,6 +299,8 @@ abstract class _QuestionModel implements QuestionModel {
   const factory _QuestionModel(
       {@JsonKey(name: "_id") final String? id,
       final String? question,
+      final String? pricePoll,
+      final bool? isSubmitted,
       final List<String>? options,
       final DateTime? createdAt,
       final DateTime? updatedAt,
@@ -268,6 +314,10 @@ abstract class _QuestionModel implements QuestionModel {
   String? get id;
   @override
   String? get question;
+  @override
+  String? get pricePoll;
+  @override
+  bool? get isSubmitted;
   @override
   List<String>? get options;
   @override

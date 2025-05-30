@@ -384,7 +384,8 @@ class IAuthRepository implements AuthRepository {
   @override
   Future<ResponseData<String>> uploadPhoto({
     required File imageFile,
-  }) async {
+  })
+  async {
       final multipartFile = {
         'file': imageFile.path,
       };
@@ -529,11 +530,15 @@ class IAuthRepository implements AuthRepository {
   Future<ResponseData<List<QuestionModel>>> getQuestions() async {
     final token = Preferences.profile?.token.bearer;
     AppUtils.log("token???? $token");
+    final id = Preferences.profile?.id;
 
     final result = await _apiMethod.get(
       url: Urls.getQuestions,
       headers: {},
       authToken: token,
+        query: {
+          "userId" : id?? ""
+        }
     );
 
     if (result.isSuccess) {
@@ -579,10 +584,12 @@ class IAuthRepository implements AuthRepository {
 
   @override
   Future<ResponseData<LoginModel>> submitQuestions({
+    required String questionId,
     required String question,
     required String answer,
   }) async {
     final body = {
+      'questionId': questionId,
       'question': question,
       'answer': answer,
     };
@@ -620,13 +627,21 @@ class IAuthRepository implements AuthRepository {
   @override
   Future<ResponseData<LoginModel>> submitQuestionsGuestUser({
     required String guestUserId,
+  required String questionId,
+  required String question,
+  required String answer,
   }) async {
-
+    final body = {
+      'questionId': questionId,
+      'question': question,
+      'answer': answer,
+    };
     final token = Preferences.profile?.token.bearer;
     final result = await _apiMethod.post(
       url: Urls.submitQuestions,
       headers: {},
       authToken: token,
+        body: body,
       query: {
         "guestUserId" : guestUserId
       }
@@ -647,6 +662,57 @@ class IAuthRepository implements AuthRepository {
       data: null,
     );
   }
+
+
+
+
+  @override
+  Future<Map<String,dynamic>> checkout(String id) async {
+    final result = await _apiMethod.post(
+      url: Urls.checkout,
+      headers: {},
+      body: {
+        "userId" : id
+      },
+    );
+
+    if (result.isSuccess) {
+      final rawData = result.data;
+      AppUtils.log("Raw Profile Data: $rawData");
+      final data = rawData?['data'];
+      final loginModel = data is Map<String, dynamic>
+          ? LoginModel.fromJson(data)
+          : null;
+      return result.data??{};
+    }
+
+    return result.data??{};
+  }
+
+
+  @override
+  Future<Map<String,dynamic>> getNotifications(String id) async {
+    final result = await _apiMethod.get(
+      url: Urls.getNotifications,
+      headers: {},
+      query: {
+        "userId" : id
+      },
+    );
+
+    if (result.isSuccess) {
+      final rawData = result.data;
+      AppUtils.log("Raw Profile Data: $rawData");
+      final data = rawData?['data'];
+      final loginModel = data is Map<String, dynamic>
+          ? LoginModel.fromJson(data)
+          : null;
+      return result.data??{};
+    }
+
+    return result.data??{};
+  }
+
 
 
 }

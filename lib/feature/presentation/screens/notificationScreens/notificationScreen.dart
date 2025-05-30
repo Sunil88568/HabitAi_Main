@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:question_app/components/styles/textStyles.dart';
+import 'package:question_app/feature/data/models/dataModels/notification_model.dart';
 import 'package:question_app/utils/extensions/context_extensions.dart';
 import 'package:question_app/utils/extensions/size.dart';
 import 'package:question_app/utils/extensions/widget.dart';
@@ -11,6 +12,8 @@ import '../../../../../components/styles/appColors.dart';
 import '../../../../../components/styles/appImages.dart';
 import '../../../../../components/styles/app_strings.dart';
 import '../../../../components/coreComponents/appBar2.dart';
+import '../../../../services/storage/preferences.dart';
+import '../../controller/auth_ctrl.dart';
 
 
 class Notificationscreen extends StatefulWidget {
@@ -24,6 +27,14 @@ class _NotificationscreenState extends State<Notificationscreen> {
   List<String> todayNotifications = ['Joe', 'Albert'];
   List<String> lastWeekNotifications = ['Sarah', 'Bob', 'Emma'];
 
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+   getData();
+  }
 
 
   Future<void> showConfirmationDialog(BuildContext context, int index ,  bool isToday) async {
@@ -168,121 +179,106 @@ class _NotificationscreenState extends State<Notificationscreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (todayNotifications.isNotEmpty)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextView(
-                      margin: 3.right + 10.bottom+ 10.top,
-                      text: 'Today',
-                      style: 14.txtBoldWhite,
-                    ),
-                    TextView(
-                      margin: 3.right + 10.bottom + 10.top,
-                      text: AppStrings.markAll,
-                      style: 14.txtRegularWhite,
-                    )
-                  ],
-                ),
-              if (lastWeekNotifications.isNotEmpty) ...[
-                Expanded(
-                  child: ListView.builder(
-                    physics: NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: lastWeekNotifications.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      double dragExtent = 0.0;
-                      bool showDeleteIcon = false;
-                      return StatefulBuilder(
-                        builder: (context, setState) {
-                          return Stack(
-                            children: [
-                              if (showDeleteIcon)
-                                Positioned.fill(
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: AnimatedContainer(
-                                      margin: 5.top + 5.bottom,
-                                      duration: const Duration(milliseconds: 300),
-                                      width: dragExtent.abs(),
-                                      height: double.infinity,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.red,
-                                        borderRadius: const BorderRadius.only(
-                                          topLeft: Radius.circular(16),
-                                          bottomLeft: Radius.circular(16),
-                                        ),
+              // if (AuthCtrl.find.notificationModel.data!.isNotEmpty)
+              //   Row(
+              //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //     children: [
+              //       TextView(
+              //         margin: 3.right + 10.bottom+ 10.top,
+              //         text: 'Today',
+              //         style: 14.txtBoldWhite,
+              //       ),
+              //       TextView(
+              //         margin: 3.right + 10.bottom + 10.top,
+              //         text: AppStrings.markAll,
+              //         style: 14.txtRegularWhite,
+              //       )
+              //     ],
+              //   ),
+          (AuthCtrl.find.notificationModel.data!.isNotEmpty)?Expanded(
+                child: ListView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: AuthCtrl.find.notificationModel.data!.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    double dragExtent = 0.0;
+                    bool showDeleteIcon = false;
+
+                    var notification = AuthCtrl.find.notificationModel.data![index];
+                    return StatefulBuilder(
+                      builder: (context, setState) {
+                        return Stack(
+                          children: [
+                            if (showDeleteIcon)
+                              Positioned.fill(
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: AnimatedContainer(
+                                    margin: 5.top + 5.bottom,
+                                    duration: const Duration(milliseconds: 300),
+                                    width: dragExtent.abs(),
+                                    height: double.infinity,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.red,
+                                      borderRadius: const BorderRadius.only(
+                                        topLeft: Radius.circular(16),
+                                        bottomLeft: Radius.circular(16),
                                       ),
-                                      alignment: Alignment.center,
-                                      child: Padding(
-                                        padding: 20.left,
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            showConfirmationDialog(context, index, false);
-                                          },
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Icon(Icons.delete,size: 30,)
-                                            ],
-                                          ),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Padding(
+                                      padding: 20.left,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          showConfirmationDialog(context, index, false);
+                                        },
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.delete,size: 30,)
+                                          ],
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              GestureDetector(
-                                onHorizontalDragUpdate: (details) {
-                                  setState(() {
-                                    if (details.primaryDelta! < 0) {
-                                      dragExtent = (dragExtent + details.primaryDelta!).clamp(-100.0, 0.0);
-                                      showDeleteIcon = dragExtent < -30;
-                                    }
-                                  });
-                                },
-                                onHorizontalDragEnd: (details) {
-                                  setState(() {
-                                    if (dragExtent < -90) {
-                                      dragExtent = -100.0;
-                                    } else {
-                                      dragExtent = 0.0;
-                                      showDeleteIcon = false;
-                                    }
-                                  });
-                                },
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 300),
-                                  transform: Matrix4.translationValues(dragExtent, 0, 0),
-                                  child: NotificationItem(
-                                    notification: '${lastWeekNotifications[index]}',
-                                  ),
+                              ),
+                            GestureDetector(
+                              onHorizontalDragUpdate: (details) {
+                                setState(() {
+                                  if (details.primaryDelta! < 0) {
+                                    dragExtent = (dragExtent + details.primaryDelta!).clamp(-100.0, 0.0);
+                                    showDeleteIcon = dragExtent < -30;
+                                  }
+                                });
+                              },
+                              onHorizontalDragEnd: (details) {
+                                setState(() {
+                                  if (dragExtent < -90) {
+                                    dragExtent = -100.0;
+                                  } else {
+                                    dragExtent = 0.0;
+                                    showDeleteIcon = false;
+                                  }
+                                });
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                transform: Matrix4.translationValues(dragExtent, 0, 0),
+                                child: NotificationItem(
+                                  notification: notification,
                                 ),
                               ),
-                            ],
-                          );
-                        },
-                      );
+                            ),
+                          ],
+                        );
+                      },
+                    );
 
-                    },
-                  ),
+                  },
                 ),
-                // Expanded(
-                //   child: Column(
-                //     children: [
-                //       Row(
-                //         children: [
-                //           TextView(
-                //             margin: 3.right + 10.bottom + 30.top,
-                //             text: 'Yesterday',
-                //             style: 14.txtRegularBlack,
-                //           ),
-                //         ],
-                //       ),
-                //     ],
-                //   ),
-                // ),
+              ):Expanded(child: Center(child: Text("No notification found",style:20.txtBoldWhite))),
 
-              ],
 
             ],
           ),
@@ -290,14 +286,23 @@ class _NotificationscreenState extends State<Notificationscreen> {
       ),
     );
   }
+
+  Future<void> getData() async {
+
+    await AuthCtrl.find.getNotifications(Preferences.profile!.id.toString());
+    setState(() {
+
+    });
+
+  }
 }
 
 
 
 class NotificationItem extends StatelessWidget {
-  final String notification;
 
-  const NotificationItem({required this.notification, super.key});
+  final Data notification;
+  const NotificationItem({ super.key, required this.notification});
 
   @override
   Widget build(BuildContext context) {
@@ -330,7 +335,7 @@ class NotificationItem extends StatelessWidget {
                               Icon(Icons.circle,color: AppColors.green,size: 6,),
                               10.width,
                               TextView(
-                                text: 'New Booking Request Received',
+                                text: notification.title.toString(),
                                 style: 14.txtBoldBlack,
                               ),
                             ],
@@ -339,7 +344,7 @@ class NotificationItem extends StatelessWidget {
                         Padding(
                           padding: 8.top,
                           child: TextView(
-                            text: 'Just now',
+                            text: AuthCtrl.find.timeAgo(notification.createdAt.toString()),
                             style: 12.txtRegularGrey,
                           ),
                         ),
@@ -351,7 +356,7 @@ class NotificationItem extends StatelessWidget {
                         children: [
                           Flexible(
                             child: TextView(
-                              text: 'You have a new booking request. Please review and confirm at your earliest convenience. ',
+                              text: notification.message.toString(),
                               style: 12.txtRegularGrey,
                               maxlines: 2,
                             ),

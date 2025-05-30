@@ -21,6 +21,7 @@ import '../../../../components/coreComponents/common_password_input_field.dart';
 import '../../../../components/styles/appColors.dart';
 import '../../../../components/styles/appImages.dart';
 import '../../../../components/styles/app_strings.dart';
+import '../../../../services/firebase/firebase_services.dart';
 import '../../../../utils/appUtils.dart';
 
 import 'package:flutter/gestures.dart';
@@ -45,7 +46,9 @@ class _SignupState extends State<SignupScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-
+    FirebaseServices.init(context).then((value){
+      FirebaseServices.listener();
+    });
 
   }
 

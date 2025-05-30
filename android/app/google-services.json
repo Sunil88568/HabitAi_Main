@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "642857860578",
-    "project_id": "sukya-89421",
-    "storage_bucket": "sukya-89421.firebasestorage.app"
+    "project_number": "789343134479",
+    "project_id": "question-app-7b8e6",
+    "storage_bucket": "question-app-7b8e6.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:642857860578:android:8787a94a6577e785770dbb",
+        "mobilesdk_app_id": "1:789343134479:android:e7a415fc4f52d4031c947a",
         "android_client_info": {
           "package_name": "com.app.question_app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA_37os92w4yaPNZY15HNeCK30bYacNaEM"
+          "current_key": "AIzaSyDz4zPGEAP-1waO2lD6Zc6SPE4ff9jQDCg"
         }
       ],
       "services": {
