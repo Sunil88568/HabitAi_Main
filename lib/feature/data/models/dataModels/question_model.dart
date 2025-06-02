@@ -19,11 +19,13 @@ class QuestionModel with _$QuestionModel {
     @JsonKey(name: "_id") String? id,
     String? question,
     String? pricePoll,
+    int? count,
     bool? isSubmitted,
 
     List<String>? options,
     DateTime? createdAt,
     DateTime? updatedAt,
+    DateTime? expiresAt,
 
     @JsonKey(name: "__v") int? v,
   }) = _QuestionModel;

@@ -265,7 +265,7 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
           dob: dobController.text,
           image: uploadedImageUrl,
           device_type: deviceType,
-          device_token: Preferences.fcmToken,
+          device_token: Preferences.fcmToken ??"",
         )
         .applyLoader
         .then((value) {

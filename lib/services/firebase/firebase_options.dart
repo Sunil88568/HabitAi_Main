@@ -42,11 +42,11 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBeLPrxn5A8TRnWVN5ve9WkL9POVtUn5Oc',
-    appId: '1:642857860578:ios:800edf9c9f47677e770dbb',
-    messagingSenderId: '642857860578',
-    projectId: 'sukya-89421',
-    storageBucket: 'sukya-89421.firebasestorage.app',
-    iosBundleId: 'com.app.waterBottle',
+    apiKey: 'AIzaSyBEQphbjEGjpu0BBmyfe56iKfdLJANGS-8',
+    appId: '1:789343134479:ios:d01219458850cb301c947a',
+    messagingSenderId: '789343134479',
+    projectId: 'question-app-7b8e6',
+    storageBucket: 'question-app-7b8e6.firebasestorage.app',
+    iosBundleId: 'com.app.question',
   );
 }

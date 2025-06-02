@@ -24,10 +24,12 @@ mixin _$QuestionModel {
   String? get id => throw _privateConstructorUsedError;
   String? get question => throw _privateConstructorUsedError;
   String? get pricePoll => throw _privateConstructorUsedError;
+  int? get count => throw _privateConstructorUsedError;
   bool? get isSubmitted => throw _privateConstructorUsedError;
   List<String>? get options => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
+  DateTime? get expiresAt => throw _privateConstructorUsedError;
   @JsonKey(name: "__v")
   int? get v => throw _privateConstructorUsedError;
 
@@ -51,10 +53,12 @@ abstract class $QuestionModelCopyWith<$Res> {
       {@JsonKey(name: "_id") String? id,
       String? question,
       String? pricePoll,
+      int? count,
       bool? isSubmitted,
       List<String>? options,
       DateTime? createdAt,
       DateTime? updatedAt,
+      DateTime? expiresAt,
       @JsonKey(name: "__v") int? v});
 }
 
@@ -76,10 +80,12 @@ class _$QuestionModelCopyWithImpl<$Res, $Val extends QuestionModel>
     Object? id = freezed,
     Object? question = freezed,
     Object? pricePoll = freezed,
+    Object? count = freezed,
     Object? isSubmitted = freezed,
     Object? options = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
+    Object? expiresAt = freezed,
     Object? v = freezed,
   }) {
     return _then(_value.copyWith(
@@ -95,6 +101,10 @@ class _$QuestionModelCopyWithImpl<$Res, $Val extends QuestionModel>
           ? _value.pricePoll
           : pricePoll // ignore: cast_nullable_to_non_nullable
               as String?,
+      count: freezed == count
+          ? _value.count
+          : count // ignore: cast_nullable_to_non_nullable
+              as int?,
       isSubmitted: freezed == isSubmitted
           ? _value.isSubmitted
           : isSubmitted // ignore: cast_nullable_to_non_nullable
@@ -110,6 +120,10 @@ class _$QuestionModelCopyWithImpl<$Res, $Val extends QuestionModel>
       updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      expiresAt: freezed == expiresAt
+          ? _value.expiresAt
+          : expiresAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
       v: freezed == v
           ? _value.v
@@ -131,10 +145,12 @@ abstract class _$$QuestionModelImplCopyWith<$Res>
       {@JsonKey(name: "_id") String? id,
       String? question,
       String? pricePoll,
+      int? count,
       bool? isSubmitted,
       List<String>? options,
       DateTime? createdAt,
       DateTime? updatedAt,
+      DateTime? expiresAt,
       @JsonKey(name: "__v") int? v});
 }
 
@@ -154,10 +170,12 @@ class __$$QuestionModelImplCopyWithImpl<$Res>
     Object? id = freezed,
     Object? question = freezed,
     Object? pricePoll = freezed,
+    Object? count = freezed,
     Object? isSubmitted = freezed,
     Object? options = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
+    Object? expiresAt = freezed,
     Object? v = freezed,
   }) {
     return _then(_$QuestionModelImpl(
@@ -173,6 +191,10 @@ class __$$QuestionModelImplCopyWithImpl<$Res>
           ? _value.pricePoll
           : pricePoll // ignore: cast_nullable_to_non_nullable
               as String?,
+      count: freezed == count
+          ? _value.count
+          : count // ignore: cast_nullable_to_non_nullable
+              as int?,
       isSubmitted: freezed == isSubmitted
           ? _value.isSubmitted
           : isSubmitted // ignore: cast_nullable_to_non_nullable
@@ -189,6 +211,10 @@ class __$$QuestionModelImplCopyWithImpl<$Res>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      expiresAt: freezed == expiresAt
+          ? _value.expiresAt
+          : expiresAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       v: freezed == v
           ? _value.v
           : v // ignore: cast_nullable_to_non_nullable
@@ -204,10 +230,12 @@ class _$QuestionModelImpl implements _QuestionModel {
       {@JsonKey(name: "_id") this.id,
       this.question,
       this.pricePoll,
+      this.count,
       this.isSubmitted,
       final List<String>? options,
       this.createdAt,
       this.updatedAt,
+      this.expiresAt,
       @JsonKey(name: "__v") this.v})
       : _options = options;
 
@@ -221,6 +249,8 @@ class _$QuestionModelImpl implements _QuestionModel {
   final String? question;
   @override
   final String? pricePoll;
+  @override
+  final int? count;
   @override
   final bool? isSubmitted;
   final List<String>? _options;
@@ -238,12 +268,14 @@ class _$QuestionModelImpl implements _QuestionModel {
   @override
   final DateTime? updatedAt;
   @override
+  final DateTime? expiresAt;
+  @override
   @JsonKey(name: "__v")
   final int? v;
 
   @override
   String toString() {
-    return 'QuestionModel(id: $id, question: $question, pricePoll: $pricePoll, isSubmitted: $isSubmitted, options: $options, createdAt: $createdAt, updatedAt: $updatedAt, v: $v)';
+    return 'QuestionModel(id: $id, question: $question, pricePoll: $pricePoll, count: $count, isSubmitted: $isSubmitted, options: $options, createdAt: $createdAt, updatedAt: $updatedAt, expiresAt: $expiresAt, v: $v)';
   }
 
   @override
@@ -256,6 +288,7 @@ class _$QuestionModelImpl implements _QuestionModel {
                 other.question == question) &&
             (identical(other.pricePoll, pricePoll) ||
                 other.pricePoll == pricePoll) &&
+            (identical(other.count, count) || other.count == count) &&
             (identical(other.isSubmitted, isSubmitted) ||
                 other.isSubmitted == isSubmitted) &&
             const DeepCollectionEquality().equals(other._options, _options) &&
@@ -263,6 +296,8 @@ class _$QuestionModelImpl implements _QuestionModel {
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
                 other.updatedAt == updatedAt) &&
+            (identical(other.expiresAt, expiresAt) ||
+                other.expiresAt == expiresAt) &&
             (identical(other.v, v) || other.v == v));
   }
 
@@ -273,10 +308,12 @@ class _$QuestionModelImpl implements _QuestionModel {
       id,
       question,
       pricePoll,
+      count,
       isSubmitted,
       const DeepCollectionEquality().hash(_options),
       createdAt,
       updatedAt,
+      expiresAt,
       v);
 
   /// Create a copy of QuestionModel
@@ -300,10 +337,12 @@ abstract class _QuestionModel implements QuestionModel {
       {@JsonKey(name: "_id") final String? id,
       final String? question,
       final String? pricePoll,
+      final int? count,
       final bool? isSubmitted,
       final List<String>? options,
       final DateTime? createdAt,
       final DateTime? updatedAt,
+      final DateTime? expiresAt,
       @JsonKey(name: "__v") final int? v}) = _$QuestionModelImpl;
 
   factory _QuestionModel.fromJson(Map<String, dynamic> json) =
@@ -317,6 +356,8 @@ abstract class _QuestionModel implements QuestionModel {
   @override
   String? get pricePoll;
   @override
+  int? get count;
+  @override
   bool? get isSubmitted;
   @override
   List<String>? get options;
@@ -324,6 +365,8 @@ abstract class _QuestionModel implements QuestionModel {
   DateTime? get createdAt;
   @override
   DateTime? get updatedAt;
+  @override
+  DateTime? get expiresAt;
   @override
   @JsonKey(name: "__v")
   int? get v;

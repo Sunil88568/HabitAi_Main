@@ -49,6 +49,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
   }
 
+  int calculateDaysUntil(DateTime isoDateString) {
+    try {
+      DateTime inputDate = isoDateString.toUtc();
+      DateTime currentDate = DateTime.now().toUtc();
+      DateTime inputDateOnly = DateTime(inputDate.year, inputDate.month, inputDate.day);
+      DateTime currentDateOnly = DateTime(currentDate.year, currentDate.month, currentDate.day);
+
+      return inputDateOnly.difference(currentDateOnly).inDays;
+    } catch (e) {
+      // Return 0 or handle as needed if parsing fails
+      print('Error parsing date: $e');
+      return 0;
+    }
+  }
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -71,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.primaryColor,
       body: SafeArea(
         child: Column(
-          mainAxisSize: MainAxisSize.max,
+          mainAxisSize : MainAxisSize.max,
           children: [
             Preferences.authToken != null
                 ? Padding(
@@ -224,25 +238,31 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                       ),
                     ),
+                    Obx((){
+                      return Row(
+                          children:[ TextView(
+                            text:
+                            //  "Ends in: 5 days",
+                            (questionCtrl.questionList.isNotEmpty)? "Ends in: ${calculateDaysUntil(questionCtrl.questionList.first.expiresAt!)} days":"Ends in: 0 days",
+                            style: 16.txtMediumWhite,
+                            margin: 20.bottom + 5.top,
+                          ),
+                          ]
+                      );
 
-                    Row(
-                        children:[ TextView(
-                          text:
-                          'Ends in: 5 Days',
-                          style: 16.txtMediumWhite,
-                          margin: 20.bottom + 5.top,
-                        ),
-                        ]
-                    ),
+                    }),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildStatCard(context, 'Total Players\nThis Week', '8,542'),
-                        _buildStatCard(context, 'Current\nPrize Pool', (questionCtrl.questionList.isNotEmpty)?"\$${questionCtrl.questionList.first.pricePoll.toString()}":"\$0.00"),
-                        _buildStatCard(context, 'Winners\nAnnounced In', '5 Days'),
-                      ],
-                    ),
+                    Obx((){
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildStatCard(context, 'Total Players\nThis Week', (questionCtrl.questionList.isNotEmpty)?questionCtrl.questionList.first.count.toString():"0"),
+                          _buildStatCard(context, 'Current\nPrize Pool', (questionCtrl.questionList.isNotEmpty)?"\$${questionCtrl.questionList.first.pricePoll.toString()}":"\$0.00"),
+                          _buildStatCard(context, 'Winners\nAnnounced In',(questionCtrl.questionList.isNotEmpty)?"${calculateDaysUntil(questionCtrl.questionList.first.expiresAt!)} days":"\$0 days"),
+                        ],
+                      );
+                    }),
+
                     30.height,
                     Center(
                         child:

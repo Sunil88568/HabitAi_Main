@@ -104,7 +104,7 @@ class AuthCtrl extends GetxController{
       email: email,
       password: password,
       device_type: deviceType,
-      device_token: Preferences.fcmToken
+      device_token: Preferences.fcmToken ??"",
     );
 
     if (response.isSuccess) {
