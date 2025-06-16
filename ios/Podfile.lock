@@ -76,26 +76,26 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - Stripe (24.11.0):
-    - StripeApplePay (= 24.11.0)
-    - StripeCore (= 24.11.0)
-    - StripePayments (= 24.11.0)
-    - StripePaymentsUI (= 24.11.0)
-    - StripeUICore (= 24.11.0)
-  - StripeApplePay (24.11.0):
-    - StripeCore (= 24.11.0)
-  - StripeCore (24.11.0)
-  - StripePayments (24.11.0):
-    - StripeCore (= 24.11.0)
-    - StripePayments/Stripe3DS2 (= 24.11.0)
-  - StripePayments/Stripe3DS2 (24.11.0):
-    - StripeCore (= 24.11.0)
-  - StripePaymentsUI (24.11.0):
-    - StripeCore (= 24.11.0)
-    - StripePayments (= 24.11.0)
-    - StripeUICore (= 24.11.0)
-  - StripeUICore (24.11.0):
-    - StripeCore (= 24.11.0)
+  - Stripe (24.15.0):
+    - StripeApplePay (= 24.15.0)
+    - StripeCore (= 24.15.0)
+    - StripePayments (= 24.15.0)
+    - StripePaymentsUI (= 24.15.0)
+    - StripeUICore (= 24.15.0)
+  - StripeApplePay (24.15.0):
+    - StripeCore (= 24.15.0)
+  - StripeCore (24.15.0)
+  - StripePayments (24.15.0):
+    - StripeCore (= 24.15.0)
+    - StripePayments/Stripe3DS2 (= 24.15.0)
+  - StripePayments/Stripe3DS2 (24.15.0):
+    - StripeCore (= 24.15.0)
+  - StripePaymentsUI (24.15.0):
+    - StripeCore (= 24.15.0)
+    - StripePayments (= 24.15.0)
+    - StripeUICore (= 24.15.0)
+  - StripeUICore (24.15.0):
+    - StripeCore (= 24.15.0)
   - webview_flutter_wkwebview (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -168,12 +168,12 @@ SPEC CHECKSUMS:
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
-  Stripe: a220ccdb4a5c0d65d56edeb6fd65cd71d09f78b3
-  StripeApplePay: ae19e44ac95dcf1424badd68d3ef33ed9c403d6f
-  StripeCore: a966111af14ffff257fe3fb39a2ae380f8e0d500
-  StripePayments: f0f97463eb26aeddc1d392c1a619094cc173f36f
-  StripePaymentsUI: 2a299b9438df7c1e0ff00147e6f403c8cf94bae9
-  StripeUICore: a0dcd51c079e0db61e13b95142ff88367f63a619
+  Stripe: 6f0047bdd52bbeecc3c87a9c0d429bf5bb2b1b86
+  StripeApplePay: e7a2f5fa07cbdba9c56cb7586cbfd4e7e32ed895
+  StripeCore: 224f995bb108e3be3bdf6cfab918657edf325559
+  StripePayments: 07ad9e3c5f22e0b068874c47c2ec37663f1b7aa5
+  StripePaymentsUI: d0549558424d3884b3fb7b8f3905ea685e750600
+  StripeUICore: dbd893086aa4fe697517624af2f1f0cea3218ac8
   webview_flutter_wkwebview: 1821ceac936eba6f7984d89a9f3bcb4dea99ebb2
 
 PODFILE CHECKSUM: 3d25b5987748c1afdce2cafc2ef2162caee67615
