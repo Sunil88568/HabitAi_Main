@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:question_app/components/styles/textStyles.dart';
 import 'package:question_app/feature/data/models/dataModels/notification_model.dart';
+import 'package:question_app/feature/presentation/screens/homeScreen/result_screen.dart';
 import 'package:question_app/utils/extensions/context_extensions.dart';
 import 'package:question_app/utils/extensions/size.dart';
 import 'package:question_app/utils/extensions/widget.dart';
@@ -308,66 +309,86 @@ class NotificationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: 5.vertical,
-      child: Container(
-        height: 100,
-        width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: Colors.grey.withOpacity(0.5)),
-        ),
-        child: Padding(
-          padding: 17.horizontal + 8.vertical,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(
-                          padding: 8.top,
-                          child: Row(
-                            children: [
-                              Icon(Icons.circle,color: AppColors.green,size: 6,),
-                              10.width,
-                              TextView(
-                                text: notification.title.toString(),
-                                style: 14.txtBoldBlack,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: 8.top,
-                          child: TextView(
-                            text: AuthCtrl.find.timeAgo(notification.createdAt.toString()),
-                            style: 12.txtRegularGrey,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: 8.top,
-                      child: Row(
+      child: GestureDetector(
+        onTap: () {
+          if (notification.title!.contains("Congratulations")) {
+            RegExp regex = RegExp(r'\d+');
+            String? prize = regex.firstMatch(notification.message.toString())?.group(0);
+            context.pushNavigator(ResultScreen(
+              score: prize.toString(),
+              maxScore: prize.toString(),
+              userName: Preferences.profile!.name.toString(),
+            ));
+          }else if (notification.title!.contains("Better Luck")) {
+
+            context.pushNavigator(ResultScreen(
+              score: "0",
+              maxScore: "0",
+              userName: Preferences.profile!.name.toString(),
+            ));
+          }
+        },
+        child: Container(
+          height: 100,
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: Colors.grey.withOpacity(0.5)),
+          ),
+          child: Padding(
+            padding: 17.horizontal + 8.vertical,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Flexible(
+                          Padding(
+                            padding: 8.top,
+                            child: Row(
+                              children: [
+                                Icon(Icons.circle, color: AppColors.green, size: 6),
+                                10.width,
+                                TextView(
+                                  text: notification.title.toString(),
+                                  style: 14.txtBoldBlack,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: 8.top,
                             child: TextView(
-                              text: notification.message.toString(),
+                              text: AuthCtrl.find.timeAgo(notification.createdAt.toString()),
                               style: 12.txtRegularGrey,
-                              maxlines: 2,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                      Padding(
+                        padding: 8.top,
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: TextView(
+                                text: notification.message.toString(),
+                                style: 12.txtRegularGrey,
+                                maxlines: 2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

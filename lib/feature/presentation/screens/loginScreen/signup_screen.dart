@@ -21,7 +21,7 @@ import '../../../../components/coreComponents/common_password_input_field.dart';
 import '../../../../components/styles/appColors.dart';
 import '../../../../components/styles/appImages.dart';
 import '../../../../components/styles/app_strings.dart';
-import '../../../../services/firebase/firebase_services.dart';
+import '../../../../services/firebase/firebaseServices.dart';
 import '../../../../utils/appUtils.dart';
 
 import 'package:flutter/gestures.dart';

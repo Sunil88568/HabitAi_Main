@@ -25,6 +25,7 @@ class AppImages{
   static const String resultbackImg = '${_path}resultbackImg.png';
   static const String settingiconImg = '${_path}settingiconImg.png';
   static const String logoutImg = '${_path}logoutImg.png';
+  static const String deleteImg = '${_path}bin.png';
   static const String persionalInfo = '${_path}persionalInfo.png';
   static const String privacyIconImage = '${_path}privacyIconImage.png';
   static const String contactUs = '${_path}contactUs.png';

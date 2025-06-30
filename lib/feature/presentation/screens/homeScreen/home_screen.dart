@@ -160,7 +160,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       buttonColor: AppColors.white,
                       onTap: () {
 
-                         showAppDialog(
+                        context.pushAndClearNavigator(LoginScreen());
+
+
+                        /*  showAppDialog(
                         context: context,
                         title: 'Sign In / Register',
                         message: 'Please Sign In / Register For Continue',
@@ -173,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                            context.pushAndClearNavigator(SignupScreen());
                          }
-                        );
+                        );*/
 
                       },
 
@@ -199,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               TextView(
                                   margin: 20.bottom,
-                                  text: 'This week quiz is closing down on Friday take part before it’s too late to win exciting prizes',
+                                  text: 'This week quiz is closing down on Sunday take part before it’s too late to win exciting prizes',
                                   style: 14.txtMediumWhite
                               ),
                             ],
@@ -222,14 +225,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         labelStyle: 18.txtBoldBlack,
                         buttonColor: AppColors.quzeYellow,
                         alignment: Alignment.center,
-                        onTap: (){
+                        onTap: () async {
                           if(questionCtrl.questionList.isNotEmpty){
 
                             if(questionCtrl.questionList.first.isSubmitted==false) {
-                              context.pushNavigator(QuizScreen(
-                                  questions: questionCtrl.questionList));
+                              var value = await context.pushNavigator(
+                                  QuizScreen(
+                                      questions: questionCtrl.questionList));
+                              if(value=="success"){
+                                profileCtrl.fetchUserProfile();
+                                questionCtrl.getQuestions();
+                              }
+
+
                             }else{
-                              AppUtils.toast("You already submitted the response");
+                              AppUtils.toast("Thanks for participating! You’ve already submitted your answer. Stay tuned for the next quiz!");
                             }
                           }else{
                             AppUtils.toastError("No Quiz Found");
@@ -243,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           children:[ TextView(
                             text:
                             //  "Ends in: 5 days",
-                            (questionCtrl.questionList.isNotEmpty)? "Ends in: ${calculateDaysUntil(questionCtrl.questionList.first.expiresAt!)} days":"Ends in: 0 days",
+                            (questionCtrl.questionList.isNotEmpty)? "Ends in: ${calculateDaysUntil(questionCtrl.questionList.first.expiresAt??DateTime.now())} days":"Ends in: 0 days",
                             style: 16.txtMediumWhite,
                             margin: 20.bottom + 5.top,
                           ),
@@ -258,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           _buildStatCard(context, 'Total Players\nThis Week', (questionCtrl.questionList.isNotEmpty)?questionCtrl.questionList.first.count.toString():"0"),
                           _buildStatCard(context, 'Current\nPrize Pool', (questionCtrl.questionList.isNotEmpty)?"\$${questionCtrl.questionList.first.pricePoll.toString()}":"\$0.00"),
-                          _buildStatCard(context, 'Winners\nAnnounced In',(questionCtrl.questionList.isNotEmpty)?"${calculateDaysUntil(questionCtrl.questionList.first.expiresAt!)} days":"\$0 days"),
+                          _buildStatCard(context, 'Winners\nAnnounced In',(questionCtrl.questionList.isNotEmpty)?"${calculateDaysUntil(questionCtrl.questionList.first.expiresAt??DateTime.now())} days":"\$0 days"),
                         ],
                       );
                     }),

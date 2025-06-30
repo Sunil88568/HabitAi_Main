@@ -26,6 +26,7 @@ import '../../../../components/coreComponents/editProfileImage.dart';
 import '../../../../components/styles/appColors.dart';
 import '../../../../components/styles/appImages.dart';
 import '../../../../components/styles/app_strings.dart';
+import '../../../../services/firebase/firebaseServices.dart';
 import '../../../../services/storage/preferences.dart';
 import '../../../../utils/appUtils.dart';
 
@@ -265,7 +266,7 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
           dob: dobController.text,
           image: uploadedImageUrl,
           device_type: deviceType,
-          device_token: Preferences.fcmToken ??"",
+          device_token: FirebaseServices.fcmToken ??"",
         )
         .applyLoader
         .then((value) {

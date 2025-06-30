@@ -99,7 +99,7 @@ abstract class AuthRepository {
 });
 
 
-  Future<Map<String,dynamic>> checkout(String id);
+  Future<Map<String,dynamic>> checkout(String id,String country);
   Future<Map<String,dynamic>> getNotifications(String id);
 
 }

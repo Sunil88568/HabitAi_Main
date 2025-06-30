@@ -9,7 +9,7 @@
 
     <application
 
-        android:label="Question App"
+        android:label="DHAN-IQ"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 

@@ -15,7 +15,7 @@ import '../../../../components/coreComponents/common_password_input_field.dart';
 import '../../../../components/styles/appColors.dart';
 import '../../../../components/styles/appImages.dart';
 import '../../../../components/styles/app_strings.dart';
-import '../../../../services/firebase/firebase_services.dart';
+import '../../../../services/firebase/firebaseServices.dart';
 import '../../controller/auth_ctrl.dart';
 import '../homeScreen/home_screen.dart';
 import 'forgotPass.dart';

@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:question_app/feature/data/models/dataModels/checkout_response.dart';
+import 'package:question_app/services/firebase/firebaseServices.dart';
 
 import '../../../services/networking/urls.dart';
 import '../../../services/storage/preferences.dart';
@@ -104,7 +105,7 @@ class AuthCtrl extends GetxController{
       email: email,
       password: password,
       device_type: deviceType,
-      device_token: Preferences.fcmToken ??"",
+      device_token: FirebaseServices.fcmToken ??"",
     );
 
     if (response.isSuccess) {
@@ -191,8 +192,8 @@ class AuthCtrl extends GetxController{
 
 
 
-  Future<CheckoutResponse> checkout(String id) async {
-    final response = await _repo.checkout(id);
+  Future<CheckoutResponse> checkout(String id,String country) async {
+    final response = await _repo.checkout(id,country);
 
     checkoutResponse = CheckoutResponse.fromJson(response);
     if (checkoutResponse.statusCode == 200) {

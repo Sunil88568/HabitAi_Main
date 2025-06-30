@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -48,6 +50,39 @@ class _QuizScreenState extends State<QuizScreen> {
   String get questionId =>
       widget.questions.isNotEmpty ? widget.questions[0].id ?? "" : "";
 
+
+
+
+  Future<String> getDeviceCountryParam() async {
+    try {
+      // Try to get current system locale
+      String? countryCode = ui.PlatformDispatcher.instance.locale.countryCode;
+
+      if (countryCode != null && countryCode.isNotEmpty) {
+        return _mapCountryCodeToParam(countryCode.toUpperCase());
+      }
+    } catch (_) {}
+
+    // Fallback
+    return "uk";
+  }
+
+  String _mapCountryCodeToParam(String isoCode) {
+    switch (isoCode) {
+      case "US":
+        return "uk";
+      case "GB": // UK
+        return "uk";
+      case "IN":
+        return "india";
+      default:
+        return "uk";
+    }
+  }
+
+
+
+
   Future<void> _submitForm() async {
     if (selectedOption == null) {
       AppUtils.log("No option selected");
@@ -68,7 +103,7 @@ class _QuizScreenState extends State<QuizScreen> {
       }
 
       try {
-        var data = await AuthCtrl.find.checkout(guestUserId);
+        var data = await AuthCtrl.find.checkout(guestUserId,await getDeviceCountryParam());
 
         if (data.statusCode == 200) {
           var value = await context.pushNavigator(
@@ -92,7 +127,7 @@ class _QuizScreenState extends State<QuizScreen> {
               AppUtils.toast("Answer Submit Successfully");
               Preferences.guestUserId="";
 
-              context.pop();
+              Navigator.pop(context, "success");
             }
           }
 
@@ -115,8 +150,7 @@ class _QuizScreenState extends State<QuizScreen> {
     } else {
       try {
         var data = await AuthCtrl.find.checkout(
-          Preferences.profile!.id.toString(),
-        );
+          Preferences.profile!.id.toString(),await getDeviceCountryParam());
         if (data.statusCode == 200) {
           var value = await context.pushNavigator(
             WebViewScreen(url: data.data!.url.toString()),
@@ -129,8 +163,8 @@ class _QuizScreenState extends State<QuizScreen> {
                     .applyLoader;
             if (response.isSuccess) {
               AppUtils.toast("Answer Submit Successfully");
+              Navigator.pop(context, "success");
 
-              context.pop();
             }
           }
         }

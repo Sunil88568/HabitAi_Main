@@ -14,8 +14,8 @@ import '../../../../components/styles/appColors.dart';
 import '../../../../components/styles/app_strings.dart';
 
 class ResultScreen extends StatelessWidget {
-  final int score;
-  final int maxScore;
+  final String score;
+  final String maxScore;
   final String userName;
 
   const ResultScreen({
@@ -47,74 +47,76 @@ class ResultScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              40.height,
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  SizedBox(
-                    width: 493,
-                    height: 353,
-                    child: ImageView(url: AppImages.resultbackImg, fit: BoxFit.contain,)
-                  ),
-                  Container(
-                    width: 187,
-                    height: 187,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                      border: Border.all(
-                        color: AppColors.scorecolor,
-                        width: 6,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              children: [
+                40.height,
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: 493,
+                      height: 353,
+                      child: ImageView(
+                        url: AppImages.resultbackImg,
+                        fit: BoxFit.contain,
                       ),
                     ),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                           TextView(
-                            text:
-                            "Your Score",
-                            style: 24.txtregularBtncolor,
-                          ),
-                          10.height,
-                          TextView(
-                            text:
-                            "$score/$maxScore",
-                            style: 34.txtRegularbtncolor
-                          ),
-                        ],
+                    Container(
+                      width: 187,
+                      height: 187,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                        border: Border.all(
+                          color: AppColors.scorecolor,
+                          width: 6,
+                        ),
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextView(
+                              text: "Winning Amount",
+                              style: 20.txtregularBtncolor,
+                            ),
+                            10.height,
+                            TextView(
+                              text: score,
+                              style: 34.txtRegularbtncolor,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-               TextView(
-                 margin: 40.top+  12.bottom,
-                text:
-                "Congratulation",
-                style: 30.txtBoldWhite
-              ),
-              TextView(
-                text:
-                "Great job, $userName! You Did It",
-                style: 18.txtMediumWhite
-              ),
-              AppButton(
-                label: AppStrings.backtoHome,
-                labelStyle:18.txtBoldBlack ,
-                buttonColor: AppColors.white,
-                radius: 10.sdp,
-                margin: 30.bottom+ 70.top,
-                onTap: (){
-                  context.pushAndClearNavigator(HomeScreen());
-                },
-              )
-            ],
+                  ],
+                ),
+                TextView(
+                  margin: 40.top + 2.bottom,
+                  text:  score=="0"?"Better Luck Next Time!":"Congratulations",
+                  style: 30.txtBoldWhite,
+                ),
+                TextView(
+                  text: score=="0"?"You didn't win this time in the quiz, but don't give up!":"Great job, $userName! You won a prize of $score in the quiz",
+                  style: 18.txtMediumWhite,
+                  textAlign: TextAlign.center,
+                ),
+                AppButton(
+                  label: AppStrings.backtoHome,
+                  labelStyle: 18.txtBoldBlack,
+                  buttonColor: AppColors.white,
+                  radius: 10.sdp,
+                  margin: 30.bottom + 70.top,
+                  onTap: () {
+                    context.pushAndClearNavigator(HomeScreen());
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -105,6 +105,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 _commonWidget(
                   onTap: () {
+                    showConfirmationDialog2(context);
+                  },
+                  image: AppImages.deleteImg,
+                  text: "Delete Account",
+                ),
+                _commonWidget(
+                  onTap: () {
                     showConfirmationDialog(context);
                   },
                   image: AppImages.logoutImg,
@@ -303,6 +310,107 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: AppButton(
                             radius: 25.sdp,
                             label: "Log Out",
+                            labelStyle: 14.txtBoldWhite,
+                            buttonColor: AppColors.btnColor,
+                            onTap: () {
+                              onLogout(context);
+                            },
+                            isFilledButton: false,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: height * 0.01),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+  Future<void> showConfirmationDialog2(BuildContext context) async {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final height = size.height;
+
+    bool? confirmDeletion = await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Stack(
+          children: [
+            BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(
+                color: Colors.black.withOpacity(0.3),
+              ),
+            ),
+            AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              backgroundColor: Colors.white,
+              insetPadding: EdgeInsets.symmetric(horizontal: width * 0.1),
+              contentPadding: EdgeInsets.zero,
+              titlePadding: EdgeInsets.zero,
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(height: height * 0.02),
+                    TextView(
+                      text: "Delete Account",
+                      style: 24.txtBoldBlack,
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: height * 0.02),
+                    Divider(
+                      color: AppColors.Grey,
+                      thickness: 1,
+                      height: 1,
+                    ),
+                    SizedBox(height: height * 0.02),
+                    TextView(
+                      text: "Are you sure you want to delete account?",
+                      textAlign: TextAlign.center,
+                      style: 16.txtRegularBlack,
+                      margin: EdgeInsets.only(top: height * 0.02),
+                    ),
+                  ],
+                ),
+              ),
+              actionsAlignment: MainAxisAlignment.center,
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        child: SizedBox(
+                          height: height * 0.07,
+                          child: AppButton(
+                            radius: 25.sdp,
+                            label: "Cancel",
+                            labelStyle: 14.txtRegularBlack,
+                            buttonColor: AppColors.white,
+                            buttonBorderColor: AppColors.grey,
+                            onTap: () {
+                              Navigator.of(context).pop(false);
+                            },
+                            isFilledButton: false,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: width * 0.04),
+                      Flexible(
+                        child: SizedBox(
+                          height: height * 0.07,
+                          child: AppButton(
+                            radius: 25.sdp,
+                            label: "Delete",
                             labelStyle: 14.txtBoldWhite,
                             buttonColor: AppColors.btnColor,
                             onTap: () {

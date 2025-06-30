@@ -667,12 +667,13 @@ class IAuthRepository implements AuthRepository {
 
 
   @override
-  Future<Map<String,dynamic>> checkout(String id) async {
+  Future<Map<String,dynamic>> checkout(String id,String country) async {
     final result = await _apiMethod.post(
       url: Urls.checkout,
       headers: {},
       body: {
-        "userId" : id
+        "userId" : id,
+        "country":country
       },
     );
 

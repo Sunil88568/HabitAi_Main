@@ -67,7 +67,7 @@ class AppStrings {
   static const String markAll ='Mark all as read';
   static const String persionalInfo ='Personal Information';
   static const String Notifications ='Notifications';
-  static const String passChangeSucceess ='Your password was changed\nsuccessfully.';
+  static const String passChangeSucceess ='Password reset link has been sent to your email. Please check your inbox to proceed.';
   static const String enterYourRegisteredEmail ='Enter your registered email for the verification process.We will send a reset password link to your email. ';
   static const String passwordMustNotContainSpace ='Password must not contain spaces';
 

@@ -73,6 +73,7 @@ import 'package:flutter/material.dart';
 import 'package:question_app/components/styles/textStyles.dart';
 import 'package:question_app/utils/extensions/context_extensions.dart';
 import 'package:question_app/utils/extensions/size.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import '../../../../../components/coreComponents/TextView.dart';
 import '../../../../components/styles/appColors.dart';
 
@@ -85,15 +86,32 @@ class PrivacyPolicy extends StatefulWidget {
 }
 
 class _PrivacyPolicyState extends State<PrivacyPolicy> {
-  // late final WebViewController _controller;
+   late final WebViewController controller;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _controller = WebViewController()
-  //     ..setJavaScriptMode(JavaScriptMode.unrestricted)
-  //     ..loadRequest(Uri.parse("https://sepprivacy.vercel.app/"));
-  // }
+   @override
+   void initState() {
+     openWebView();
+     super.initState();
+   }
+
+   void openWebView() {
+     controller = WebViewController()
+       ..setNavigationDelegate(
+         NavigationDelegate(
+           onPageStarted: (String url) {
+             print("Page started loading: $url");
+           },
+           onPageFinished: (String url) {
+             print("Page finished loading: $url");
+           },
+
+         ),
+       )
+       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+       ..loadRequest(Uri.parse("https://dhanqprivacy.vercel.app/")); // Load dynamic URL
+   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -119,11 +137,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
         ),
         body: Padding(
           padding: 15.vertical + 15.horizontal,
-          child: TextView(text: '''Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-      ''',
-            textAlign: TextAlign.start,
-            style: 15.txtMediumWhite,
-          ),
+          child: WebViewWidget(controller: controller)
         )
 
       // WebViewWidget(controller: _controller),

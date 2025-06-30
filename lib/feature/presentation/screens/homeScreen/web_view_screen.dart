@@ -29,13 +29,18 @@ class _WebViewScreenState extends State<WebViewScreen> {
             print("Page finished loading: $url");
           },
           onNavigationRequest: (NavigationRequest request) {
+
+            print("Page finished loading: ${request.url}");
             if (request.url.contains("success")) {
               Navigator.pop(context, "success");
               return NavigationDecision.prevent;
-            }else{
+            }else if(request.url.contains("cancel")){
               Navigator.pop(context, "fail");
               return NavigationDecision.navigate;
+            }else{
+              return NavigationDecision.navigate;
             }
+
 
           },
         ),

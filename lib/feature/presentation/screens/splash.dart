@@ -4,10 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:question_app/components/styles/appColors.dart';
-import 'package:question_app/services/firebase/firebase_services.dart';
 import 'package:question_app/utils/extensions/context_extensions.dart';
 import '../../../components/coreComponents/ImageView.dart';
 import '../../../components/styles/appImages.dart';
+import '../../../services/firebase/firebaseServices.dart';
 import '../../../services/storage/preferences.dart';
 import '../controller/profile_user_controller.dart';
 import 'homeScreen/home_screen.dart';
@@ -24,7 +24,13 @@ class _SplashState extends State<Splash> {
   @override
   void initState() {
     super.initState();
-    FirebaseServices.init(context).then((value){
+
+
+    onCreate();
+  }
+
+  void onCreate() async{
+    await FirebaseServices.init(context).then((value){
       FirebaseServices.listener();
     });
     _checkLoginStatus();
