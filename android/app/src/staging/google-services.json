@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "629170845083",
+    "project_id": "habitai-staging",
+    "storage_bucket": "habitai-staging.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:629170845083:android:82874e1c9e80ada9701d3e",
+        "android_client_info": {
+          "package_name": "com.jofu.habitai.staging"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "629170845083-04dhi4ijnaif5og40227qf2o0seglrpk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCA0fGkC_dWEQ61TtHycBfb93zGpOzGd0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "629170845083-04dhi4ijnaif5og40227qf2o0seglrpk.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "629170845083-2tpq9cgvu1t20d66ptflq1rcgh5uqj6v.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.jofu.habitai.staging"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
