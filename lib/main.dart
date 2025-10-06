@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'firebase_options_dev.dart';
@@ -9,13 +11,13 @@ import 'firebase_options_prod.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 1️⃣ Determine flavor: dev, staging, prod
+  // 1️⃣ Determine flavor
   const env = String.fromEnvironment('ENV', defaultValue: 'dev');
 
-  // 2️⃣ Load corresponding .env file
+  // 2️⃣ Load .env file for current flavor
   await dotenv.load(fileName: ".env.$env");
 
-  // 3️⃣ Initialize Firebase based on flavor
+  // 3️⃣ Choose Firebase config
   FirebaseOptions firebaseOptions;
   switch (env) {
     case 'staging':
@@ -28,7 +30,14 @@ Future<void> main() async {
       firebaseOptions = DefaultFirebaseOptionsDev.currentPlatform;
   }
 
+  // 4️⃣ Initialize Firebase
   await Firebase.initializeApp(options: firebaseOptions);
+
+  // 5️⃣ Initialize Crashlytics & handle uncaught errors
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+  // 6️⃣ Log app start to Analytics
+  await FirebaseAnalytics.instance.logEvent(name: 'app_start', parameters: {'env': env});
 
   runApp(const HabitAIApp());
 }
@@ -42,6 +51,9 @@ class HabitAIApp extends StatelessWidget {
     return MaterialApp(
       title: 'HabitAI',
       debugShowCheckedModeBanner: false,
+      navigatorObservers: [
+        FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
+      ],
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -62,11 +74,13 @@ class HomeScreen extends StatelessWidget {
         title: const Text('HabitAI Home'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: const Center(
-        child: Text(
-          'Welcome to HabitAI!\nYour app is ready for M1 milestone.',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            // Crash test button
+            FirebaseCrashlytics.instance.crash();
+          },
+          child: const Text('Test Crashlytics (crash app)'),
         ),
       ),
     );
