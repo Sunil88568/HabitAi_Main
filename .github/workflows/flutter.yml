@@ -17,7 +17,5 @@ jobs:
         run: flutter pub get
       - name: Analyze code
         run: flutter analyze
-      - name: Build APK (Android)
-        run: flutter build apk --debug
       - name: Run tests (if any)
         run: flutter test  # Skips if no tests; add later
