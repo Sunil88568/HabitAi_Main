@@ -7,11 +7,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: subosito/flutter-action@v2
+
+      # Use v3 for better version handling
+      - uses: subosito/flutter-action@v3
         with:
-          flutter-version: 'latest' # updated for Dart 3.6+
+          flutter-version: '3.35.5'  # exact Flutter version
           channel: 'stable'
+
       - run: flutter pub get
+
       - run: flutter format --set-exit-if-changed .
+
       - run: flutter analyze
+
       - run: flutter build apk --debug
