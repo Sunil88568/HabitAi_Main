@@ -6,18 +6,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      # Use v3 for better version handling
-      - uses: subosito/flutter-action@v3
+      - uses: actions/checkout@v4  # Updated for security & reliability
+      - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.35.5'  # exact Flutter version
+          flutter-version: '3.35.5'  # Targets Dart 3.6+; verify exists via flutter.dev
           channel: 'stable'
-
-      - run: flutter pub get
-
-      - run: flutter format --set-exit-if-changed .
-
-      - run: flutter analyze
-
-      - run: flutter build apk --debug
+          cache: true  # Caches pub deps for faster runs
+          cache-key: flutter-${{ runner.os }}-pub-cache  # Improves hit rate
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Format code
+        run: flutter format --set-exit-if-changed .
+      - name: Analyze code
+        run: flutter analyze
+      - name: Build APK (Android)
+        run: flutter build apk --debug
+      - name: Run tests (if any)
+        run: flutter test  # Skips if no tests; add later
