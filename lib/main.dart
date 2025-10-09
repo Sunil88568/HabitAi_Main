@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -15,7 +17,7 @@ Future<void> main() async {
   const env = String.fromEnvironment('ENV', defaultValue: 'dev');
 
   // 2️⃣ Load .env file for current flavor
-  await dotenv.load(fileName: ".env.$env");
+  await dotenv.load(fileName: "assets/.env.$env");
 
   // 3️⃣ Choose Firebase config
   FirebaseOptions firebaseOptions;
@@ -32,9 +34,20 @@ Future<void> main() async {
 
   // 4️⃣ Initialize Firebase
   await Firebase.initializeApp(options: firebaseOptions);
-
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+  print('🔹 Running flavor: $env');
+  print('🔹 API URL: ${dotenv.env['API_BASE_URL']}');
   // 5️⃣ Initialize Crashlytics & handle uncaught errors
-  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    FlutterError.dumpErrorToConsole(errorDetails);
+  };
+
+  // Async/native errors
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
 
   // 6️⃣ Log app start to Analytics
   await FirebaseAnalytics.instance.logEvent(name: 'app_start', parameters: {'env': env});
