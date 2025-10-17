@@ -9,6 +9,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options_dev.dart';
 import 'firebase_options_staging.dart';
 import 'firebase_options_prod.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:habitai/Habits/habit_tracker.dart';
+import 'package:habitai/Habits/habit_tracker_binding.dart'; // Added to fix error
+import 'package:habitai/welcome.dart';
+import "./theme.dart";
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,17 +68,19 @@ class HabitAIApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'HabitAI',
+    return GetMaterialApp(
+      title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      navigatorObservers: [
-        FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
+      theme: AppTheme.darkTheme,
+      home:  WelcomeScreen(),
+      initialBinding: HabitTrackerBinding(), // Now recognized with import
+      getPages: [
+        GetPage(
+          name: '/habit_tracker',
+          page: () =>  HabitTrackerScreen(),
+          binding: HabitTrackerBinding(),
+        ),
       ],
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const HomeScreen(),
     );
   }
 }
