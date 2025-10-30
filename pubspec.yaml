@@ -40,7 +40,10 @@ dependencies:
   get: ^4.6.6
   intl: ^0.18.1
   table_calendar: ^3.0.9
-  
+  google_sign_in: ^6.2.1
+  sign_in_with_apple: ^6.1.0
+  flutter_signin_button: ^2.0.0
+
 dev_dependencies:
   flutter_flavorizr: ^2.3.0
   flutter_test:

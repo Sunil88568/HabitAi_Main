@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../services/auth_service.dart';
 
 class UserSettings {
   RxBool dailyReminders = true.obs;
@@ -8,6 +9,18 @@ class UserSettings {
 
 class ProfileScreenController extends GetxController {
   UserSettings settings = UserSettings();
+  final RxBool isLoggedIn = false.obs;
+  final RxBool isAnonymous = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    final user = AuthService().currentUser;
+    if (user != null) {
+      isLoggedIn.value = true;
+      isAnonymous.value = user.isAnonymous; // true if anonymous
+    }
+  }
 
   void toggleDailyReminders() {
     settings.dailyReminders.value = !settings.dailyReminders.value;
@@ -15,6 +28,17 @@ class ProfileScreenController extends GetxController {
 
   void toggleDarkMode() {
     settings.darkMode.value = !settings.darkMode.value;
+  }
+
+  void login() {
+    Get.toNamed('/login');
+  }
+
+  void logout() async {
+    await AuthService().signOut();
+    isLoggedIn.value = false;
+    isAnonymous.value = false;
+    Get.offAllNamed('/login');
   }
 }
 
@@ -30,98 +54,159 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF1E1E2A),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          child: Column(
-            children: [
-              // Back button
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton(
-                  onPressed: onBack ?? () => Get.back(),
-                  child: const Text(
-                    "← Back",
-                    style: TextStyle(color: Colors.grey, fontSize: 14),
-                  ),
+        child: Obx(() {
+          if (!controller.isLoggedIn.value) {
+            // Not logged in
+            return Center(
+              child: ElevatedButton(
+                onPressed: controller.login,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF3B82F6),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 32, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text(
+                  'Login',
+                  style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
-              const SizedBox(height: 20),
-
-              // Profile Header
-              Column(
+            );
+          } else if (controller.isAnonymous.value) {
+            // Anonymous user
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF8B5CF6), Color(0xFF3B82F6)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                  const Text(
+                    "You are browsing anonymously",
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: controller.login,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF3B82F6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text(
+                      "Complete Login",
+                      style: TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          // Fully logged in user
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+            child: Column(
+              children: [
+                // Back button
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: onBack ?? () => Get.back(),
+                    child: const Text(
+                      "← Back",
+                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Profile Header
+                Column(
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF8B5CF6), Color(0xFF3B82F6)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "👤",
+                          style: TextStyle(fontSize: 36),
+                        ),
                       ),
                     ),
-                    child: const Center(
-                      child: Text(
-                        "👤",
-                        style: TextStyle(fontSize: 36),
+                    const SizedBox(height: 12),
+                    const Text(
+                      "John Doe",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    "John Doe",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+                    const SizedBox(height: 4),
+                    const Text(
+                      "john.doe@email.com",
+                      style: TextStyle(color: Colors.grey, fontSize: 14),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    "john.doe@email.com",
-                    style: TextStyle(color: Colors.grey, fontSize: 14),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
+                  ],
+                ),
+                const SizedBox(height: 32),
 
-              // Preferences Section
-              _buildSection(
-                title: "Preferences",
-                children: [
-                  _buildToggle(
-                    label: "Daily Reminders",
-                    value: controller.settings.dailyReminders,
-                    onChanged: controller.toggleDailyReminders,
-                  ),
-                  _buildToggle(
-                    label: "Dark Mode",
-                    value: controller.settings.darkMode,
-                    onChanged: controller.toggleDarkMode,
-                  ),
-                ],
-              ),
+                // Preferences Section
+                _buildSection(
+                  title: "Preferences",
+                  children: [
+                    _buildToggle(
+                      label: "Daily Reminders",
+                      value: controller.settings.dailyReminders,
+                      onChanged: controller.toggleDailyReminders,
+                    ),
+                    _buildToggle(
+                      label: "Dark Mode",
+                      value: controller.settings.darkMode,
+                      onChanged: controller.toggleDarkMode,
+                    ),
+                  ],
+                ),
 
-              // Account Section
-              _buildSection(
-                title: "Account",
-                children: [
-                  _buildActionButton("Export Data", onTap: () {}),
-                  _buildActionButton("Premium Features", onTap: () {}),
-                ],
-              ),
+                // Account Section
+                _buildSection(
+                  title: "Account",
+                  children: [
+                    _buildActionButton("Export Data", onTap: () {}),
+                    _buildActionButton("Premium Features", onTap: () {}),
+                  ],
+                ),
 
-              // Support Section
-              _buildSection(
-                title: "Support",
-                children: [
-                  _buildActionButton("Help & FAQ", onTap: () {}),
-                ],
-              ),
-            ],
-          ),
-        ),
+                // Support Section
+                _buildSection(
+                  title: "Support",
+                  children: [
+                    _buildActionButton("Help & FAQ", onTap: () {}),
+                  ],
+                ),
+
+                _buildSection(
+                  title: "Logout",
+                  children: [
+                    _buildActionButton(
+                      "Logout",
+                      onTap: controller.logout,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }

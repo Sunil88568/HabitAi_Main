@@ -5,6 +5,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:habitai/screens/auth/login_screen.dart';
+import 'package:habitai/services/auth_service.dart';
+import 'package:habitai/services/firestore_service.dart';
 
 import 'firebase_options_dev.dart';
 import 'firebase_options_staging.dart';
@@ -59,31 +62,59 @@ Future<void> main() async {
   // 6️⃣ Log app start to Analytics
   await FirebaseAnalytics.instance.logEvent(name: 'app_start', parameters: {'env': env});
 
-  runApp(const HabitAIApp());
+  runApp(HabitAIApp());
 }
 
 /// Root App Widget
 class HabitAIApp extends StatelessWidget {
-  const HabitAIApp({super.key});
+  final AuthService _auth = AuthService();
+
+  final FirestoreService _firestore = FirestoreService();
+
+  HabitAIApp({super.key});
+
+  Future<Widget> _getInitialScreen() async {
+    final user = _auth.currentUser;
+    if (user == null) return const LoginScreen();
+
+    // Check if onboarding is completed
+    final completed = await _firestore.hasCompletedOnboarding();
+    if (completed) {
+      return HabitTrackerScreen(); // or your main app screen
+    } else {
+      return const WelcomeScreen();
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
-      home:  WelcomeScreen(),
-      initialBinding: HabitTrackerBinding(), // Now recognized with import
-      getPages: [
-        GetPage(
-          name: '/habit_tracker',
-          page: () =>  HabitTrackerScreen(),
-          binding: HabitTrackerBinding(),
-        ),
-      ],
+    return StreamBuilder(
+      stream: _auth.authStateChanges,
+      builder: (context, snapshot) {
+        final user = snapshot.data;
+        return GetMaterialApp(
+          title: 'HabitAI',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.darkTheme,
+          home: user == null ? const LoginScreen() : const WelcomeScreen(),
+          getPages: [
+            GetPage(name: '/habit_tracker', page: () => HabitTrackerScreen(), binding: HabitTrackerBinding()),
+            GetPage(
+              name: '/welcome',
+              page: () => WelcomeScreen(),
+            ),
+            GetPage(
+              name: '/login',
+              page: () => LoginScreen(),
+            ),
+          ],
+        );
+      },
     );
   }
 }
+
 
 /// Placeholder Home Screen
 class HomeScreen extends StatelessWidget {

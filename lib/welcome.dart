@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../services/firestore_service.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -10,7 +11,9 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
   final TextEditingController _customHabitController = TextEditingController();
+  final FirestoreService _firestore = FirestoreService();
   Set<String> selectedHabits = {};
+  bool _loading = false;
 
   final List<Map<String, dynamic>> predefinedHabits = [
     {
@@ -47,6 +50,33 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     super.dispose();
   }
 
+  Future<void> _saveAndNavigate() async {
+    List<String> chosenHabits = [];
+
+    if (selectedHabits.isNotEmpty) {
+      chosenHabits = selectedHabits.toList();
+    } else if (_customHabitController.text.isNotEmpty) {
+      chosenHabits = [_customHabitController.text.trim()];
+    }
+
+    if (chosenHabits.isEmpty) {
+      Get.snackbar("Select Habit", "Please select or enter at least one habit",
+          backgroundColor: Colors.red, colorText: Colors.white);
+      return;
+    }
+
+    setState(() => _loading = true);
+    try {
+      await _firestore.saveUserHabits(chosenHabits);
+      Get.offAllNamed('/habit_tracker', arguments: chosenHabits);
+    } catch (e) {
+      Get.snackbar("Error", "Failed to save habits: $e",
+          backgroundColor: Colors.red, colorText: Colors.white);
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,9 +90,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 top: 20,
               ),
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: Column(
                   children: [
                     Container(
@@ -78,20 +106,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           const Text(
                             "Let's create your",
                             style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              height: 1.2,
-                            ),
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                height: 1.2),
                           ),
                           const Text(
                             "first habit!",
                             style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              height: 1.2,
-                            ),
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                height: 1.2),
                           ),
                           const SizedBox(height: 10),
                           const Text(
@@ -107,7 +133,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             shrinkWrap: true,
                             padding: EdgeInsets.zero,
                             physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
                               crossAxisSpacing: 16,
                               mainAxisSpacing: 16,
@@ -116,8 +143,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             itemCount: predefinedHabits.length,
                             itemBuilder: (context, index) {
                               final habit = predefinedHabits[index];
-                              final isSelected = selectedHabits.contains(habit['title']);
-
+                              final isSelected =
+                              selectedHabits.contains(habit['title']);
                               return GestureDetector(
                                 onTap: () {
                                   setState(() {
@@ -133,9 +160,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                 },
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color: isSelected ? habit['color'] : const Color(0xFF677FEB),
+                                    color: isSelected
+                                        ? habit['color']
+                                        : const Color(0xFF677FEB),
                                     borderRadius: BorderRadius.circular(16),
-                                    border: isSelected ? Border.all(color: habit['color'], width: 2) : null,
+                                    border: isSelected
+                                        ? Border.all(
+                                        color: habit['color'], width: 2)
+                                        : null,
                                   ),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -150,11 +182,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                         habit['title'],
                                         textAlign: TextAlign.center,
                                         style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          height: 1.2,
-                                        ),
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            height: 1.2),
                                       ),
                                     ],
                                   ),
@@ -216,7 +247,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         width: double.infinity,
                         height: 60,
                         child: ElevatedButton(
-                          onPressed: _navigateToHabitTracker,
+                          onPressed: _loading ? null : _saveAndNavigate,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             elevation: 0,
@@ -225,9 +256,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               borderRadius: BorderRadius.circular(16),
                             ),
                           ).copyWith(
-                            backgroundColor: MaterialStateProperty.resolveWith((states) => null),
+                            backgroundColor: MaterialStateProperty.resolveWith(
+                                    (states) => null),
                           ),
-                          child: Ink(
+                          child: _loading
+                              ? const CircularProgressIndicator(
+                              color: Colors.white)
+                              : Ink(
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
                                 colors: [Color(0xFF6875DE), Color(0xFF7353AE)],
@@ -239,7 +274,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             child: Container(
                               alignment: Alignment.center,
                               child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisAlignment:
+                                MainAxisAlignment.center,
                                 children: [
                                   Text(
                                     'Start My Journey',
@@ -265,7 +301,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     const SizedBox(height: 10),
                     Center(
                       child: TextButton(
-                        onPressed: _navigateToHabitTracker,
+                        onPressed: _loading ? null : _saveAndNavigate,
                         child: Text(
                           'Skip for now',
                           style: TextStyle(
@@ -285,17 +321,5 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         ),
       ),
     );
-  }
-
-  void _navigateToHabitTracker() {
-    List<String>? chosenHabits;
-
-    if (selectedHabits.isNotEmpty) {
-      chosenHabits = selectedHabits.toList();
-    } else if (_customHabitController.text.isNotEmpty) {
-      chosenHabits = [_customHabitController.text.trim()];
-    }
-
-    Get.offAllNamed('/habit_tracker', arguments: chosenHabits);
   }
 }
