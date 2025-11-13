@@ -1,24 +1,39 @@
+// lib/Habits/habit_controller.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 import '../Ai Chat/ai_chat.dart';
 import '../Ai Chat/chat_controller.dart';
 import 'create_habit.dart';
 import '../features/progress/progress.dart';
 
-/// Utility for UTC date strings (yyyy-MM-dd)
-String dateUTCString([DateTime? now]) {
-  final n = (now ?? DateTime.now()).toUtc();
-  final mm = n.month.toString().padLeft(2, '0');
-  final dd = n.day.toString().padLeft(2, '0');
-  return '${n.year}-$mm-$dd';
+/// ---------------------------------------------------------------------------
+///  UTILITY — Adelaide timezone date (YYYY-MM-DD)
+/// ---------------------------------------------------------------------------
+bool _tzInitialized = false;
+
+String dateUTCString([DateTime? date]) {
+  if (!_tzInitialized) {
+    tz.initializeTimeZones();
+    _tzInitialized = true;
+  }
+
+  final adelaide = tz.getLocation('Australia/Adelaide');
+  final dt = tz.TZDateTime.from(date ?? DateTime.now(), adelaide);
+
+  final mm = dt.month.toString().padLeft(2, '0');
+  final dd = dt.day.toString().padLeft(2, '0');
+  return '${dt.year}-$mm-$dd';
 }
 
-/// --- HABIT MODEL ---
+/// ---------------------------------------------------------------------------
+///  HABIT MODEL
+/// ---------------------------------------------------------------------------
 class HabitItem {
   final String id;
   final String title;
@@ -34,6 +49,7 @@ class HabitItem {
 
   final RxBool isCompleted = false.obs;
   final RxInt streak = 0.obs;
+  final RxInt longestStreak = 0.obs;
 
   HabitItem({
     required this.id,
@@ -53,7 +69,8 @@ class HabitItem {
 
   factory HabitItem.fromDoc(DocumentSnapshot doc) {
     final d = doc.data() as Map<String, dynamic>;
-    return HabitItem(
+
+    final item = HabitItem(
       id: doc.id,
       title: d['title'] ?? '',
       subtitle: d['subtitle'] ?? '',
@@ -72,10 +89,17 @@ class HabitItem {
           ? (d['updatedAt'] as Timestamp).toDate()
           : DateTime.now(),
     );
+
+    item.streak.value = d['streak'] ?? 0;
+    item.longestStreak.value = d['longestStreak'] ?? 0;
+
+    return item;
   }
 }
 
-/// --- CONTROLLER ---
+/// ---------------------------------------------------------------------------
+///  CONTROLLER
+/// ---------------------------------------------------------------------------
 class HabitTrackerController extends GetxController {
   final RxList<HabitItem> habits = <HabitItem>[].obs;
   final RxMap<String, bool> todayCompletions = <String, bool>{}.obs;
@@ -95,20 +119,18 @@ class HabitTrackerController extends GetxController {
     _watchLogsForSelectedDate();
   }
 
-  /// ✅ Enable offline persistence
   Future<void> _enablePersistence() async {
     try {
       _db.settings = const Settings(
         persistenceEnabled: true,
         cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
       );
-      print('✅ Firestore offline persistence configured');
-    } catch (e) {
-      print('⚠️ Persistence setup failed: $e');
-    }
+    } catch (_) {}
   }
 
-  /// ✅ Listen to habits collection
+  /// -------------------------------------------------------------------------
+  ///  FETCH HABITS STREAM
+  /// -------------------------------------------------------------------------
   void _watchHabits() {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return;
@@ -121,18 +143,20 @@ class HabitTrackerController extends GetxController {
         .snapshots()
         .listen((snapshot) {
       habits.value = snapshot.docs.map(HabitItem.fromDoc).toList();
-      // Refresh completion whenever habits reload
       _refreshCompletionsForSelectedDate();
     });
   }
 
-  /// ✅ Watch logs dynamically based on selected date
+  /// -------------------------------------------------------------------------
+  ///  FETCH DAILY LOGS FOR SELECTED DATE
+  /// -------------------------------------------------------------------------
   void _watchLogsForSelectedDate() {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return;
 
     ever(selectedDate, (DateTime date) {
       final dateStr = dateUTCString(date);
+
       _lSub?.cancel();
 
       _lSub = _db
@@ -143,89 +167,130 @@ class HabitTrackerController extends GetxController {
           .snapshots()
           .listen((snapshot) {
         final m = <String, bool>{};
+
         for (var doc in snapshot.docs) {
-          final data = doc.data() as Map<String, dynamic>;
-          m[data['habitId']] = data['completed'] ?? false;
+          m[doc['habitId']] = doc['completed'] ?? false;
         }
+
         todayCompletions.value = m;
 
-        for (final habit in habits) {
-          habit.isCompleted.value = m[habit.id] ?? false;
+        for (final h in habits) {
+          h.isCompleted.value = m[h.id] ?? false;
         }
-        print('📅 Logs updated for $dateStr (${snapshot.docs.length} entries)');
       });
     });
 
-    selectedDate.refresh(); // trigger once for today
+    selectedDate.refresh();
   }
 
-  /// 🔹 Manually refresh completions (useful after habits reload)
   void _refreshCompletionsForSelectedDate() {
-    final m = todayCompletions;
-    for (final habit in habits) {
-      habit.isCompleted.value = m[habit.id] ?? false;
+    for (final h in habits) {
+      h.isCompleted.value = todayCompletions[h.id] ?? false;
     }
   }
 
-  /// ✅ Toggle completion for current date
-  /// ✅ Toggle completion for the currently selected date
+  HabitItem? _findHabitById(String id) {
+    final i = habits.indexWhere((h) => h.id == id);
+    return i == -1 ? null : habits[i];
+  }
+
+  /// -------------------------------------------------------------------------
+  ///  TOGGLE COMPLETION + SAVE STREAKS IN FIRESTORE
+  /// -------------------------------------------------------------------------
   Future<void> toggleHabitCompletion(String habitId) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return;
 
-    // use selected date, not today
     final selected = selectedDate.value;
-    final dateStr = dateUTCString(selected);
-    final logId = '${habitId}_$dateStr';
+    final todayStr = dateUTCString(selected);
+    final todayId = '${habitId}_$todayStr';
+
     final logsRef = _db.collection('users').doc(uid).collection('logs');
+    final habitsRef = _db.collection('users').doc(uid).collection('habits');
 
-    // Check local completion state
-    final currentCompleted = todayCompletions[habitId] ?? false;
-    final newCompleted = !currentCompleted;
+    // ---- 1. Toggle today's completion ----
+    final isCompletedToday = !(todayCompletions[habitId] ?? false);
+    todayCompletions[habitId] = isCompletedToday;
 
-    // Update UI instantly
-    todayCompletions[habitId] = newCompleted;
-    final habit = habits.firstWhereOrNull((h) => h.id == habitId);
-    if (habit != null) habit.isCompleted.value = newCompleted;
+    final habit = _findHabitById(habitId);
+    if (habit != null) habit.isCompleted.value = isCompletedToday;
 
-    // Write to Firestore (works offline too)
-    await logsRef.doc(logId).set({
+    await logsRef.doc(todayId).set({
       'habitId': habitId,
-      'dateUTC': dateStr,
-      'completed': newCompleted,
+      'dateUTC': todayStr,
+      'completed': isCompletedToday,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
 
-    // Force refresh for selected date
-    _refreshCompletionsForSelectedDate();
+    // ---- 2. Streak calculation now becomes SUPER simple ----
 
-    // Update streak locally and in UI
-    final newStreak = await _calculateStreak(habitId);
-    if (habit != null) habit.streak.value = newStreak;
+    int newStreak = 0;
 
-    print('✅ Toggled completion for $habitId on $dateStr → $newCompleted');
+    if (isCompletedToday) {
+      // Check yesterday
+      final yesterday = selected.subtract(const Duration(days: 1));
+      final yesterdayStr = dateUTCString(yesterday);
+      final yesterdayId = '${habitId}_$yesterdayStr';
+
+      final yesterdayDoc = await logsRef.doc(yesterdayId)
+          .get(const GetOptions(source: Source.serverAndCache));
+
+      final completedYesterday =
+          yesterdayDoc.exists && (yesterdayDoc['completed'] == true);
+
+      if (completedYesterday) {
+        newStreak = (habit?.streak.value ?? 0) + 1;
+      } else {
+        newStreak = 1;
+      }
+    } else {
+      // If today is uncompleted → streak breaks
+      newStreak = 0;
+    }
+
+    // ---- 3. Longest streak update ----
+    final newLongest = (habit?.longestStreak.value ?? 0);
+    final updatedLongest = newStreak > newLongest ? newStreak : newLongest;
+
+    if (habit != null) {
+      habit.streak.value = newStreak;
+      habit.longestStreak.value = updatedLongest;
+    }
+
+    // ---- 4. Save streak + longest streak in Firestore ----
+    await habitsRef.doc(habitId).update({
+      'streak': newStreak,
+      'longestStreak': updatedLongest,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    print("🔥 Updated streak: $newStreak | longest: $updatedLongest");
   }
 
-  /// ✅ Calculate streak up to the selected date, not just today
+
+  /// -------------------------------------------------------------------------
+  ///  STREAK LOGIC
+  /// -------------------------------------------------------------------------
   Future<int> _calculateStreak(String habitId) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return 0;
 
-    var current = selectedDate.value.toUtc(); // use currently selected date
-    var streak = 0;
+    int streak = 0;
+    var cursor = selectedDate.value.toUtc();
 
-    // Check backward day-by-day until break
     for (int i = 0; i < 365; i++) {
-      final d = dateUTCString(current);
+      final d = dateUTCString(cursor);
+
       final doc = await _db
           .collection('users')
           .doc(uid)
           .collection('logs')
           .doc('${habitId}_$d')
-          .get(const GetOptions(source: Source.serverAndCache)); // use both cache & server
-      if (doc.exists && (doc.data()?['completed'] == true)) {
+          .get(const GetOptions(source: Source.serverAndCache));
+
+      if (doc.exists && doc['completed'] == true) {
         streak++;
-        current = current.subtract(const Duration(days: 1));
+        cursor = cursor.subtract(const Duration(days: 1));
       } else {
         break;
       }
@@ -233,36 +298,168 @@ class HabitTrackerController extends GetxController {
     return streak;
   }
 
+  Future<int> _calculateLongestStreak(String habitId,
+      {int daysBack = 365}) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return 0;
 
-  /// ✅ Create a new habit
+    int longest = 0;
+    int running = 0;
+
+    var cursor =
+    selectedDate.value.toUtc().subtract(Duration(days: daysBack));
+
+    for (int i = 0; i < daysBack; i++) {
+      final d = dateUTCString(cursor);
+
+      final snap = await _db
+          .collection('users')
+          .doc(uid)
+          .collection('logs')
+          .doc('${habitId}_$d')
+          .get(const GetOptions(source: Source.serverAndCache));
+
+      if (snap.exists && snap['completed'] == true) {
+        running++;
+        if (running > longest) longest = running;
+      } else {
+        running = 0;
+      }
+
+      cursor = cursor.add(const Duration(days: 1));
+    }
+    return longest;
+  }
+
+  /// -------------------------------------------------------------------------
+  ///  ANALYTICS — REQUIRED BY PROGRESS CONTROLLER
+  /// -------------------------------------------------------------------------
+  Future<double> completionRateForWindow(int days) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null || habits.isEmpty) return 0;
+
+    int totalCompleted = 0;
+    final end = selectedDate.value.toUtc();
+
+    for (int i = 0; i < days; i++) {
+      final d = dateUTCString(end.subtract(Duration(days: i)));
+
+      final snap = await _db
+          .collection('users')
+          .doc(uid)
+          .collection('logs')
+          .where('dateUTC', isEqualTo: d)
+          .get(const GetOptions(source: Source.serverAndCache));
+
+      for (var doc in snap.docs) {
+        if (doc['completed'] == true) totalCompleted++;
+      }
+    }
+
+    final denom = habits.length * days;
+    return denom == 0 ? 0 : totalCompleted / denom;
+  }
+
+  Future<Map<int, int>> bestDaysOfWeek({int days = 90}) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return {};
+
+    final end = selectedDate.value.toUtc();
+    final map = {1:0,2:0,3:0,4:0,5:0,6:0,7:0};
+
+    for (int i = 0; i < days; i++) {
+      final d = end.subtract(Duration(days: i));
+      final dateStr = dateUTCString(d);
+
+      final snap = await _db
+          .collection('users')
+          .doc(uid)
+          .collection('logs')
+          .where('dateUTC', isEqualTo: dateStr)
+          .get(const GetOptions(source: Source.serverAndCache));
+
+      for (var doc in snap.docs) {
+        if (doc['completed'] == true) {
+          final weekday = d.weekday;
+          map[weekday] = (map[weekday] ?? 0) + 1;
+        }
+      }
+    }
+    return map;
+  }
+
+  Future<Map<String, int>> categoryCompletionStats({int days = 30}) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return {};
+
+    final end = selectedDate.value.toUtc();
+    final result = <String, int>{};
+
+    final categories = {
+      for (final h in habits) h.id: h.category,
+    };
+
+    for (int i = 0; i < days; i++) {
+      final d = end.subtract(Duration(days: i));
+      final dateStr = dateUTCString(d);
+
+      final snap = await _db
+          .collection('users')
+          .doc(uid)
+          .collection('logs')
+          .where('dateUTC', isEqualTo: dateStr)
+          .get(const GetOptions(source: Source.serverAndCache));
+
+      for (var doc in snap.docs) {
+        if (doc['completed'] == true) {
+          final hid = doc['habitId'];
+          final cat = categories[hid] ?? 'general';
+          result[cat] = (result[cat] ?? 0) + 1;
+        }
+      }
+    }
+    return result;
+  }
+
+  /// -------------------------------------------------------------------------
+  ///  CRUD
+  /// -------------------------------------------------------------------------
   Future<void> createHabit(Map<String, dynamic> data) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return;
 
     await _db.collection('users').doc(uid).collection('habits').add({
       ...data,
+      'streak': 0,
+      'longestStreak': 0,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     });
   }
 
-  /// ✅ Update habit
   Future<void> updateHabit(String id, Map<String, dynamic> data) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return;
+
+    final habit = _findHabitById(id);
 
     await _db
         .collection('users')
         .doc(uid)
         .collection('habits')
         .doc(id)
-        .update({...data, 'updatedAt': FieldValue.serverTimestamp()});
+        .update({
+      ...data,
+      'streak': habit?.streak.value ?? 0,
+      'longestStreak': habit?.longestStreak.value ?? 0,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
   }
 
-  /// ✅ Delete habit
   Future<void> removeHabit(String habitId) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return;
+
     await _db
         .collection('users')
         .doc(uid)
@@ -270,88 +467,123 @@ class HabitTrackerController extends GetxController {
         .doc(habitId)
         .delete();
   }
-  /// 🔹 Open Edit Habit Screen
+
+  /// -------------------------------------------------------------------------
+  ///  NAVIGATION
+  /// -------------------------------------------------------------------------
   void openEditHabit(HabitItem habit) {
-    // Navigate to CreateHabitScreen in edit mode with existing data
-    Get.to(() => CreateNewHabitScreen(
-      existingHabit: habit,
-    ));
+    Get.to(() => CreateNewHabitScreen(existingHabit: habit));
   }
 
-  /// 🔹 Navigate to AI Chat (for AI-generated habit creation)
+  void navigateToCreateHabit() =>
+      Get.to(() => const CreateNewHabitScreen());
+
+  void navigateToProgress() =>
+      Get.to(() => ProgressScreen());
+
   Future<void> navigateToAIChat() async {
-    try {
-      Get.put(OpenAIService(), permanent: true);
-      Get.put(AICoachController());
+    Get.put(OpenAIService(), permanent: true);
+    Get.put(AICoachController());
+    final result = await Get.to(() => AICoachChatScreen());
 
-      final result = await Get.to(() => AICoachChatScreen());
+    if (result is HabitTemplate) {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) return;
 
-      if (result is HabitTemplate) {
-        final uid = FirebaseAuth.instance.currentUser?.uid;
-        if (uid == null) return;
-
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(uid)
-            .collection('habits')
-            .add({
-          'title': result.title,
-          'subtitle': 'AI-generated habit',
-          'iconCode': Icons.auto_awesome.codePoint,
-          'cadence': 'daily',
-          'daysOfWeek': [1, 2, 3, 4, 5, 6, 7],
-          'category': result.category ?? 'general',
-          'reminders': false,
-          'isDynamic': true,
-          'createdAt': FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
-
-        Get.snackbar(
-          'AI Habit Created',
-          'Your AI-generated habit has been added successfully!',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 2),
-        );
-      }
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to create AI habit: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
-      print('⚠️ navigateToAIChat failed: $e');
+      await createHabit({
+        'title': result.title,
+        'subtitle': 'AI-generated habit',
+        'iconCode': Icons.auto_awesome.codePoint,
+        'cadence': 'daily',
+        'daysOfWeek': [1, 2, 3, 4, 5, 6, 7],
+        'category': result.category ?? 'general',
+        'reminders': false,
+        'isDynamic': true,
+      });
     }
   }
-  /// 🔹 Calculate weekly progress percentage (0–1)
+
+  /// -------------------------------------------------------------------------
+  ///  PROGRESS HELPERS
+  /// -------------------------------------------------------------------------
   double calculateWeeklyProgress() {
-    if (habits.isEmpty) return 0.0;
+    if (habits.isEmpty) return 0;
+    int count = 0;
+    for (final h in habits) {
+      if (todayCompletions[h.id] == true) {
+        count++;
+      }
+    }
+    return habits.isEmpty ? 0 : count / habits.length;
 
-    // Count how many habits are completed today
-    final completedCount = todayCompletions.values.where((done) => done).length;
+  }
+  Future<List<Map<String, dynamic>>> topHabits({int days = 30}) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return [];
 
-    // Return as a ratio (e.g., 0.75 means 75%)
-    return completedCount / habits.length;
+    final end = selectedDate.value.toUtc();
+    final List<Map<String, dynamic>> list = [];
+
+    for (final habit in habits) {
+      int completed = 0;
+
+      for (int i = 0; i < days; i++) {
+        final d = dateUTCString(end.subtract(Duration(days: i)));
+
+        final doc = await _db
+            .collection('users')
+            .doc(uid)
+            .collection('logs')
+            .doc('${habit.id}_$d')
+            .get(const GetOptions(source: Source.serverAndCache));
+
+        if (doc.exists && doc['completed'] == true) {
+          completed++;
+        }
+      }
+
+      final rate = days == 0 ? 0 : (completed / days);
+
+      list.add({
+        'habit': habit,
+        'completionRate': rate,
+      });
+    }
+
+    // Highest completion first
+    list.sort((a, b) =>
+        (b['completionRate'] as double).compareTo(a['completionRate'] as double));
+
+    return list;
   }
 
-  /// 🔹 Return completion stats (completed, total, and percentage)
   Map<String, int> getCompletionStats() {
-    final completed = todayCompletions.values.where((done) => done).length;
+    // OLD METHOD counted duplicate logs → WRONG
+// final completed = todayCompletions.values.where((x) => x == true).length;
+
+// NEW: completion = number of habits completed today, not number of log entries
+    int completed = 0;
+    for (final h in habits) {
+      if (todayCompletions[h.id] == true) {
+        completed++;
+      }
+    }
+
     final total = habits.length;
+
+
     return {
       'completed': completed,
       'total': total,
-      'percentage': total > 0 ? ((completed / total) * 100).round() : 0,
+      'percentage': total == 0
+          ? 0
+          : ((completed / total) * 100).round(),
     };
   }
 
-  void navigateToCreateHabit() => Get.to(() => const CreateNewHabitScreen());
-  void navigateToProgress() => Get.to(() => ProgressScreen());
-
+  /// -------------------------------------------------------------------------
+  ///  CLEANUP
+  /// -------------------------------------------------------------------------
   @override
   void onClose() {
     _hSub?.cancel();
@@ -360,6 +592,7 @@ class HabitTrackerController extends GetxController {
   }
 }
 
+/// Bindings
 class HabitTrackerBinding extends Bindings {
   @override
   void dependencies() {

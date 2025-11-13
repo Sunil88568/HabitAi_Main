@@ -73,7 +73,8 @@ class ProgressScreen extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Obx(() => Text(
-                                      controller.weeklyProgressPercentage,
+                                  "${(controller.weeklyProgress * 100).toInt()}%"
+                                  ,
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 48,
@@ -99,14 +100,16 @@ class ProgressScreen extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Obx(() => _buildStatCard(
-                                controller.currentStreak.toString(),
+                            controller.overallCurrentStreak
+                                .toString(),
                                 'Current\nStreak',
                               )),
                         ),
                         const SizedBox(width: 20),
                         Expanded(
                           child: Obx(() => _buildStatCard(
-                                controller.bestStreak.toString(),
+                            controller.overallLongestStreak
+                                .toString(),
                                 'Best Streak',
                               )),
                         ),
@@ -117,14 +120,16 @@ class ProgressScreen extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Obx(() => _buildStatCard(
-                                controller.totalCompleted.toString(),
+                            controller.totalCompletedToday
+                                .toString(),
                                 'Total\nCompleted',
                               )),
                         ),
                         const SizedBox(width: 20),
                         Expanded(
                           child: Obx(() => _buildStatCard(
-                                controller.successRatePercentage,
+                            "${(controller.successRateToday * 100).toInt()}%"
+                            ,
                                 'Success\nRate',
                               )),
                         ),
@@ -144,7 +149,7 @@ class ProgressScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Top Habits',
+                      'Top Habit',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -152,58 +157,73 @@ class ProgressScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    // Top Habit Item
-                    Row(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF6875DE), Color(0xFF7353AE)],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
+
+                    Obx(() {
+                      // if no top habit → show nothing
+                      if (controller.topHabitTitle.isEmpty) {
+                        return const Text(
+                          "No habits tracked yet",
+                          style: TextStyle(color: Colors.grey),
+                        );
+                      }
+
+                      return Row(
+                        children: [
+                          // Icon circle
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF6875DE), Color(0xFF7353AE)],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.star,  // optional: dynamic icon later
+                              color: Colors.white,
+                              size: 20,
                             ),
                           ),
-                          child: const Icon(
-                            Icons.water_drop,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Drink Water',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
+                          const SizedBox(width: 12),
+
+                          // Habit title + subtitle + percent
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  controller.topHabitTitle,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                '95% completion',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 14,
+                                Text(
+                                  "${(controller.topHabitPercent * 100).toInt()}% completion",
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        const Text(
-                          '🏆',
-                          style: TextStyle(fontSize: 20),
-                        ),
-                      ],
-                    ),
+
+                          const Text(
+                            '🏆',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ],
+                      );
+                    }),
                   ],
                 ),
               ),
+
             ],
           ),
         ),

@@ -13,6 +13,7 @@ import 'package:habitai/Habits/habit_tracker.dart';
 // import 'package:habitai/Habits/habit_tracker_binding.dart';
 import 'package:habitai/welcome.dart';
 import './theme.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 // Firebase option imports
 import 'Habits/habit_controller.dart';
@@ -22,7 +23,7 @@ import 'firebase_options_prod.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  tz.initializeTimeZones();
   // 1️⃣ Determine flavor
   const env = String.fromEnvironment('ENV', defaultValue: 'dev');
 
