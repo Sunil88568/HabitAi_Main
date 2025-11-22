@@ -20,6 +20,8 @@ import 'Habits/habit_controller.dart';
 import 'firebase_options_dev.dart';
 import 'firebase_options_staging.dart';
 import 'firebase_options_prod.dart';
+import 'package:habitai/services/notification_service.dart';
+import 'package:habitai/services/push_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -103,7 +105,32 @@ Future<void> main() async {
   print('🔹 API URL: ${dotenv.env['API_BASE_URL']}');
 
   // 8️⃣ Run app
-  runApp(HabitAIApp());
+  // Initialize notification & push services so background handlers are registered before UI runs.
+  bool notifyExactDenied = false;
+  bool notifySchedulingFailed = false;
+  try {
+    await NotificationService().init();
+    await PushService().init();
+    print('✅ Notification & Push services initialized');
+
+// ⬇️ Request Android & iOS notification permission
+    final granted = await NotificationService().requestPermissions();
+    print('📍 Notification permission granted: $granted');
+
+
+    // Determine flags to show (but DO NOT call Get.snackbar here — Get isn't ready)
+    notifyExactDenied = await NotificationService().isExactAlarmDenied();
+    notifySchedulingFailed = await NotificationService().hasSchedulingFailed();
+  } catch (e, st) {
+    print('⚠ Notifications init failed: $e\n$st');
+  }
+// quick test: immediate local notification
+
+
+  runApp(HabitAIApp(
+    showExactDeniedHint: notifyExactDenied,
+    showSchedulingFailedHint: notifySchedulingFailed,
+  ));
 }
 
 /// Root App Widget
@@ -111,7 +138,10 @@ class HabitAIApp extends StatelessWidget {
   final AuthService _auth = AuthService();
   final FirestoreService _firestore = FirestoreService();
 
-  HabitAIApp({super.key});
+  final bool showExactDeniedHint;
+  final bool showSchedulingFailedHint;
+
+  HabitAIApp({super.key, this.showExactDeniedHint = false, this.showSchedulingFailedHint = false});
 
   Future<Widget> _getInitialScreen() async {
     final user = _auth.currentUser;
@@ -132,6 +162,34 @@ class HabitAIApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // After the first frame, surface any persisted notification scheduling warnings via Get.snackbar.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (showExactDeniedHint) {
+        try {
+          Get.snackbar(
+            'Notifications may be unreliable',
+            'Exact alarms are not permitted on this device. Scheduled reminders may not fire at exact times. To enable exact alarms add SCHEDULE_EXACT_ALARM to your AndroidManifest and allow Exact Alarms in system settings (Android 12+).',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.orange.shade900,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 8),
+          );
+        } catch (_) {}
+      }
+      if (showSchedulingFailedHint) {
+        try {
+          Get.snackbar(
+            'Reminder scheduling failed',
+            'Previously the app could not register scheduled reminders on this device. Test on a real device or enable exact alarms in system settings.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.orange.shade900,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 8),
+          );
+        } catch (_) {}
+      }
+    });
+
     return StreamBuilder(
       stream: _auth.authStateChanges,
       builder: (context, snapshot) {

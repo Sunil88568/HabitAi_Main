@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart'; // add for formatting time
 import 'create_habit_controller.dart';
 import 'habit_controller.dart';
 
@@ -62,6 +63,57 @@ class CreateNewHabitScreen extends StatelessWidget {
             const SizedBox(height: 24),
             _label('Goal'),
             _inputField(controller.goalController),
+            const SizedBox(height: 24),
+            // Reminders toggle + Time picker
+            Obx(() => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _label('Reminders'),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(child: Text(
+                      'Enable reminders for this habit',
+                      style: const TextStyle(color: Colors.grey, fontSize: 16),
+                    )),
+                    Switch(
+                      value: controller.remindersEnabled.value,
+                      onChanged: (v) => controller.remindersEnabled.value = v,
+                      activeColor: const Color(0xFF6C5CE7),
+                    ),
+                  ],
+                ),
+                if (controller.remindersEnabled.value) ...[
+                  const SizedBox(height: 12),
+                  GestureDetector(
+                    onTap: () async {
+                      final initial = TimeOfDay(hour: controller.reminderHour.value, minute: controller.reminderMinute.value);
+                      final picked = await showTimePicker(context: context, initialTime: initial);
+                      if (picked != null) {
+                        controller.setReminderTime(picked.hour, picked.minute);
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      decoration: BoxDecoration(color: const Color(0xFF2A2A2A), borderRadius: BorderRadius.circular(12)),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Reminder time', style: TextStyle(color: Colors.grey)),
+                          Obx(() {
+                            final t = TimeOfDay(hour: controller.reminderHour.value, minute: controller.reminderMinute.value);
+                            final formatted = DateFormat.jm().format(DateTime(0,0,0, t.hour, t.minute));
+                            return Text(formatted, style: const TextStyle(color: Colors.white, fontSize: 16));
+                          }),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 24),
+              ],
+            )),
             const SizedBox(height: 32),
             _saveButton(isEdit, controller, existingHabit),
           ],

@@ -11,6 +11,7 @@ import '../Ai Chat/ai_chat.dart';
 import '../Ai Chat/chat_controller.dart';
 import 'create_habit.dart';
 import '../features/progress/progress.dart';
+import 'package:habitai/services/notification_service.dart';
 
 /// ---------------------------------------------------------------------------
 ///  UTILITY — Adelaide timezone date (YYYY-MM-DD)
@@ -47,6 +48,10 @@ class HabitItem {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  // persisted reminder time
+  final int reminderHour;
+  final int reminderMinute;
+
   final RxBool isCompleted = false.obs;
   final RxInt streak = 0.obs;
   final RxInt longestStreak = 0.obs;
@@ -63,6 +68,8 @@ class HabitItem {
     required this.isDynamic,
     required this.createdAt,
     required this.updatedAt,
+    required this.reminderHour,
+    required this.reminderMinute,
   });
 
   IconData get icon => IconData(iconCode, fontFamily: 'MaterialIcons');
@@ -88,6 +95,8 @@ class HabitItem {
       updatedAt: (d['updatedAt'] is Timestamp)
           ? (d['updatedAt'] as Timestamp).toDate()
           : DateTime.now(),
+      reminderHour: (d['reminderHour'] is int) ? d['reminderHour'] as int : (d['reminder_hour'] is int ? d['reminder_hour'] as int : 9),
+      reminderMinute: (d['reminderMinute'] is int) ? d['reminderMinute'] as int : (d['reminder_minute'] is int ? d['reminder_minute'] as int : 0),
     );
 
     item.streak.value = d['streak'] ?? 0;
@@ -144,6 +153,16 @@ class HabitTrackerController extends GetxController {
         .listen((snapshot) {
       habits.value = snapshot.docs.map(HabitItem.fromDoc).toList();
       _refreshCompletionsForSelectedDate();
+
+      // NEW: sync local scheduled reminders with the current habit list.
+      // Fire-and-forget; log errors if sync fails.
+      try {
+        NotificationService().syncWithHabits(habits.value).catchError((e) {
+          print('⚠ Notification sync failed: $e');
+        });
+      } catch (e) {
+        print('⚠ Notification sync threw: $e');
+      }
     });
   }
 
@@ -424,17 +443,18 @@ class HabitTrackerController extends GetxController {
   /// -------------------------------------------------------------------------
   ///  CRUD
   /// -------------------------------------------------------------------------
-  Future<void> createHabit(Map<String, dynamic> data) async {
+  Future<String?> createHabit(Map<String, dynamic> data) async {
     final uid = _auth.currentUser?.uid;
-    if (uid == null) return;
+    if (uid == null) return null;
 
-    await _db.collection('users').doc(uid).collection('habits').add({
+    final ref = await _db.collection('users').doc(uid).collection('habits').add({
       ...data,
       'streak': 0,
       'longestStreak': 0,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     });
+    return ref.id;
   }
 
   Future<void> updateHabit(String id, Map<String, dynamic> data) async {

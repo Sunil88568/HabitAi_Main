@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../services/auth_service.dart';
+import '../services/notification_service.dart';
+import '../services/push_service.dart';
 
 class UserSettings {
   RxBool dailyReminders = true.obs;
@@ -20,10 +22,32 @@ class ProfileScreenController extends GetxController {
       isLoggedIn.value = true;
       isAnonymous.value = user.isAnonymous; // true if anonymous
     }
+
+    // Initialize notifications & push services and load persisted setting
+    () async {
+      await NotificationService().init(); // initializes local notifications & restores scheduled map
+      await PushService().init(); // registers FCM handlers
+      final enabled = await NotificationService().getDailyRemindersEnabled();
+      settings.dailyReminders.value = enabled;
+    }();
   }
 
-  void toggleDailyReminders() {
-    settings.dailyReminders.value = !settings.dailyReminders.value;
+  // Make async so we can request platform permission when enabling
+  Future<void> toggleDailyReminders() async {
+    final newValue = !settings.dailyReminders.value;
+    if (newValue) {
+      // user is enabling → request permission (will no-op on platforms that don't need it)
+      final granted = await NotificationService().requestPermissions();
+      if (!granted) {
+        // user denied, keep setting false
+        settings.dailyReminders.value = false;
+        await NotificationService().setDailyRemindersEnabled(false);
+        return;
+      }
+    }
+
+    settings.dailyReminders.value = newValue;
+    await NotificationService().setDailyRemindersEnabled(newValue);
   }
 
   void toggleDarkMode() {
