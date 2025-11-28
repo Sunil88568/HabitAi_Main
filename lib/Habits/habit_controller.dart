@@ -165,6 +165,30 @@ class HabitTrackerController extends GetxController {
       }
     });
   }
+  Future<void> createHabit2(Map<String, dynamic> data) async {
+    print('🚀 createHabit2 called');
+    print('📝 Data: $data');
+
+    final uid = _auth.currentUser?.uid;
+    print('👤 User ID: $uid');
+
+    if (uid == null) {
+      print('❌ No user logged in!');
+      return;
+    }
+
+    try {
+      print('💾 Writing to Firestore...');
+      await _db.collection('users').doc(uid).collection('habits').add({
+        ...data,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      print('✅ Habit saved to Firebase successfully!');
+    } catch (e) {
+      print('❌ Firestore Error: $e');
+    }
+  }
 
   /// -------------------------------------------------------------------------
   ///  FETCH DAILY LOGS FOR SELECTED DATE

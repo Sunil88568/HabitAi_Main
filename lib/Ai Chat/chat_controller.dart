@@ -566,6 +566,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:habitai/Habits/habit_controller.dart';
 import 'package:http/http.dart' as http;
 
 // Models
@@ -585,11 +586,13 @@ class HabitCadence {
 
 class HabitTemplate {
   final String title;
+  final String subtitle;
   final HabitCadence cadence;
   final String category;
 
   HabitTemplate({
     required this.title,
+    required this.subtitle,
     required this.cadence,
     required this.category,
   });
@@ -597,6 +600,7 @@ class HabitTemplate {
   factory HabitTemplate.fromJson(Map<String, dynamic> json) {
     return HabitTemplate(
       title: json['title'],
+      subtitle: json['subtitle'],
       cadence: HabitCadence.fromJson(json['cadence']),
       category: json['category'] ?? 'custom',
     );
@@ -653,11 +657,13 @@ class ChatMessage {
 // Services
 class AILogger {
   static void logTokenUsage(int tokens, int latencyMs, String model) {
-    print('🤖 AI Metrics: $tokens tokens, ${latencyMs}ms latency, model: $model');
+    print(
+        '🤖 AI Metrics: $tokens tokens, ${latencyMs}ms latency, model: $model');
   }
 
   static void logSchemaValidation(bool isValid, String error) {
-    print('📋 Schema Validation: ${isValid ? "✅ VALID" : "❌ INVALID - $error"}');
+    print(
+        '📋 Schema Validation: ${isValid ? "✅ VALID" : "❌ INVALID - $error"}');
   }
 
   static void logApiCall(String endpoint, int statusCode) {
@@ -668,7 +674,8 @@ class AILogger {
 class OpenAIService extends GetxService {
   static const String baseUrl = String.fromEnvironment(
     'API_BASE',
-    defaultValue: 'https://habitai-proxy-9k8kj6eoz-jofus-projects-a8bfd489.vercel.app',
+    defaultValue:
+    'https://habitai-proxy-9k8kj6eoz-jofus-projects-a8bfd489.vercel.app',
   );
 
   @override
@@ -686,71 +693,177 @@ class OpenAIService extends GetxService {
   }
 
   static void printPassRate() {
-    print('📊 Schema Pass Rate: ${getSchemaPassRate().toStringAsFixed(1)}% ($successfulValidations/$totalApiCalls)');
+    print(
+        '📊 Schema Pass Rate: ${getSchemaPassRate().toStringAsFixed(1)}% ($successfulValidations/$totalApiCalls)');
   }
 
   static const String systemPrompt = '''
-You are HabitAI's Coach, helping users design and stick to small, achievable habits.
+You are HabitAI's Coach. Your ONLY job is to help users create habits using a strict validation-based flow. 
+You must stay short, structured, and task-focused. Do NOT give motivation, therapy, safety lectures, or emotional guidance.
 
-Rules:
-- Be concise: 1–3 short sentences, no markdown.
-- Default tone: supportive. Use "accountable" for user-requested pushes; "celebratory" for successes.
-- Always provide 1–2 actionable next_questions to clarify habit details (e.g., goal, schedule, blockers) or prompt next steps (e.g., start tracking, adjust habit). Avoid vague questions like "What do you prefer?".
-- Examples of good next_questions: "When do you want to do this habit?", "What's your goal for this habit?", "Need help with reminders?", "Want to start tracking today?".
-- Prefer a single, specific next step (tiny, achievable).
-- Use tool calls for: CREATE_HABIT (propose habit with habit_template), SCHEDULE_REMINDER, or LOG_COMPLETION.
-- Use ADVICE for general guidance; REFRAME for setbacks with a retry plan.
-- For CREATE_HABIT, include habit_template with realistic cadence (days: ["Mon","Tue",...], times: HH:MM in 24-hour format, user’s local time).
-- Keep message ≤ 500 chars, next_questions ≤ 2 items, each ≤ 140 chars.
-- Safety: No medical/clinical diagnosis or crisis counseling; suggest professional help if needed.
+-------------------------------------
+GENERAL RULES
+-------------------------------------
+- Use 1–3 short sentences.
+- next_questions ≤ 2.
+- NEVER restart the habit creation flow.
+- NEVER repeat a question **after the user provides a VALID answer**.
+- If the user gives an INVALID answer → ask again.
+- Do NOT ask unnecessary questions.
+- Follow the JSON schema EXACTLY.
+- habit_template MUST stay null until ALL required fields are valid and collected.
 
-Output:
-Return ONLY valid JSON matching the schema:
+-------------------------------------
+WHEN TO START HABIT CREATION
+-------------------------------------
+Start the 3-step flow when the user:
+- says “I want to start…”
+- says “help me create a habit…”
+- describes a repeated behavior (e.g., “I want to study daily”, “I want to exercise every day”)
+- clearly shows intention to build a habit
+
+If unclear → ask: "Do you want to create a habit?"
+
+-------------------------------------
+STRICT 3-STEP HABIT CREATION FLOW
+-------------------------------------
+
+STEP 1 → Habit Title  
+Ask ONLY if missing or invalid.  
+Question: **"What would you like to name your habit?"**  
+Valid: non-empty string.
+
+STEP 2 → Habit Goal / Purpose  
+Ask ONLY if missing or invalid.  
+Question: **"What is the goal or purpose of this habit?"**  
+Valid: non-empty string.  
+(This becomes the `subtitle`.)
+
+STEP 3 → Habit Schedule  
+Requires:  
+- Days = one or more of ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]  
+- Time = HH:MM (24-hour format)
+
+Ask only for the missing part:
+
+If days missing →  
+**"Which days should we schedule this habit?"**
+
+If time missing →  
+**"What time should we schedule it? (HH:MM)"**
+
+Validation:
+- Reject formats like “everyday”, “all days”, “weekdays”, “morning”, etc.
+- Ask again until valid.
+
+-------------------------------------
+CATEGORY RULE
+-------------------------------------
+- If user explicitly gives a category → use it.
+- If not → always use `"custom"`.
+
+-------------------------------------
+AFTER ALL DETAILS ARE VALID AND COMPLETE
+-------------------------------------
+Immediately return:
+- coach_action = "CREATE_HABIT"
+- habit_template filled with:
+  * title  
+  * subtitle (goal)  
+  * cadence { days, times }  
+  * category  
+
+And:
+- next_questions must be empty list: []
+
+-------------------------------------
+SAFETY
+-------------------------------------
+- If user mentions boxing, karate, MMA, wrestling → treat as exercise.
+- If user describes harmful/illegal actions → DO NOT create habit. Ask for a safe alternative.
+
+-------------------------------------
+OUTPUT FORMAT (MANDATORY)
+-------------------------------------
+Return ONLY valid JSON matching this schema:
 {
   "coach_action": "ADVICE|CREATE_HABIT|SCHEDULE_REMINDER|LOG_COMPLETION|REFRAME",
   "message": string,
   "next_questions": [string],
-  "habit_template": { "title": string, "cadence": { "days": [string], "times": [string] }, "category": string } | null,
-  "reminders": [{ "habit_id": string|null, "time_local": string, "days": [string] }],
+  "habit_template": { 
+      "title": string,
+      "subtitle": string,
+      "cadence": { "days": [string], "times": [string] },
+      "category": string 
+  } | null,
+  "reminders": [
+      { "habit_id": string|null, "time_local": string, "days": [string] }
+  ],
   "tone": "supportive|celebratory|accountable",
   "confidence": number
 }
+
 ''';
 
   static const Map<String, dynamic> responseSchema = {
+
     "type": "object",
     "additionalProperties": false,
-    "required": ["coach_action", "message", "next_questions", "habit_template", "reminders", "tone", "confidence"],
+    "required": [
+      "coach_action",
+      "message",
+      "next_questions",
+      "habit_template",
+      "reminders",
+      "tone",
+      "confidence"
+    ],
     "properties": {
       "coach_action": {
         "type": "string",
-        "enum": ["ADVICE", "CREATE_HABIT", "SCHEDULE_REMINDER", "LOG_COMPLETION", "REFRAME"]
+        "enum": [
+          "ADVICE",
+          "CREATE_HABIT",
+          "SCHEDULE_REMINDER",
+          "LOG_COMPLETION",
+          "REFRAME"
+        ]
       },
+
       "message": {
         "type": "string",
         "minLength": 1,
         "maxLength": 500
       },
+
       "next_questions": {
         "type": "array",
         "minItems": 0,
-        "maxItems": 3,
+        "maxItems": 2,   // 🔥 FIXED (previously 3)
         "items": {
           "type": "string",
           "minLength": 1,
           "maxLength": 140
         }
       },
+
       "habit_template": {
         "type": ["object", "null"],
         "additionalProperties": false,
-        "required": ["title", "cadence", "category"],
+        "required": ["title", "subtitle", "cadence", "category"],
         "properties": {
           "title": {
             "type": "string",
             "minLength": 1,
             "maxLength": 80
           },
+
+          "subtitle": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 150
+          },
+
           "cadence": {
             "type": "object",
             "additionalProperties": false,
@@ -776,12 +889,22 @@ Return ONLY valid JSON matching the schema:
               }
             }
           },
+
           "category": {
             "type": "string",
-            "enum": ["health", "work", "study", "mindfulness", "finance", "relationships", "custom"]
+            "enum": [
+              "health",
+              "work",
+              "study",
+              "mindfulness",
+              "finance",
+              "relationships",
+              "custom"
+            ]
           }
         }
       },
+
       "reminders": {
         "type": "array",
         "minItems": 0,
@@ -810,10 +933,12 @@ Return ONLY valid JSON matching the schema:
           }
         }
       },
+
       "tone": {
         "type": "string",
         "enum": ["supportive", "celebratory", "accountable"]
       },
+
       "confidence": {
         "type": "number",
         "minimum": 0.0,
@@ -822,7 +947,10 @@ Return ONLY valid JSON matching the schema:
     }
   };
 
-  Future<CoachResponse?> getChatCompletion(String userMessage, {int retryCount = 0}) async {
+
+
+  Future<CoachResponse?> getChatCompletion(List<Map<String, String>> messages,
+      {int retryCount = 0}) async {
     final startTime = DateTime.now();
     totalApiCalls++;
 
@@ -834,10 +962,12 @@ Return ONLY valid JSON matching the schema:
         },
         body: jsonEncode({
           'model': 'gpt-4o-mini',
-          'messages': [
-            {'role': 'system', 'content': systemPrompt},
-            {'role': 'user', 'content': userMessage}
-          ],
+          'messages': messages,
+
+          //  [
+          //   {'role': 'system', 'content': systemPrompt},
+          //   {'role': 'user', 'content': userMessage}
+          // ],
           'response_format': {
             'type': 'json_schema',
             'json_schema': {
@@ -863,19 +993,27 @@ Return ONLY valid JSON matching the schema:
 
         try {
           final responseJson = jsonDecode(content);
+          print('🔍 AI Response JSON: $responseJson');
 
           if (_validateResponse(responseJson)) {
             successfulValidations++;
             AILogger.logSchemaValidation(true, '');
             printPassRate();
             final coachResponse = CoachResponse.fromJson(responseJson);
+            print('🔍 Parsed Coach Action: ${coachResponse.coachAction}');
+            print(
+                '🔍 Has Habit Template: ${coachResponse.habitTemplate != null}');
+            if (coachResponse.habitTemplate != null) {
+              print('🔍 Template Title: ${coachResponse.habitTemplate!.title}');
+            }
             return coachResponse;
           } else {
             AILogger.logSchemaValidation(false, 'Schema validation failed');
             printPassRate();
             if (retryCount < 1) {
               print('🔄 Retrying API call due to schema validation failure...');
-              return await getChatCompletion(userMessage, retryCount: retryCount + 1);
+              return await getChatCompletion(messages,
+                  retryCount: retryCount + 1);
             }
           }
         } catch (e) {
@@ -883,7 +1021,8 @@ Return ONLY valid JSON matching the schema:
           printPassRate();
           if (retryCount < 1) {
             print('🔄 Retrying API call due to JSON parsing error...');
-            return await getChatCompletion(userMessage, retryCount: retryCount + 1);
+            return await getChatCompletion(messages,
+                retryCount: retryCount + 1);
           }
         }
       } else {
@@ -908,13 +1047,21 @@ Return ONLY valid JSON matching the schema:
         return false;
       }
 
-      final validActions = ['ADVICE', 'CREATE_HABIT', 'SCHEDULE_REMINDER', 'LOG_COMPLETION', 'REFRAME'];
+      final validActions = [
+        'ADVICE',
+        'CREATE_HABIT',
+        'SCHEDULE_REMINDER',
+        'LOG_COMPLETION',
+        'REFRAME'
+      ];
       if (!validActions.contains(response['coach_action'])) {
         return false;
       }
 
       final message = response['message'];
-      if (message == null || message.toString().isEmpty || message.toString().length > 500) {
+      if (message == null ||
+          message.toString().isEmpty ||
+          message.toString().length > 500) {
         return false;
       }
 
@@ -945,7 +1092,8 @@ Return ONLY valid JSON matching the schema:
 }
 
 // Controllers
-class AICoachController extends GetxController with GetTickerProviderStateMixin {
+class AICoachController extends GetxController
+    with GetTickerProviderStateMixin {
   final OpenAIService _openAIService = Get.find<OpenAIService>();
   final TextEditingController chatController = TextEditingController();
   final ScrollController chatScrollController = ScrollController();
@@ -955,7 +1103,8 @@ class AICoachController extends GetxController with GetTickerProviderStateMixin 
 
   final RxList<ChatMessage> chatMessages = <ChatMessage>[
     ChatMessage(
-      message: "Hi! I'm your AI habit coach. I can help you create new habits, provide advice, and keep you motivated. What would you like to work on today? 🎯",
+      message:
+      "Hi! I'm your AI habit coach. I can help you create new habits, provide advice, and keep you motivated. What would you like to work on today? 🎯",
       isUser: false,
       timestamp: DateTime.now().subtract(Duration(minutes: 1)),
       nextQuestions: ["I want to start a new habit", "Help me stay motivated"],
@@ -1014,7 +1163,24 @@ class AICoachController extends GetxController with GetTickerProviderStateMixin 
     isTyping.value = true;
 
     try {
-      final coachResponse = await _openAIService.getChatCompletion(message);
+      // Build full conversation history
+      List<Map<String, String>> messages = [
+        {
+          "role": "system",
+          "content": OpenAIService.systemPrompt
+        }
+      ];
+
+      // Add all previous chat messages (including the new user one)
+      for (var msg in chatMessages) {
+        messages.add({
+          "role": msg.isUser ? "user" : "assistant",
+          "content": msg.message,
+        });
+      }
+
+      // Call API
+      final coachResponse = await _openAIService.getChatCompletion(messages);
 
       isTyping.value = false;
 
@@ -1028,15 +1194,17 @@ class AICoachController extends GetxController with GetTickerProviderStateMixin 
         ));
 
         await _handleCoachAction(coachResponse);
+
       } else {
         chatMessages.add(ChatMessage(
-          message: "I'm having trouble connecting right now. Please try again in a moment.",
+          message: "I'm having trouble connecting right now. Please try again.",
           isUser: false,
           timestamp: DateTime.now(),
         ));
       }
 
       scrollToBottom();
+
     } catch (e) {
       isTyping.value = false;
       chatMessages.add(ChatMessage(
@@ -1048,21 +1216,47 @@ class AICoachController extends GetxController with GetTickerProviderStateMixin 
     }
   }
 
+
   Future<void> _handleCoachAction(CoachResponse response) async {
+    print('🔍 Coach Action: ${response.coachAction}');
+    print('🔍 Has Template: ${response.habitTemplate != null}');
+
     switch (response.coachAction) {
       case 'CREATE_HABIT':
         if (response.habitTemplate != null) {
-          await createHabit(response.habitTemplate!);
+          final template = response.habitTemplate!;
+          print('📝 Creating habit: ${template.title}');
+          print('📝 Subtitle: ${template.subtitle}');
+          print('📝 Days: ${template.cadence.days}');
+          print('📝 Category: ${template.category}');
+
+          final data = {
+            'title': template.title,
+            'subtitle': template.subtitle ?? 'AI-generated habit',
+            'iconCode': Icons.auto_awesome.codePoint,
+            'cadence': 'daily',
+            'daysOfWeek': _convertDaysToNumbers(template.cadence.days),
+            'category': template.category,
+            'reminders': false,
+            'isDynamic': true,
+          };
+          print("data======${data}");
+          final habitCtrl = Get.find<HabitTrackerController>();
+          await habitCtrl.createHabit2(data);
+          print('✅ Habit created successfully!');
 
           chatMessages.add(ChatMessage(
-            message: "✅ Great! I've created the habit \"${response.habitTemplate!.title}\" for you. It's scheduled for ${response.habitTemplate!.cadence.days.join(', ')} at ${response.habitTemplate!.cadence.times.join(', ')}.",
+            message:
+            "✅ Great! I've created the habit \"${template.title}\" for you. It's scheduled for ${template.cadence.days.join(', ')} at ${template.cadence.times.join(', ')}. Check your habits list!",
             isUser: false,
             timestamp: DateTime.now(),
-            nextQuestions: ["Start tracking today", "Modify this habit"],
+            nextQuestions: ["View my habits", "Create another habit"],
           ));
 
           scrollToBottom();
           update();
+        } else {
+          print('❌ No habit template in response');
         }
         break;
       case 'LOG_COMPLETION':
@@ -1130,5 +1324,18 @@ class AICoachController extends GetxController with GetTickerProviderStateMixin 
       default: // supportive
         return Color(0xFF10B981).withOpacity(0.2);
     }
+  }
+
+  List<int> _convertDaysToNumbers(List<String> days) {
+    const map = {
+      "Mon": 1,
+      "Tue": 2,
+      "Wed": 3,
+      "Thu": 4,
+      "Fri": 5,
+      "Sat": 6,
+      "Sun": 7,
+    };
+    return days.map((d) => map[d] ?? 1).toList();
   }
 }

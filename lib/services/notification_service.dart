@@ -409,8 +409,8 @@ class NotificationService {
 
     await _flutterLocal.show(
       DateTime.now().millisecondsSinceEpoch ~/ 2000,
-      'Complete this habit',
-      'Your habit "$habitName" Pending!',
+      'Time is running out!',
+      'Complete "$habitName" now!',
       details,
     );
   }
