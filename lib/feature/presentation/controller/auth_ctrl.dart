@@ -62,6 +62,21 @@ class AuthCtrl extends GetxController{
       final data = response.data;
       AppUtils.log("register successful: $data");
       Preferences.savePrefOnLogin = data;
+      
+      // Save user to Firebase Realtime Database
+      if (data?.id != null) {
+        await FirebaseServices.saveUserToRealtimeDB(
+          userId: data!.id!,
+          name: name ?? '',
+          email: email ?? '',
+          image: image,
+          gender: gender,
+          dob: dob,
+          mobileNumber: mobileNumber,
+          countryCode: countryCode,
+        );
+      }
+      
       return response;
     } else {
       final error = response.getError;

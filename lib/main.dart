@@ -1,3 +1,4 @@
+import 'package:question_app/feature/presentation/screens/homeScreen/home_screen.dart';
 import 'package:question_app/services/storage/preferences.dart';
 import 'package:question_app/utils/extensions/loader_utils.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:get/get.dart';
 import 'components/styles/ui_theme.dart';
 import 'feature/presentation/controller/profile_user_controller.dart';
 import 'feature/presentation/screens/splash.dart';
+import 'services/firebase/firebaseServices.dart';
 
 final GlobalKey<NavigatorState> navState = GlobalKey<NavigatorState>();
 
@@ -30,7 +32,7 @@ class MyApp extends StatelessWidget {
             lightUiTheme,
           ],
         ),
-        home:  Splash(),
+        home:  HomeScreen(),
       ),
     );
   }

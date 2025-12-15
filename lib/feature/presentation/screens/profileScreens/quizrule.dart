@@ -78,14 +78,14 @@ import '../../../../../components/coreComponents/TextView.dart';
 import '../../../../components/styles/appColors.dart';
 
 
-class PrivacyPolicy extends StatefulWidget {
-  const PrivacyPolicy({super.key});
+class QuizRule extends StatefulWidget {
+  const QuizRule({super.key});
 
   @override
-  _PrivacyPolicyState createState() => _PrivacyPolicyState();
+  _QuizRuleState createState() => _QuizRuleState();
 }
 
-class _PrivacyPolicyState extends State<PrivacyPolicy> {
+class _QuizRuleState extends State<QuizRule> {
    late final WebViewController controller;
 
    @override
@@ -107,8 +107,9 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
 
          ),
        )
+
        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-       ..loadRequest(Uri.parse("https://dhanqprivacy.vercel.app/")); // Load dynamic URL
+       ..loadRequest(Uri.parse("https://dhan-iq-rule.vercel.app/")); // Load dynamic URL
    }
 
 
@@ -123,7 +124,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
           centerTitle: true,
           backgroundColor: AppColors.white,
           elevation: 0,
-          title: Text("Privacy Policy"),
+          title: Text("Quiz Rules"),
           titleTextStyle: 24.txtBoldWhite,
           leading: GestureDetector(
             onTap: () {

@@ -16,6 +16,7 @@ class Preferences {
   static const _seemypost = 'seemypost_question_app';
   static const _sharepost = 'sharepost_question_app';
   static const _guestUserIdKey = 'guestUserId_question_app';
+  static const _userCoinsKey = 'userCoins_question_app';
 
 
   static late SharedPreferences _prefs;
@@ -146,6 +147,10 @@ class Preferences {
   static set guestUserId(String? id) =>
       id != null ? _prefs.setString(_guestUserIdKey, id) : _prefs.remove(_guestUserIdKey);
 
+  static set setUserCoins(int coins) => _prefs.setInt(_userCoinsKey, coins);
+
+  static int? get getUserCoins => _prefs.getInt(_userCoinsKey);
+
 
 
 
@@ -158,6 +163,7 @@ class Preferences {
     await _prefs.remove(_emailKey);
     await _prefs.remove(_seemypost);
     await _prefs.remove(_sharepost);
+    await _prefs.remove(_userCoinsKey);
   }
 
 

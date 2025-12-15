@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key></key>
-	<dict/>
 	<key>AVGameBypassSystemSpatialAudio</key>
 	<false/>
 	<key>App Category NSLocationAlwaysUsageDescription</key>
@@ -23,11 +21,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.3</string>
+	<string>1.4</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.2</string>
+	<string>1.0.3</string>
 	<key>GIDClientID</key>
 	<string></string>
 	<key>ITSAppUsesNonExemptEncryption</key>
@@ -50,15 +48,11 @@
 		</dict>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>This app needs Camera Usage Description</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>This app needs location permission to access current location to show the nearby mosque from your location</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs location permission to access current location to show the nearby mosque from your location</string>
+	<string>This app needs Camera Usage To upload the profile image of user</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app needs Microphone Usage Description</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app needs Photo Library Usage Description</string>
+	<string>This app needs Photo Library Usage upload the profile image of user</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>

@@ -80,26 +80,26 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - Stripe (24.15.0):
-    - StripeApplePay (= 24.15.0)
-    - StripeCore (= 24.15.0)
-    - StripePayments (= 24.15.0)
-    - StripePaymentsUI (= 24.15.0)
-    - StripeUICore (= 24.15.0)
-  - StripeApplePay (24.15.0):
-    - StripeCore (= 24.15.0)
-  - StripeCore (24.15.0)
-  - StripePayments (24.15.0):
-    - StripeCore (= 24.15.0)
-    - StripePayments/Stripe3DS2 (= 24.15.0)
-  - StripePayments/Stripe3DS2 (24.15.0):
-    - StripeCore (= 24.15.0)
-  - StripePaymentsUI (24.15.0):
-    - StripeCore (= 24.15.0)
-    - StripePayments (= 24.15.0)
-    - StripeUICore (= 24.15.0)
-  - StripeUICore (24.15.0):
-    - StripeCore (= 24.15.0)
+  - Stripe (24.24.0):
+    - StripeApplePay (= 24.24.0)
+    - StripeCore (= 24.24.0)
+    - StripePayments (= 24.24.0)
+    - StripePaymentsUI (= 24.24.0)
+    - StripeUICore (= 24.24.0)
+  - StripeApplePay (24.24.0):
+    - StripeCore (= 24.24.0)
+  - StripeCore (24.24.0)
+  - StripePayments (24.24.0):
+    - StripeCore (= 24.24.0)
+    - StripePayments/Stripe3DS2 (= 24.24.0)
+  - StripePayments/Stripe3DS2 (24.24.0):
+    - StripeCore (= 24.24.0)
+  - StripePaymentsUI (24.24.0):
+    - StripeCore (= 24.24.0)
+    - StripePayments (= 24.24.0)
+    - StripeUICore (= 24.24.0)
+  - StripeUICore (24.24.0):
+    - StripeCore (= 24.24.0)
   - webview_flutter_wkwebview (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -169,7 +169,7 @@ SPEC CHECKSUMS:
   FirebaseCoreInternal: ef4505d2afb1d0ebbc33162cb3795382904b5679
   FirebaseInstallations: 9980995bdd06ec8081dfb6ab364162bdd64245c3
   FirebaseMessaging: 2b9f56aa4ed286e1f0ce2ee1d413aabb8f9f5cb9
-  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_local_notifications: a5a732f069baa862e728d839dd2ebb904737effb
   fluttertoast: 2c67e14dce98bbdb200df9e1acf610d7a6264ea1
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
@@ -180,14 +180,14 @@ SPEC CHECKSUMS:
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
-  Stripe: 6f0047bdd52bbeecc3c87a9c0d429bf5bb2b1b86
-  StripeApplePay: e7a2f5fa07cbdba9c56cb7586cbfd4e7e32ed895
-  StripeCore: 224f995bb108e3be3bdf6cfab918657edf325559
-  StripePayments: 07ad9e3c5f22e0b068874c47c2ec37663f1b7aa5
-  StripePaymentsUI: d0549558424d3884b3fb7b8f3905ea685e750600
-  StripeUICore: dbd893086aa4fe697517624af2f1f0cea3218ac8
+  Stripe: 64849211528185870444d8ca696eeab40bdcacce
+  StripeApplePay: 1e65bbf41e4844a02b0dff60cb56c8d37261e53d
+  StripeCore: 63f2337bceb55db0095c5e29a61cfad33a61963c
+  StripePayments: 7a994f28bedd16bc0e4eb9091d2811425adaa6af
+  StripePaymentsUI: 8302dfe8094abb32cd2e0998a5b601164216d9db
+  StripeUICore: defd03b91fd5fb2838c59284e697b8da9cef0db0
   webview_flutter_wkwebview: 1821ceac936eba6f7984d89a9f3bcb4dea99ebb2
 
-PODFILE CHECKSUM: 3d25b5987748c1afdce2cafc2ef2162caee67615
+PODFILE CHECKSUM: 1838fc4c37bb2ab04362c91abbe34e5a756d60cd
 
 COCOAPODS: 1.16.2

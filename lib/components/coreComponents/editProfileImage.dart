@@ -26,8 +26,6 @@ class EditProfileImage extends StatelessWidget {
   final Gradient? gradient;
   final Function()? onImageTap;
 
-
-
   const EditProfileImage({
     super.key,
     required this.size,
@@ -40,15 +38,17 @@ class EditProfileImage extends StatelessWidget {
     this.error,
     this.img,
     this.tintColor,
-    this.gradient, this.onImageTap,
+    this.gradient,
+    this.onImageTap,
   });
-
 
   Widget imageView() {
     String _getImageUrl() {
-      if (imageData.type == ImageType.network && (imageData.network?.isNotEmpty ?? false)) {
+      if (imageData.type == ImageType.network &&
+          (imageData.network?.isNotEmpty ?? false)) {
         return imageData.network!;
-      } else if (imageData.type == ImageType.file && (imageData.file?.isNotEmpty ?? false)) {
+      } else if (imageData.type == ImageType.file &&
+          (imageData.file?.isNotEmpty ?? false)) {
         return imageData.file!;
       } else if (img?.isNotEmpty ?? false) {
         return img!;
@@ -57,18 +57,20 @@ class EditProfileImage extends StatelessWidget {
         return AppImages.dummyImg;
       }
     }
+
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: ImageView(
         radius: radius ?? 60,
         hasBorder: !hasGradient,
         bgColor: AppColors.white,
-        url: _getImageUrl(),  // Extracted logic for better readability
+        url: _getImageUrl(), // Extracted logic for better readability
         defaultImage: imageData.asset,
-        tintColor: imageData.type == ImageType.network &&
-            !(imageData.network?.isNotEmpty ?? false)
-            ? tintColor
-            : null,
+        tintColor:
+            imageData.type == ImageType.network &&
+                    !(imageData.network?.isNotEmpty ?? false)
+                ? tintColor
+                : null,
         size: size,
         imageType: imageData.type,
         fit: BoxFit.cover,
@@ -76,61 +78,70 @@ class EditProfileImage extends StatelessWidget {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
-    return
-      Padding(
-        padding: margin ?? EdgeInsets.zero,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Stack(
-              children: [
-                hasGradient ?
-                InkWell(
-                  onTap:onImageTap ,
-                  child: GradientCard(
-                    radius: radius,
-                    height: size,
-                    width: size,
-                    child:  imageView(),
-                  ),
-                ) : imageView()
-                ,
-                Visibility(
-                  visible: isEditable,
-                  child: Positioned(
-                      right: 40,
-                      bottom: 0,
-                      child: ImageEditButton(
-                        size: 32,
-                        onTap: () {
-                          appBSheet(context, EditImageBSheetView(
-                            onItemTap: (source) async {
-                              Navigator.pop(context);
-                              final path =  await openFilePicker(source);
-                              if(path != null){
-                                ImageDataModel imageDataTemp = imageData; imageDataTemp.file = path; imageDataTemp.type = ImageType.file; if(onChange != null){
-                                  onChange!(imageDataTemp); }
+    return Padding(
+      padding: margin ?? EdgeInsets.zero,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Stack(
+            children: [
+              hasGradient
+                  ? InkWell(
+                    onTap: onImageTap,
+                    child: GradientCard(
+                      radius: radius,
+                      height: size,
+                      width: size,
+                      child: imageView(),
+                    ),
+                  )
+                  : imageView(),
+              Visibility(
+                visible: isEditable,
+                child: Positioned(
+                  right: 40,
+                  bottom: 0,
+                  child: ImageEditButton(
+                    size: 32,
+                    onTap: () {
+                      appBSheet(
+                        context,
+                        EditImageBSheetView(
+                          onItemTap: (source) async {
+                            Navigator.pop(context);
+                            final path = await openFilePicker(source);
+                            if (path != null) {
+                              ImageDataModel imageDataTemp = imageData;
+                              imageDataTemp.file = path;
+                              imageDataTemp.type = ImageType.file;
+                              if (onChange != null) {
+                                onChange!(imageDataTemp);
                               }
-                            },
-                          ));
-                        },
-                      )),
-                )
-              ],
-            ),
-            SizedBox(
-                child: error != null ? TextView(
-                  text: error ?? '',
-                  style: 14.txtRegularError,
-                  margin: const EdgeInsets.only(top: 7),
-                ) : null)
-          ],
-        ),
-      );
+                            }
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(
+            child:
+                error != null
+                    ? TextView(
+                      text: error ?? '',
+                      style: 14.txtRegularError,
+                      margin: const EdgeInsets.only(top: 7),
+                    )
+                    : null,
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -162,75 +173,73 @@ class ImageEditButton extends StatelessWidget {
         //   //   url: AppIcons.editCamera,
         //   // ),
         // ),
-        Positioned.fill(
-            child: TapWidget(
-              onTap: onTap,
-            ))
+        Positioned.fill(child: TapWidget(onTap: onTap)),
       ],
     );
   }
 }
 
-
-
 class EditImageBSheetView extends StatelessWidget {
   final Function(MediaSource) onItemTap;
   final bool hasVideoPicker;
 
-  const EditImageBSheetView({super.key, required this.onItemTap, this.hasVideoPicker = false});
+  const EditImageBSheetView({
+    super.key,
+    required this.onItemTap,
+    this.hasVideoPicker = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     // final locale = context.locale;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20 )+ EdgeInsets.only(top: 10, bottom: 25),
+      padding:
+          const EdgeInsets.symmetric(horizontal: 20) +
+          EdgeInsets.only(top: 10, bottom: 25),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           TextView(
             margin: EdgeInsets.zero,
-            text: "Choose ${hasVideoPicker ?'File' :'Photo'}",
+            text: "Choose ${hasVideoPicker ? 'File' : 'Photo'}",
             style: 16.txtRegularPrimary,
           ),
-          SizedBox(height: 10,),
+          SizedBox(height: 10),
           Row(
             children: [
               _ItemTile(
-                  onTap: () => onItemTap(MediaSource.cameraPhoto),
-                  image: AppImages.cameraaa,
-                  name: "Camera"),
-              const SizedBox(
-                width: 20,
+                onTap: () => onItemTap(MediaSource.cameraPhoto),
+                image: AppImages.cameraaa,
+                name: "Camera",
               ),
+              const SizedBox(width: 20),
               _ItemTile(
-                  onTap: () => onItemTap(MediaSource.gallery),
-                  image: AppImages.gallery,
-                  name: "Gallery"),
+                onTap: () => onItemTap(MediaSource.gallery),
+                image: AppImages.gallery,
+                name: "Gallery",
+              ),
 
               Visibility(
-                  visible: hasVideoPicker,
-                  child: Row(
-                    children: [
-                      const SizedBox(
-                        width: 20,
-                      ),
-                      _ItemTile(
-                          onTap: () => onItemTap(MediaSource.video),
-                          image: AppImages.videoicon,
-                          name: "Video"),
-                    ],
-                  ))
-
-
-
+                visible: hasVideoPicker,
+                child: Row(
+                  children: [
+                    const SizedBox(width: 20),
+                    _ItemTile(
+                      onTap: () => onItemTap(MediaSource.video),
+                      image: AppImages.videoicon,
+                      name: "Video",
+                    ),
+                  ],
+                ),
+              ),
 
               // _ItemTile(onTap: ()=> onItemTap(ImageSource.camera),
               //     image: AppIcons.camera, name: locale.camera), const SizedBox(width: 20,),
               // _ItemTile(onTap: ()=> onItemTap(ImageSource.gallery),
               //     image: AppIcons.image, name: locale.gallery),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -242,8 +251,7 @@ class _ItemTile extends StatelessWidget {
   final String name;
   final Function()? onTap;
 
-  const _ItemTile(
-      {super.key, required this.image, required this.name, this.onTap});
+  const _ItemTile({required this.image, required this.name, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -257,43 +265,44 @@ class _ItemTile extends StatelessWidget {
               tintColor: AppColors.grey,
               margin: const EdgeInsets.only(bottom: 5),
             ),
-            TextView(
-              text: name,
-              style: 14.txtRegularPrimary,
-            ),
+            TextView(text: name, style: 14.txtRegularPrimary),
           ],
         ),
-        Positioned.fill(
-            child: TapWidget(
-              onTap: onTap,
-            ))
+        Positioned.fill(child: TapWidget(onTap: onTap)),
       ],
     );
   }
 }
 
-
-Future<String?> openCameraPhoto()=> openFilePicker(MediaSource.cameraPhoto);
-Future<String?> openGallery()=> openFilePicker(MediaSource.gallery);
-Future<String?> openVideo()=> openFilePicker(MediaSource.video);
-Future<String?> openCameraVideo()=> openFilePicker(MediaSource.cameraVideo);
+Future<String?> openCameraPhoto() => openFilePicker(MediaSource.cameraPhoto);
+Future<String?> openGallery() => openFilePicker(MediaSource.gallery);
+Future<String?> openVideo() => openFilePicker(MediaSource.video);
+Future<String?> openCameraVideo() => openFilePicker(MediaSource.cameraVideo);
 // Future<String?> openGallery()=> _imagePickerOpen(ImageSource.gallery);
 
-Future<String?> openFilePicker(MediaSource source) async{
+Future<String?> openFilePicker(MediaSource source) async {
   final ImagePicker picker = ImagePicker();
-  final XFile? image = await (source.isPhoto ? picker.pickImage(source: source.imageSource) : picker.pickVideo(source: source.videoSource));
+  final XFile? image =
+      await (source.isPhoto
+          ? picker.pickImage(source: source.imageSource)
+          : picker.pickVideo(source: source.videoSource));
   return image?.path;
 }
 
+enum MediaSource { cameraPhoto, gallery, cameraVideo, video }
 
-enum MediaSource{cameraPhoto,gallery,cameraVideo,video}
-
-
-extension OnMediaSource on MediaSource{
-  bool get isPhoto => this == MediaSource.cameraPhoto || this == MediaSource.gallery;
-  bool get isVideo => this == MediaSource.video || this == MediaSource.cameraVideo;
-  ImageSource get imageSource => this == MediaSource.cameraPhoto ? ImageSource.camera : ImageSource.gallery;
-  ImageSource get videoSource => this == MediaSource.cameraVideo ? ImageSource.camera : ImageSource.gallery;
-  String get fileType => isPhoto? 'image' : 'video';
-
+extension OnMediaSource on MediaSource {
+  bool get isPhoto =>
+      this == MediaSource.cameraPhoto || this == MediaSource.gallery;
+  bool get isVideo =>
+      this == MediaSource.video || this == MediaSource.cameraVideo;
+  ImageSource get imageSource =>
+      this == MediaSource.cameraPhoto
+          ? ImageSource.camera
+          : ImageSource.gallery;
+  ImageSource get videoSource =>
+      this == MediaSource.cameraVideo
+          ? ImageSource.camera
+          : ImageSource.gallery;
+  String get fileType => isPhoto ? 'image' : 'video';
 }

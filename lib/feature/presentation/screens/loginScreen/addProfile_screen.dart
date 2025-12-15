@@ -262,8 +262,8 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
           name: widget.name ?? "",
           countryCode: widget.countryCode ?? "",
           mobileNumber: widget.phoneNumber ?? "",
-          gender: genderController.text,
-          dob: dobController.text,
+          gender: genderController.text??"",
+          dob: dobController.text??"",
           image: uploadedImageUrl,
           device_type: deviceType,
           device_token: FirebaseServices.fcmToken ??"",
@@ -339,13 +339,12 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
                         radius: 10,
                         width: double.infinity,
                         label: AppStrings.Continue,
-                        labelStyle:
-                            _isFormValid ? 17.txtBoldWhite : 17.txtBoldGrey,
-                        onTap: _isFormValid ? _submitForm : null,
-                        buttonColor:
-                            _isFormValid
-                                ? AppColors.btnColor
-                                : AppColors.greyHint.withOpacity(0.3),
+                     //   labelStyle: _isFormValid ? 17.txtBoldWhite : 17.txtBoldGrey,
+                        labelStyle:  17.txtBoldWhite ,
+                     //   onTap: _isFormValid ? _submitForm : null,
+                        onTap: _submitForm ,
+                     //   buttonColor: _isFormValid ? AppColors.btnColor : AppColors.greyHint.withOpacity(0.3),
+                        buttonColor: AppColors.btnColor,
                       ),
                     ],
                   ),
@@ -381,12 +380,12 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
           controller: dobController,
           readOnly: true,
           onTap: _selectDateOfBirth,
-          validator: (value) {
+          /*validator: (value) {
             if (value == null || value.isEmpty) {
               return AppStrings.pleaseEnterYourDate;
             }
             return null;
-          },
+          },*/
           margin: 10.bottom,
         ),
       ],

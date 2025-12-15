@@ -7,6 +7,7 @@ import 'package:question_app/components/coreComponents/ImageView.dart';
 import 'package:question_app/components/coreComponents/TextView.dart';
 import 'package:question_app/components/styles/appImages.dart';
 import 'package:question_app/components/styles/textStyles.dart';
+import 'package:question_app/feature/presentation/screens/homeScreen/result_screen.dart';
 import 'package:question_app/feature/presentation/screens/homeScreen/web_view_screen.dart';
 import 'package:question_app/services/storage/preferences.dart';
 import 'package:question_app/utils/appUtils.dart';
@@ -50,15 +51,12 @@ class _QuizScreenState extends State<QuizScreen> {
   String get questionId =>
       widget.questions.isNotEmpty ? widget.questions[0].id ?? "" : "";
 
-
-
-
   Future<String> getDeviceCountryParam() async {
     try {
       // Try to get current system locale
       String? countryCode = ui.PlatformDispatcher.instance.locale.countryCode;
 
-      if (countryCode != null && countryCode.isNotEmpty) {
+      if (countryCode.isNotEmpty) {
         return _mapCountryCodeToParam(countryCode.toUpperCase());
       }
     } catch (_) {}
@@ -80,9 +78,6 @@ class _QuizScreenState extends State<QuizScreen> {
     }
   }
 
-
-
-
   Future<void> _submitForm() async {
     if (selectedOption == null) {
       AppUtils.log("No option selected");
@@ -103,11 +98,18 @@ class _QuizScreenState extends State<QuizScreen> {
       }
 
       try {
-        var data = await AuthCtrl.find.checkout(guestUserId,await getDeviceCountryParam());
+        var data = await AuthCtrl.find.checkout(
+          guestUserId,
+          await getDeviceCountryParam(),
+        );
 
         if (data.statusCode == 200) {
           var value = await context.pushNavigator(
-            WebViewScreen(url: data.data!.url.toString()),
+            ResultScreen(
+              score: "12",
+              maxScore: "200",
+              userName: Preferences.profile!.name.toString(),
+            ),
           );
 
           print("Return Data = $value");
@@ -125,35 +127,53 @@ class _QuizScreenState extends State<QuizScreen> {
                     .applyLoader;
             if (response.isSuccess) {
               AppUtils.toast("Answer Submit Successfully");
-              Preferences.guestUserId="";
+              Preferences.guestUserId = "";
 
               Navigator.pop(context, "success");
             }
           }
 
-          /*final response = await AuthCtrl.find.submitQuestion(questionId,question, selectedOption ?? "").applyLoader;
-         if (response.isSuccess) {
-           AppUtils.toast("Answer Submit Successfully");
+          /* final response =
+              await AuthCtrl.find
+                  .submitQuestion(questionId, question, selectedOption ?? "")
+                  .applyLoader;
+          if (response.isSuccess) {
+            AppUtils.toast("Answer Submit Successfully");
 
-           context.pop();
-         }*/
+            context.pop();
+          }
         }
 
-        /*final response = await AuthCtrl.find.submitQuestionsGuestUser(guestUserId,questionId,question, selectedOption ?? "").applyLoader;
+        final response =
+            await AuthCtrl.find
+                .submitQuestionsGuestUser(
+                  guestUserId,
+                  questionId,
+                  question,
+                  selectedOption ?? "",
+                )
+                .applyLoader;
         if (response.isSuccess) {
           AppUtils.toast("Answer Submit Successfully");
           context.pop();
         }*/
+        }
       } catch (e) {
         AppUtils.log('Guest question submit error: $e');
       }
     } else {
       try {
         var data = await AuthCtrl.find.checkout(
-          Preferences.profile!.id.toString(),await getDeviceCountryParam());
+          Preferences.profile!.id.toString(),
+          await getDeviceCountryParam(),
+        );
         if (data.statusCode == 200) {
           var value = await context.pushNavigator(
-            WebViewScreen(url: data.data!.url.toString()),
+            ResultScreen(
+              score: "12",
+              maxScore: "200",
+              userName: Preferences.profile!.name.toString(),
+            ),
           );
           if (value == "success") {
             print("Return Data = $value");
@@ -164,7 +184,6 @@ class _QuizScreenState extends State<QuizScreen> {
             if (response.isSuccess) {
               AppUtils.toast("Answer Submit Successfully");
               Navigator.pop(context, "success");
-
             }
           }
         }
@@ -205,12 +224,9 @@ class _QuizScreenState extends State<QuizScreen> {
             'Guest Login Response Data: name=${loginData?.name ?? ""}, email=${loginData?.email}, id=${loginData?.id}',
           );
           widget.guestid = loginData?.id;
-          Preferences.guestUserId=loginData?.id;
+          Preferences.guestUserId = loginData?.id;
           // context.pop();
           _submitForm();
-
-
-
         } catch (e) {
           AppUtils.log('Guest Login Error: $e');
         }
@@ -294,11 +310,11 @@ class _QuizScreenState extends State<QuizScreen> {
                       inputType: TextInputType.phone,
                       hintStyle: 16.txtRegularGrey,
                       prefixIcon: _pfIcon(AppImages.phoneIcon),
-                      validator:
+                      /*validator:
                           (v) =>
                               v.isNotNullEmpty
                                   ? null
-                                  : AppStrings.pleaseEnterYourPhoneNumber,
+                                  : AppStrings.pleaseEnterYourPhoneNumber,*/
                     ),
                   ],
                 ),

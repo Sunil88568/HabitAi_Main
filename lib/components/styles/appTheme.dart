@@ -33,7 +33,7 @@ class AppTheme {
       floatingActionButtonTheme: _floatingButtonTheme,
       checkboxTheme: _checkboxThemeData,
   // dialogBackgroundColor: Colors.transparent,
-    dialogTheme: const DialogTheme(
+    dialogTheme: const DialogThemeData(
         // backgroundColor: canvasColor,
         surfaceTintColor: Colors.transparent,
     )
@@ -60,7 +60,7 @@ class AppTheme {
 
       inputDecorationTheme: EditTextTheme.editTextTheme,
       floatingActionButtonTheme: _floatingButtonTheme, checkboxTheme: _checkboxThemeData,
-      dialogTheme: const DialogTheme(
+      dialogTheme: const DialogThemeData(
         surfaceTintColor: Colors.transparent,
       )
   );

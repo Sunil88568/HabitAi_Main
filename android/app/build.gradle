@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.app.question_app"
-    compileSdk = 35
+    compileSdk = 36
 //            flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
     compileOptions {
@@ -30,8 +30,8 @@ android {
 //                flutter.minSdkVersion
         targetSdk = 35
 //                flutter.targetSdkVersion
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 4
+        versionName = "1.0.3"
     }
 
     buildTypes {
@@ -51,8 +51,3 @@ flutter {
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
 }
-
-
-
-
-

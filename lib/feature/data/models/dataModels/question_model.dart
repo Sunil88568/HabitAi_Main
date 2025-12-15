@@ -1,35 +1,129 @@
-import 'dart:ffi';
+// CSV-based QuestionModel for local quiz
+class CsvQuestionModel {
+  final String question;
+  final String correctAnswer;
+  final String optionA;
+  final String optionB;
+  final String optionC;
+  final String optionD;
 
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'dart:convert';
+  CsvQuestionModel({
+    required this.question,
+    required this.correctAnswer,
+    required this.optionA,
+    required this.optionB,
+    required this.optionC,
+    required this.optionD,
+  });
 
-part 'question_model.freezed.dart';
-part 'question_model.g.dart';
+  factory CsvQuestionModel.fromCsv(List<String> csvRow) {
+    return CsvQuestionModel(
+      question: csvRow[0],
+      correctAnswer: csvRow[1],
+      optionA: csvRow[2],
+      optionB: csvRow[3],
+      optionC: csvRow[4],
+      optionD: csvRow[5],
+    );
+  }
 
-/// For decoding from JSON string
-QuestionModel questionModelFromJson(String str) =>
-    QuestionModel.fromJson(json.decode(str));
+  List<String> get options => [optionA, optionB, optionC, optionD];
+  
+  String getCorrectAnswerText() {
+    switch (correctAnswer) {
+      case 'A': return optionA;
+      case 'B': return optionB;
+      case 'C': return optionC;
+      case 'D': return optionD;
+      default: return optionA;
+    }
+  }
+}
 
-/// For encoding to JSON string
-String questionModelToJson(QuestionModel data) => json.encode(data.toJson());
+// API-based QuestionModel for server quiz
+class QuestionModel {
+  final String? id;
+  final String? question;
+  final String? pricePoll;
+  final int? count;
+  final bool? isSubmitted;
+  final List<String>? options;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final DateTime? expiresAt;
+  final int? v;
 
-@freezed
-class QuestionModel with _$QuestionModel {
-  const factory QuestionModel({
-    @JsonKey(name: "_id") String? id,
-    String? question,
-    String? pricePoll,
-    int? count,
-    bool? isSubmitted,
+  QuestionModel({
+    this.id,
+    this.question,
+    this.pricePoll,
+    this.count,
+    this.isSubmitted,
+    this.options,
+    this.createdAt,
+    this.updatedAt,
+    this.expiresAt,
+    this.v,
+  });
 
-    List<String>? options,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? expiresAt,
+  factory QuestionModel.fromJson(Map<String, dynamic> json) {
+    return QuestionModel(
+      id: json['_id'] as String?,
+      question: json['question'] as String?,
+      pricePoll: json['pricePoll'] as String?,
+      count: json['count'] as int?,
+      isSubmitted: json['isSubmitted'] as bool?,
+      options: (json['options'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt'] as String) : null,
+      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt'] as String) : null,
+      expiresAt: json['expiresAt'] != null ? DateTime.parse(json['expiresAt'] as String) : null,
+      v: json['__v'] as int?,
+    );
+  }
 
-    @JsonKey(name: "__v") int? v,
-  }) = _QuestionModel;
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'question': question,
+      'pricePoll': pricePoll,
+      'count': count,
+      'isSubmitted': isSubmitted,
+      'options': options,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+      'expiresAt': expiresAt?.toIso8601String(),
+      '__v': v,
+    };
+  }
+}
 
-  factory QuestionModel.fromJson(Map<String, dynamic> json) =>
-      _$QuestionModelFromJson(json);
+class QuizResult {
+  final int totalQuestions;
+  final int correctAnswers;
+  final int coinsEarned;
+  final List<CsvQuestionModel> questions;
+  final List<String> userAnswers;
+  final int? timeTaken;
+
+  QuizResult({
+    required this.totalQuestions,
+    required this.correctAnswers,
+    required this.coinsEarned,
+    required this.questions,
+    required this.userAnswers,
+    this.timeTaken,
+  });
+
+  double get percentage => (correctAnswers / totalQuestions) * 100;
+  
+  Map<String, dynamic> toJson() {
+    return {
+      'totalQuestions': totalQuestions,
+      'correctAnswers': correctAnswers,
+      'coinsEarned': coinsEarned,
+      'percentage': percentage,
+      'timeTaken': timeTaken,
+      'completedAt': DateTime.now().toIso8601String(),
+    };
+  }
 }

@@ -66,8 +66,18 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       AppUtils.logEr(">>>>>>>>>${imageData.value}");
       AppUtils.logEr("image>>>>>>>>>${ProfileUserController.find.userProfile.value!.image.fileUrl}");
     }
-    _selectedDob = DateFormat("dd/MM/yyyy").parse(ProfileUserController.find.userProfile.value?.dob??"");
-    gender = ProfileUserController.find.userProfile.value?.gender;
+    final dobString = ProfileUserController.find.userProfile.value?.dob;
+    if (dobString != null && dobString.isNotEmpty) {
+      try {
+        _selectedDob = DateFormat("dd/MM/yyyy").parse(dobString);
+      } catch (e) {
+        _selectedDob = null; // or handle invalid format
+      }
+    } else {
+      _selectedDob = null;
+    }
+
+    gender = ProfileUserController.find.userProfile.value?.gender ?? "";
   }
 
   @override

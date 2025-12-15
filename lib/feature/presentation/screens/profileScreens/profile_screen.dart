@@ -7,6 +7,7 @@ import 'package:question_app/feature/presentation/screens/homeScreen/home_screen
 import 'package:question_app/feature/presentation/screens/loginScreen/login_screen.dart';
 import 'package:question_app/feature/presentation/screens/profileScreens/persional_info_screen.dart';
 import 'package:question_app/feature/presentation/screens/profileScreens/privacypolicy.dart';
+import 'package:question_app/feature/presentation/screens/profileScreens/quizrule.dart';
 import 'package:question_app/feature/presentation/screens/profileScreens/setting_screen.dart';
 import 'package:question_app/feature/presentation/screens/profileScreens/termandconditions.dart';
 import 'package:question_app/utils/appUtils.dart';
@@ -94,6 +95,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   text: "Terms & Conditions",
                   onTap: () {
                     context.pushNavigator(Termandconditions());
+                  },
+                ),
+                _commonWidget(
+                  image: AppImages.termAndCondation,
+                  text: "Quiz Rules",
+                  onTap: () {
+                    context.pushNavigator(QuizRule());
                   },
                 ),
                 _commonWidget(

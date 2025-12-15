@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -16,6 +17,7 @@ import 'firebase_options.dart';
 class FirebaseServices{
   // static final _chatCtrl = ChatCtrl.find;
   static String? fcmToken;
+  static late DatabaseReference _database;
 
   static late FirebaseMessaging _messaging;
   static late BuildContext _context;
@@ -45,6 +47,7 @@ class FirebaseServices{
 
 
     _messaging = FirebaseMessaging.instance;
+    _database = FirebaseDatabase.instance.ref();
 
     requestGetToken();
      // await FirebaseMessaging.instance.setAutoInitEnabled(true);
@@ -293,6 +296,33 @@ class FirebaseServices{
       return false;
     }
 
+  }
+
+  static Future<void> saveUserToRealtimeDB({
+    required String userId,
+    required String name,
+    required String email,
+    String? image,
+    String? gender,
+    String? dob,
+    String? mobileNumber,
+    String? countryCode,
+  }) async {
+    try {
+      await _database.child('users').child(userId).set({
+        'name': name,
+        'email': email,
+        'image': image,
+        'gender': gender,
+        'dob': dob,
+        'mobileNumber': mobileNumber,
+        'countryCode': countryCode,
+        'createdAt': ServerValue.timestamp,
+        'updatedAt': ServerValue.timestamp,
+      });
+    } catch (e) {
+      print('Error saving user to Realtime DB: $e');
+    }
   }
 }
 

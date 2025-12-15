@@ -130,7 +130,7 @@ class _EmailLoginFormState extends State<EmailLoginForm> {
           nameController.text.isNotEmpty &&
           passwordController.text.isNotEmpty &&
           // countryCodeController.text.isNotEmpty &&
-          phoneController.text.isNotEmpty &&
+        //  phoneController.text.isNotEmpty &&
           confirmPasswordController.text.isNotEmpty &&
           _formKey.currentState!.validate() ?? false;
 
