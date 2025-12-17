@@ -49,15 +49,12 @@ class ProfileScreenController extends GetxController {
     settings.dailyReminders.value = newValue;
     await NotificationService().setDailyRemindersEnabled(newValue);
   }
-
   void toggleDarkMode() {
     settings.darkMode.value = !settings.darkMode.value;
   }
-
   void login() {
     Get.toNamed('/login');
   }
-
   void logout() async {
     await AuthService().signOut();
     isLoggedIn.value = false;
@@ -65,7 +62,6 @@ class ProfileScreenController extends GetxController {
     Get.offAllNamed('/login');
   }
 }
-
 class ProfileScreen extends StatelessWidget {
   final VoidCallback? onBack;
   ProfileScreen({super.key, this.onBack});

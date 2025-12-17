@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import "./CalenderScreen.dart";
 import 'habit_controller.dart';
 import "../Components/ProfileScreen.dart";
+import '../widgets/badge_display.dart';
 
 class HabitTrackerScreen extends GetView<HabitTrackerController> {
   @override
@@ -62,6 +63,29 @@ class HabitTrackerScreen extends GetView<HabitTrackerController> {
                   }).toList(),
                 );
               }),
+            ),
+
+            // 🔹 XP and Badge Display
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Color(0xFF2C2C2E),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Obx(() => Row(
+                children: [
+                  Icon(Icons.stars, color: Colors.yellow, size: 20),
+                  SizedBox(width: 8),
+                  Text('XP: ${controller.totalXP.value}', 
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  Spacer(),
+                  Icon(Icons.military_tech, color: Colors.orange, size: 20),
+                  SizedBox(width: 8),
+                  Text('${controller.unlockedBadges.length}/${HabitTrackerController.allBadges.length} Badges', 
+                    style: TextStyle(color: Colors.white)),
+                ],
+              )),
             ),
 
             // 🔹 Habits list

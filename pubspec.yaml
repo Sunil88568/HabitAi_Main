@@ -1,53 +1,44 @@
 name: habitai
-description: "A new Flutter project."
+description: A new Flutter project.
 publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.6.1
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-
-  # Firebase Core Packages
-  firebase_core: ^4.1.1
-  firebase_auth: ^6.1.0
-  cloud_firestore: ^6.0.2
-  firebase_analytics: ^12.0.2
-  firebase_crashlytics: ^5.0.2
-  firebase_messaging: ^16.0.4
-
-  # Authentication (Google + Apple)
-  google_sign_in: ^6.2.1
-  sign_in_with_apple: ^6.1.0
+  cupertino_icons: ^1.0.2
+  get: ^4.6.5
+  firebase_core: ^2.15.1
+  firebase_auth: ^4.7.3
+  firebase_crashlytics: ^3.3.5
+  firebase_analytics: ^10.4.5
+  firebase_messaging: ^14.6.7
+  cloud_firestore: ^4.8.5
+  google_sign_in: ^6.1.4
   flutter_signin_button: ^2.0.0
-
-  # UI / Utility
-  get: ^4.6.6
-  cupertino_icons: ^1.0.8
-  intl: ^0.18.1
-  table_calendar: ^3.0.9
   flutter_dotenv: ^6.0.0
-
-  # NEW: For Habit CRUD & Offline-first Logs
-  uuid: ^4.5.1
-  flutter_local_notifications: ^17.2.2
-  shared_preferences: ^2.0.15
-  timezone: ^0.9.0+1
-  flutter_timezone: ^5.0.1
+  http: ^1.6.0
+  flutter_local_notifications: ^19.5.0
+  timezone: ^0.10.1
+  table_calendar: ^3.2.0
+  intl: ^0.20.2
+  purchases_flutter: ^9.9.9
+  shared_preferences: ^2.5.3
+  sign_in_with_apple: ^7.0.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
-  flutter_flavorizr: ^2.3.0
-  fake_cloud_firestore: ^4.0.0
+  flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true
-
   assets:
+    - assets/
+    - assets/bgimages/
     - assets/.env.dev
     - assets/.env.staging
     - assets/.env.prod

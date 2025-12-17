@@ -118,13 +118,10 @@ class NotificationService {
     print('📍 NotificationService: tz.local set to UTC (scheduling will convert from device local time)');
 
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-    final iosInit = DarwinInitializationSettings(
+    const iosInit = DarwinInitializationSettings(
       requestSoundPermission: true,
       requestBadgePermission: true,
       requestAlertPermission: true,
-      onDidReceiveLocalNotification: (id, title, body, payload) {
-        if (payload != null) handleSelectNotification(payload);
-      },
     );
 
     await _flutterLocal.initialize(
@@ -473,7 +470,6 @@ class NotificationService {
         scheduledDate,
         details,
         payload: payload,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         matchDateTimeComponents: match,
       );
@@ -497,7 +493,7 @@ class NotificationService {
             scheduledDate,
             details,
             payload: payload,
-            uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+            androidScheduleMode: AndroidScheduleMode.inexact,
             matchDateTimeComponents: match,
           );
           return true;

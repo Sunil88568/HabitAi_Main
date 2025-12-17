@@ -22,6 +22,7 @@ import 'firebase_options_staging.dart';
 import 'firebase_options_prod.dart';
 import 'package:habitai/services/notification_service.dart';
 import 'package:habitai/services/push_service.dart';
+import 'package:habitai/services/revenue_cat_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,11 +66,13 @@ Future<void> main() async {
     print('❌ Firebase initialization failed: $e');
     print(st);
   }
-
-  // ✅ 5️⃣ Register controller AFTER Firebase is ready
+  // ✅ 5️⃣ Register controllers AFTER Firebase is ready
   Get.put(HabitTrackerController(), permanent: true);
+  Get.put(RevenueCatService(), permanent: true);
+  
+  print('✅ Badge system initialized with habit controller');
 
-  print('✅ HabitTrackerController registered');
+  print('✅ Controllers registered');
 
   // 6️⃣ Initialize Crashlytics safely
   try {
@@ -103,7 +106,6 @@ Future<void> main() async {
 
   print('🔹 Running flavor: $env');
   print('🔹 API URL: ${dotenv.env['API_BASE_URL']}');
-
   // 8️⃣ Run app
   // Initialize notification & push services so background handlers are registered before UI runs.
   bool notifyExactDenied = false;
@@ -116,8 +118,6 @@ Future<void> main() async {
 // ⬇️ Request Android & iOS notification permission
     final granted = await NotificationService().requestPermissions();
     print('📍 Notification permission granted: $granted');
-
-
     // Determine flags to show (but DO NOT call Get.snackbar here — Get isn't ready)
     notifyExactDenied = await NotificationService().isExactAlarmDenied();
     notifySchedulingFailed = await NotificationService().hasSchedulingFailed();
@@ -125,14 +125,11 @@ Future<void> main() async {
     print('⚠ Notifications init failed: $e\n$st');
   }
 // quick test: immediate local notification
-
-
   runApp(HabitAIApp(
     showExactDeniedHint: notifyExactDenied,
     showSchedulingFailedHint: notifySchedulingFailed,
   ));
 }
-
 /// Root App Widget
 class HabitAIApp extends StatelessWidget {
   final AuthService _auth = AuthService();
@@ -146,7 +143,6 @@ class HabitAIApp extends StatelessWidget {
   Future<Widget> _getInitialScreen() async {
     final user = _auth.currentUser;
     if (user == null) return const LoginScreen();
-
     try {
       final completed = await _firestore.hasCompletedOnboarding();
       if (completed) {
@@ -159,7 +155,6 @@ class HabitAIApp extends StatelessWidget {
       return const LoginScreen(); // fallback to safe route
     }
   }
-
   @override
   Widget build(BuildContext context) {
     // After the first frame, surface any persisted notification scheduling warnings via Get.snackbar.
@@ -189,12 +184,10 @@ class HabitAIApp extends StatelessWidget {
         } catch (_) {}
       }
     });
-
     return StreamBuilder(
       stream: _auth.authStateChanges,
       builder: (context, snapshot) {
         final user = snapshot.data;
-
         return FutureBuilder<Widget>(
           future: _getInitialScreen(),
           builder: (context, snap) {
@@ -209,7 +202,6 @@ class HabitAIApp extends StatelessWidget {
                 ),
               );
             }
-
             return GetMaterialApp(
               title: 'HabitAI',
               debugShowCheckedModeBanner: false,
@@ -234,11 +226,9 @@ class HabitAIApp extends StatelessWidget {
     );
   }
 }
-
 /// Placeholder Home Screen (Crashlytics test)
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

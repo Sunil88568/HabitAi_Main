@@ -8,10 +8,14 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../Ai Chat/ai_chat.dart';
-import '../Ai Chat/chat_controller.dart';
+import '../Ai Chat/simple_chat_controller.dart';
 import 'create_habit.dart';
 import '../features/progress/progress.dart';
 import 'package:habitai/services/notification_service.dart';
+import '../services/revenue_cat_service.dart';
+import '../screens/paywall/paywall_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 /// ---------------------------------------------------------------------------
 ///  UTILITY — Adelaide timezone date (YYYY-MM-DD)
@@ -109,10 +113,34 @@ class HabitItem {
 /// ---------------------------------------------------------------------------
 ///  CONTROLLER
 /// ---------------------------------------------------------------------------
+class Badge {
+  final String id;
+  final String name;
+  final String description;
+  final int streakRequired;
+  final String emoji;
+  
+  Badge(this.id, this.name, this.description, this.streakRequired, this.emoji);
+}
+
 class HabitTrackerController extends GetxController {
   final RxList<HabitItem> habits = <HabitItem>[].obs;
   final RxMap<String, bool> todayCompletions = <String, bool>{}.obs;
   final selectedDate = DateTime.now().obs;
+  final RxInt totalXP = 0.obs;
+  final RxList<Badge> unlockedBadges = <Badge>[].obs;
+  final RxList<Badge> newBadges = <Badge>[].obs;
+  final RxMap<String, bool> xpAwarded = <String, bool>{}.obs;
+  
+  static const int dailyCheckInXP = 10;
+  static final List<Badge> allBadges = [
+    Badge('week_warrior', 'Week Warrior', '7-day streak', 7, '🔥'),
+    Badge('monthly_master', 'Monthly Master', '30-day streak', 30, '💪'),
+    Badge('quarterly_champion', 'Quarterly Champion', '90-day streak', 90, '🏆'),
+    Badge('half_year_hero', 'Half Year Hero', '180-day streak', 180, '⭐'),
+    Badge('nine_month_ninja', 'Nine Month Ninja', '270-day streak', 270, '🥷'),
+    Badge('yearly_legend', 'Yearly Legend', '365-day streak', 365, '👑'),
+  ];
 
   final _db = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
@@ -124,6 +152,7 @@ class HabitTrackerController extends GetxController {
   void onInit() {
     super.onInit();
     _enablePersistence();
+    _loadBadgeData();
     _watchHabits();
     _watchLogsForSelectedDate();
   }
@@ -152,6 +181,15 @@ class HabitTrackerController extends GetxController {
         .snapshots()
         .listen((snapshot) {
       habits.value = snapshot.docs.map(HabitItem.fromDoc).toList();
+      
+      // Update RevenueCat service with current habit count
+      try {
+        final service = Get.find<RevenueCatService>();
+        service.updateHabitCount(habits.length);
+      } catch (e) {
+        print('⚠ RevenueCat service not found: $e');
+      }
+      
       _refreshCompletionsForSelectedDate();
 
       // NEW: sync local scheduled reminders with the current habit list.
@@ -252,7 +290,8 @@ class HabitTrackerController extends GetxController {
     final habitsRef = _db.collection('users').doc(uid).collection('habits');
 
     // ---- 1. Toggle today's completion ----
-    final isCompletedToday = !(todayCompletions[habitId] ?? false);
+    final wasCompletedBefore = todayCompletions[habitId] ?? false;
+    final isCompletedToday = !wasCompletedBefore;
     todayCompletions[habitId] = isCompletedToday;
 
     final habit = _findHabitById(habitId);
@@ -306,6 +345,17 @@ class HabitTrackerController extends GetxController {
       'longestStreak': updatedLongest,
       'updatedAt': FieldValue.serverTimestamp(),
     });
+
+    // ---- 5. Award XP and check for badges (only once per habit per day) ----
+    final xpKey = '${habitId}_$todayStr';
+    if (isCompletedToday && !(xpAwarded[xpKey] ?? false)) {
+      await awardDailyXP();
+      xpAwarded[xpKey] = true;
+      final newBadgesList = await checkStreakAndAwardBadges(newStreak);
+      if (newBadgesList.isNotEmpty) {
+        _showBadgeAnimation(newBadgesList.first, newStreak);
+      }
+    }
 
     print("🔥 Updated streak: $newStreak | longest: $updatedLongest");
   }
@@ -519,32 +569,33 @@ class HabitTrackerController extends GetxController {
     Get.to(() => CreateNewHabitScreen(existingHabit: habit));
   }
 
-  void navigateToCreateHabit() =>
-      Get.to(() => const CreateNewHabitScreen());
+  void navigateToCreateHabit() {
+    final service = Get.find<RevenueCatService>();
+    service.updateHabitCount(habits.length);
+    if (!service.canCreateHabit()) {
+      Get.to(() => PaywallScreen());
+      return;
+    }
+    Get.to(() => const CreateNewHabitScreen());
+  }
 
   void navigateToProgress() =>
       Get.to(() => ProgressScreen());
 
   Future<void> navigateToAIChat() async {
-    Get.put(OpenAIService(), permanent: true);
-    Get.put(AICoachController());
-    final result = await Get.to(() => AICoachChatScreen());
-
-    if (result is HabitTemplate) {
-      final uid = FirebaseAuth.instance.currentUser?.uid;
-      if (uid == null) return;
-
-      await createHabit({
-        'title': result.title,
-        'subtitle': 'AI-generated habit',
-        'iconCode': Icons.auto_awesome.codePoint,
-        'cadence': 'daily',
-        'daysOfWeek': [1, 2, 3, 4, 5, 6, 7],
-        'category': result.category ?? 'general',
-        'reminders': false,
-        'isDynamic': true,
-      });
+    final service = Get.find<RevenueCatService>();
+    if (!service.canUseAICoach()) {
+      Get.to(() => PaywallScreen());
+      return;
     }
+    
+    service.incrementAIUsage();
+    
+    // Clear existing controllers to ensure fresh chat
+    Get.delete<SimpleChatController>(force: true);
+    Get.put(SimpleChatController());
+    
+    await Get.to(() => AICoachChatScreen());
   }
 
   /// -------------------------------------------------------------------------
@@ -623,6 +674,81 @@ class HabitTrackerController extends GetxController {
           ? 0
           : ((completed / total) * 100).round(),
     };
+  }
+
+  /// -------------------------------------------------------------------------
+  ///  BADGE SYSTEM
+  /// -------------------------------------------------------------------------
+  Future<void> _loadBadgeData() async {
+    final prefs = await SharedPreferences.getInstance();
+    totalXP.value = prefs.getInt('total_xp') ?? 0;
+    final badgeIds = prefs.getStringList('unlocked_badges') ?? [];
+    unlockedBadges.value = allBadges.where((b) => badgeIds.contains(b.id)).toList();
+    
+    final xpAwardedJson = prefs.getString('xp_awarded') ?? '{}';
+    final xpAwardedMap = Map<String, dynamic>.from(jsonDecode(xpAwardedJson));
+    xpAwarded.value = xpAwardedMap.map((k, v) => MapEntry(k, v as bool));
+  }
+  
+  Future<void> _saveBadgeData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('total_xp', totalXP.value);
+    await prefs.setStringList('unlocked_badges', unlockedBadges.map((b) => b.id).toList());
+    await prefs.setString('xp_awarded', jsonEncode(xpAwarded));
+  }
+  
+  Future<List<Badge>> checkStreakAndAwardBadges(int currentStreak) async {
+    final newlyUnlocked = <Badge>[];
+    
+    for (final badge in allBadges) {
+      if (currentStreak >= badge.streakRequired && !_hasBadge(badge.id)) {
+        unlockedBadges.add(badge);
+        newlyUnlocked.add(badge);
+      }
+    }
+    
+    if (newlyUnlocked.isNotEmpty) {
+      await _saveBadgeData();
+    }
+    
+    return newlyUnlocked;
+  }
+  
+  Future<void> awardDailyXP() async {
+    totalXP.value += dailyCheckInXP;
+    await _saveBadgeData();
+  }
+  
+  bool _hasBadge(String badgeId) => unlockedBadges.any((b) => b.id == badgeId);
+  
+  void _showBadgeAnimation(Badge badge, int streak) {
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: Colors.black87,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(badge.emoji, style: TextStyle(fontSize: 80)),
+            SizedBox(height: 16),
+            Text('You\'ve conquered the day!', 
+              style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+            Text('Great work!', 
+              style: TextStyle(color: Colors.white, fontSize: 18)),
+            SizedBox(height: 16),
+            Text(badge.name, 
+              style: TextStyle(color: Colors.yellow, fontSize: 20, fontWeight: FontWeight.bold)),
+            Text('$streak-day streak!', 
+              style: TextStyle(color: Colors.grey, fontSize: 16)),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => Get.back(),
+              child: Text('Continue'),
+            ),
+          ],
+        ),
+      ),
+      barrierDismissible: false,
+    );
   }
 
   /// -------------------------------------------------------------------------

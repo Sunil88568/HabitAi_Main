@@ -6,9 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
-import 'chat_controller.dart';
+import 'simple_chat_controller.dart';
 
-class AICoachChatScreen extends GetView<AICoachController> {
+class AICoachChatScreen extends GetView<SimpleChatController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -172,7 +172,7 @@ class AICoachChatScreen extends GetView<AICoachController> {
     );
   }
 
-  Widget _buildChatMessage(ChatMessage message) {
+  Widget _buildChatMessage(SimpleChatMessage message) {
     return Padding(
       padding: EdgeInsets.only(bottom: 16),
       child: Column(
@@ -188,8 +188,8 @@ class AICoachChatScreen extends GetView<AICoachController> {
             children: [
               if (!message.isUser) ...[
                 Container(
-                  width: 32, // radius * 2
-                  height: 32, // radius * 2
+                  width: 32,
+                  height: 32,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: const LinearGradient(
@@ -223,14 +223,6 @@ class AICoachChatScreen extends GetView<AICoachController> {
                   ),
                 ),
               ),
-              // if (message.isUser) ...[
-              //   SizedBox(width: 8),
-              //   CircleAvatar(
-              //     radius: 16,
-              //     backgroundColor: Color(0xFF6366F1).withOpacity(0.1),
-              //     child: Text('👤', style: TextStyle(fontSize: 16)),
-              //   ),
-              // ],
             ],
           ),
 
@@ -273,10 +265,20 @@ class AICoachChatScreen extends GetView<AICoachController> {
       padding: EdgeInsets.only(bottom: 16),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 16,
-            backgroundColor: Color(0xFF10B981).withOpacity(0.2),
-            child: Text('🤖', style: TextStyle(fontSize: 16)),
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const LinearGradient(
+                colors: [Color(0xFF6875DE), Color(0xFF7353AE)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+            ),
+            child: Center(
+              child: Text('🤖', style: TextStyle(fontSize: 16)),
+            ),
           ),
           SizedBox(width: 8),
           Container(
@@ -319,14 +321,5 @@ class AICoachChatScreen extends GetView<AICoachController> {
         );
       },
     );
-  }
-}
-
-// Binding for dependency injection
-class AICoachBinding extends Bindings {
-  @override
-  void dependencies() {
-    Get.put<OpenAIService>(OpenAIService(), permanent: true);
-    Get.lazyPut<AICoachController>(() => AICoachController());
   }
 }
