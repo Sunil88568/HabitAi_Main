@@ -5,6 +5,8 @@ class BottomNavItem extends StatelessWidget {
   final bool isSelected;
   final VoidCallback? onTap;
 
+
+
   const BottomNavItem({super.key, required this.icon, this.isSelected = false, this.onTap});
 
   @override

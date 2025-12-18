@@ -32,12 +32,12 @@ class BadgeTestScreen extends StatelessWidget {
                   onPressed: () async {
                     final badges = await controller.checkStreakAndAwardBadges(7);
                     if (badges.isNotEmpty) {
-                      Get.snackbar('Badge Unlocked!', badges.first.name);
+                      Get.snackbar('Badge Unlocked!!', badges.first.name);
                     } else {
-                      Get.snackbar('No New Badges', 'Badge already unlocked or streak too low');
+                      Get.snackbar('NO New Badges', 'Badge already unlocked or streak too low');
                     }
                   },
-                  child: Text('Test 7-Day Badge'),
+                  child: Text('Test 7-DAY Badge'),
                 ),
                 SizedBox(height: 8),
                 ElevatedButton(
