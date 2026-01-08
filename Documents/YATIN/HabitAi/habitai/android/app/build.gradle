@@ -1,0 +1,79 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace = "com.jofu.habitai"
+    compileSdk = 36
+    ndkVersion = flutter.ndkVersion
+
+    flavorDimensions "env"
+    productFlavors {
+        dev {
+            dimension "env"
+            applicationIdSuffix ".dev"
+            versionNameSuffix "-dev"
+        }
+        staging {
+            dimension "env"
+            applicationIdSuffix ".staging"
+            versionNameSuffix "-staging"
+        }
+        prod {
+            dimension "env"
+        }
+    }
+
+    sourceSets {
+        dev {
+            res.srcDirs += 'src/dev/res'
+        }
+        staging {
+            res.srcDirs += 'src/staging/res'
+        }
+        prod {
+            res.srcDirs += 'src/prod/res'
+        }
+    }
+
+    // ✅ Enable Java 17 + core library desugaring (fixes Firebase TimeZone crash)
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    defaultConfig {
+        minSdkVersion = flutter.minSdkVersion
+        targetSdk = 34
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    buildTypes {
+        release {
+            // TODO: Replace with your own release keystore later.
+            signingConfig = signingConfigs.debug
+        }
+    }
+
+    // ✅ Dependencies block must be *inside* android {} so Gradle recognizes it properly
+    dependencies {
+        // Needed for Java 8+ APIs (Firebase uses j$.util.TimeZone)
+        coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+    }
+}
+
+flutter {
+    source = "../.."
+}
+
+// Google services plugin for Firebase
+apply plugin: 'com.google.gms.google-services'

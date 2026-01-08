@@ -1,0 +1,22 @@
+flavors:
+  dev:
+    app:
+      name: "HabitAI Dev"
+    android:
+      applicationId: "com.example.habitai.dev"
+    ios:
+      bundleId: "com.example.habitai.dev"
+  staging:
+    app:
+      name: "HabitAI Staging"
+    android:
+      applicationId: "com.example.habitai.staging"
+    ios:
+      bundleId: "com.example.habitai.staging"
+  prod:
+    app:
+      name: "HabitAI"
+    android:
+      applicationId: "com.example.habitai"
+    ios:
+      bundleId: "com.example.habitai"

@@ -1,0 +1,21 @@
+android {
+    flavorDimensions += "flavor-type"
+
+    productFlavors {
+        dev {
+            dimension "flavor-type"
+            applicationId "com.example.habitai.dev"
+            resValue "string", "app_name", "HabitAI Dev"
+        }
+        staging {
+            dimension "flavor-type"
+            applicationId "com.example.habitai.staging"
+            resValue "string", "app_name", "HabitAI Staging"
+        }
+        prod {
+            dimension "flavor-type"
+            applicationId "com.example.habitai"
+            resValue "string", "app_name", "HabitAI"
+        }
+    }
+}

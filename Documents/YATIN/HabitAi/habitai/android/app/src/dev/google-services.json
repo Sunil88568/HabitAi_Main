@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "81812555129",
+    "project_id": "habitai-dev",
+    "storage_bucket": "habitai-dev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:81812555129:android:daf51a4efcf52ecc375ba8",
+        "android_client_info": {
+          "package_name": "com.jofu.habitai.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "81812555129-9tqkrfe7mbme79dn3e6nsofo32c4skp8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqSeKzSbOp3wk0QkvGeEjn5reTaRL50GI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "81812555129-9tqkrfe7mbme79dn3e6nsofo32c4skp8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "81812555129-3u5d9hisclqrq0p626mc2p177f7ph66g.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.jofu.habitai.dev"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

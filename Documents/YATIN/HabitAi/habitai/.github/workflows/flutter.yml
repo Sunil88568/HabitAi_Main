@@ -1,0 +1,19 @@
+name: Flutter CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4  # Updated for security & reliability
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.5'  # Targets Dart 3.6+; verify exists via flutter.dev
+          channel: 'stable'
+          cache: true  # Caches pub deps for faster runs
+          cache-key: flutter-${{ runner.os }}-pub-cache  # Improves hit rate
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Analyze code
+        run: flutter analyze

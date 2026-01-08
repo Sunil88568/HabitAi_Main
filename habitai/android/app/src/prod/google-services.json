@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "1090097185211",
+    "project_id": "habitai---habit-tracker-12d13",
+    "storage_bucket": "habitai---habit-tracker-12d13.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1090097185211:android:d23122f0636cb20291849e",
+        "android_client_info": {
+          "package_name": "com.jofu.habitai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1090097185211-uu4k912unlm6qn2pjlkv4u3blrh7h8ah.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0QtTZ05OB5eoRI4dTO70QMHZ1I3Qhyjs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1090097185211-uu4k912unlm6qn2pjlkv4u3blrh7h8ah.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1090097185211-e990h640aar5dlp3n1japnvaibtqq3ga.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.jofu.habitai"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
